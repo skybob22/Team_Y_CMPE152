@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "Node.h"
+#include "intermediate/Node.h"
 
 namespace intermediate {
 

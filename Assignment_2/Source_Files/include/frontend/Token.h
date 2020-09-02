@@ -11,8 +11,8 @@
 #include <string>
 #include <map>
 
-#include "../Object.h"
-#include "Source.h"
+#include "Object.h"
+#include "frontend/Source.h"
 
 namespace frontend {
 

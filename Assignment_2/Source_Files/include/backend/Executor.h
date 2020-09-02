@@ -12,9 +12,9 @@
 #include <vector>
 #include <set>
 
-#include "../Object.h"
-#include "../intermediate/Symtab.h"
-#include "../intermediate/Node.h"
+#include "Object.h"
+#include "intermediate/Symtab.h"
+#include "intermediate/Node.h"
 
 namespace backend {
 

@@ -10,10 +10,10 @@
 
 #include <set>
 
-#include "Scanner.h"
-#include "Token.h"
-#include "../intermediate/Symtab.h"
-#include "../intermediate/Node.h"
+#include "frontend/Scanner.h"
+#include "frontend/Token.h"
+#include "intermediate/Symtab.h"
+#include "intermediate/Node.h"
 
 namespace frontend {
 

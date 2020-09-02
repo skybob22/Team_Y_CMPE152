@@ -8,8 +8,8 @@
 #ifndef SCANNER_H_
 #define SCANNER_H_
 
-#include "Source.h"
-#include "Token.h"
+#include "frontend/Source.h"
+#include "frontend/Token.h"
 
 namespace frontend {
 

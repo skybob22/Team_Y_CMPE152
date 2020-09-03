@@ -1,4 +1,5 @@
 #==============================Building the Program==============================#
+This Makefile was designed to work on Linux using g++
 When trying to build the programs make sure to navigate into the build directory such that it is the working directory
 
 Release:
@@ -16,7 +17,8 @@ Unit Tests:
 #==============================Running the Program==============================#
 Application:
   Navigate to the root assignment directory
-  To run the application run: './Build/[Application_Name]'
+  To run the application run: './Build/[Application_Name]' [Any arguments needed to run]
+  For this case, an example would be './Build/Team_Y.app -scan ./Inputs/ScannerTest.txt'
 
 Unit Tests:
   Navigate to the root assignment directory

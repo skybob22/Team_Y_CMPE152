@@ -24,6 +24,10 @@ private:
     int  lineNum;      // current source line number
     char currentCh;    // current source character
 
+    //Used for 'peeking' at next character without consuming it
+    bool hold;
+    char heldCh;
+
 public:
     static const char EOL = '\n';
 
@@ -31,7 +35,7 @@ public:
      * Constructor
      * @param sourceFileName the source file name.
      */
-    Source(string sourceFileName) : lineNum(1)
+    Source(string sourceFileName) : lineNum(1),hold(false),heldCh(0)
     {
         source.open(sourceFileName);
 
@@ -62,7 +66,21 @@ public:
      */
     char nextChar()
     {
-        currentCh = source.get();
+        if(hold)
+        {
+            //There is a 'held' character, replace read with load
+            hold = false;
+            currentCh = heldCh;
+
+            if(heldCh == EOL){
+                //Account for 'peeking' possibly incrementing newlines
+                lineNum--;
+            }
+        }
+        else{
+            //Get next character normally
+            currentCh = source.get();
+        }
 
         if (source.eof()) currentCh = EOF;
         else if (currentCh == EOL) lineNum++;
@@ -74,6 +92,20 @@ public:
         }
 
         return currentCh;
+    }
+
+    /**
+     * Read the next input character without consuming it,
+     * such that the next call to 'nextChar' will still return it
+     * @return
+     */
+    char peek()
+    {
+        char nextCh = nextChar();
+        hold = true;
+        heldCh = nextCh;
+
+        return nextCh;
     }
 };
 

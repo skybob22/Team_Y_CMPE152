@@ -20,13 +20,35 @@ map<string, TokenType> Token::reservedWords;
 
 void Token::initialize()
 {
-    reservedWords["PROGRAM"] = PROGRAM;
-    reservedWords["BEGIN"]   = BEGIN;
-    reservedWords["END"]     = END;
-    reservedWords["REPEAT"]  = REPEAT;
-    reservedWords["UNTIL"]   = UNTIL;
-    reservedWords["WRITE"]   = WRITE;
-    reservedWords["WRITELN"] = WRITELN;
+    reservedWords["PROGRAM"]    = PROGRAM;
+    reservedWords["BEGIN"]      = BEGIN;
+    reservedWords["END"]        = END;
+    reservedWords["REPEAT"]     = REPEAT;
+    reservedWords["UNTIL"]      = UNTIL;
+    reservedWords["WRITE"]      = WRITE;
+    reservedWords["WRITELN"]    = WRITELN;
+
+    //Newly added tokens
+    reservedWords["DIV"]        = DIV;
+    reservedWords["MOD"]        = MOD;
+    reservedWords["AND"]        = AND;
+    reservedWords["OR"]         = OR;
+    reservedWords["NOT"]        = NOT;
+    reservedWords["CONST"]      = CONST;
+    reservedWords["TYPE"]       = TYPE;
+    reservedWords["VAR"]        = VAR;
+    reservedWords["PROCEDURE"]  = PROCEDURE;
+    reservedWords["FUNCTION"]   = FUNCTION;
+    reservedWords["WHILE"]      = WHILE;
+    reservedWords["DO"]         = DO;
+    reservedWords["FOR"]        = FOR;
+    reservedWords["TO"]         = TO;
+    reservedWords["DOWNTO"]     = DOWNTO;
+    reservedWords["IF"]         = IF;
+    reservedWords["THEN"]       = THEN;
+    reservedWords["ELSE"]       = ELSE;
+    reservedWords["CASE"]       = CASE;
+    reservedWords["OF"]         = OF;
 }
 
 Token *Token::Word(char firstChar, Source *source)
@@ -58,6 +80,7 @@ Token *Token::Word(char firstChar, Source *source)
 Token *Token::Number(char firstChar, Source *source)
 {
     Token *token = new Token(firstChar);
+    token->lineNumber = source->lineNumber();
     int pointCount = 0;
 
     // Loop to get the rest of the characters of the number token.
@@ -93,16 +116,35 @@ Token *Token::Number(char firstChar, Source *source)
 Token *Token::String(char firstChar, Source *source)
 {
     Token *token = new Token(firstChar);  // the leading '
+    token->lineNumber = source->lineNumber();
 
     // Loop to append the rest of the characters of the string,
-    // up to but not including the closing quote.
-    for (char ch = source->nextChar(); ch != '\''; ch = source->nextChar())
+    bool EOS = false; //End-of-String
+    for (char ch = source->nextChar();!EOS; ch = source->nextChar())
     {
+        //Check if we've reached the end of the file
+        if(ch == EOF)
+        {
+            //Reached end of file
+            tokenError(token, "String not closed");
+            token->type = TokenType::ERROR;
+            return token;
+        }
+        else if(ch == '\'')
+        {
+            //Check if it is the end of string or literal quote
+            char nextChar = source->nextChar();
+            if(nextChar != '\'')
+            {
+                //End of string
+                EOS = true;
+                token->text += ch;
+                break;
+            }
+        }
+
         token->text += ch;
     }
-
-    token->text += '\'';  // the closing quote
-    source->nextChar();  // consume the closing quote
 
     token->type = TokenType::STRING;
 
@@ -115,28 +157,101 @@ Token *Token::String(char firstChar, Source *source)
 Token *Token::SpecialSymbol(char firstChar, Source *source)
 {
     Token *token = new Token(firstChar);
+    token->lineNumber = source->lineNumber();
 
     switch (firstChar)
     {
-        case '.' : token->type = TokenType::PERIOD;     break;
+
         case ';' : token->type = TokenType::SEMICOLON;  break;
         case '+' : token->type = TokenType::PLUS;       break;
         case '-' : token->type = TokenType::MINUS;      break;
         case '*' : token->type = TokenType::STAR;       break;
         case '/' : token->type = TokenType::SLASH;      break;
         case '=' : token->type = TokenType::EQUALS;     break;
-        case '<' : token->type = TokenType::LESS_THAN;  break;
         case '(' : token->type = TokenType::LPAREN;     break;
         case ')' : token->type = TokenType::RPAREN;     break;
 
+        //Newly added
+        case ',' : token->type = TokenType::COMMA;      break;
+        case '[' : token->type = TokenType::LBRACKET;   break;
+        case ']' : token->type = TokenType::RBRACKET;   break;
+        case '^' : token->type = TokenType::CARAT;     break;
+
+        case '.' :
+        {
+            char nextChar = source->peek();
+
+            //Is it the .. symbol?
+            if (nextChar == '.')
+            {
+                token->text += source->nextChar();
+                token->type = TokenType::DOT_DOT;
+            }
+
+            // It's just the . symbol
+            else
+            {
+                token->type = TokenType::PERIOD;
+            }
+
+            break;
+        }
+
+        case '<' :
+        {
+            char nextChar = source->peek();
+
+            // Is it the <> symbol?
+            if (nextChar == '>')
+            {
+                token->text += source->nextChar();
+                token->type = TokenType::NOT_EQUALS;
+            }
+
+            // Is it the <= symbol?
+            else if (nextChar == '=')
+            {
+                token->text += source->nextChar();
+                token->type = TokenType::LESS_EQUALS;
+            }
+
+            // It's just the < symbol
+            else
+            {
+                token->type = TokenType::LESS_THAN;
+            }
+
+            break;
+        }
+
+        case '>' :
+        {
+            char nextChar = source->peek();
+
+            // Is it the >= symbol?
+            if (nextChar == '=')
+            {
+                token->text += source->nextChar();
+                token->type = TokenType::GREATER_EQUALS;
+            }
+
+            // It's just the > symbol
+            else
+            {
+                token->type = TokenType::GREATER_THAN;
+            }
+
+            break;
+        }
+
         case ':' :
         {
-            char nextChar = source->nextChar();
-            token->text += nextChar;
+            char nextChar = source->peek();
 
             // Is it the := symbol?
             if (nextChar == '=')
             {
+                token->text += source->nextChar();
                 token->type = TokenType::COLON_EQUALS;
             }
 
@@ -152,7 +267,10 @@ Token *Token::SpecialSymbol(char firstChar, Source *source)
 
         case EOF : token->type = END_OF_FILE; break;
 
-        default: token->type = TokenType::ERROR;
+        default:{
+            tokenError(token, "Invalid Token");
+            token->type = TokenType::ERROR;
+        }
     }
 
     source->nextChar();  // consume the special symbol

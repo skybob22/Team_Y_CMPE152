@@ -38,6 +38,16 @@ public:
         // Skip blanks and other whitespace characters.
         while (isspace(ch)) ch = source->nextChar();
 
+        // Skip comments
+        if (ch == '{'){
+            while(ch != '}'){
+                ch = source->nextChar();
+            }
+            //Consume the '}' character
+            ch = source->nextChar();
+            return nextToken();
+        }
+
         if (isalpha(ch))      return Token::Word(ch, source);
         else if (isdigit(ch)) return Token::Number(ch, source);
         else if (ch == '\'')  return Token::String(ch, source);

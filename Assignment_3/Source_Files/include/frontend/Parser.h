@@ -55,11 +55,11 @@ private:
     Node *parseCompoundStatement();
     Node *parseRepeatStatement();
     Node *parseWhileStatement();
+    Node *parseForStatement();
     Node *parseIfStatement();
     Node *parseWriteStatement();
     Node *parseWritelnStatement();
     Node *parseExpression();
-    Node *parseCompoundExpression(Node *parentNode, TokenType terminalType);
     Node *parseSimpleExpression();
     Node *parseTerm();
     Node *parseFactor();

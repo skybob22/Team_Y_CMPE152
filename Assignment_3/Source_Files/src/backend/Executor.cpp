@@ -220,6 +220,17 @@ Object Executor::visitExpression(Node *expressionNode)
     }
 
     // Binary expressions.
+    /*std::vector<double> values(2);
+    for(unsigned int i=0;i<values.size();i++){
+        if(expressionNode->children[i]->type == VARIABLE){
+            string variableName = expressionNode->children[i]->text;
+            SymtabEntry *variableId = symtab->lookup(variableName);
+            values[i] = variableId->getValue();
+        }
+        else{
+            values[i] = visit(expressionNode->children[i]).D;
+        }
+    }*/
     double value1 = visit(expressionNode->children[0]).D;
     double value2 = visit(expressionNode->children[1]).D;
 

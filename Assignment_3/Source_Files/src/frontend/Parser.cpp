@@ -37,6 +37,8 @@ void Parser::initialize()
     statementFollowers.insert(UNTIL);
     statementFollowers.insert(END_OF_FILE);
     statementFollowers.insert(THEN);
+    statementFollowers.insert(TO);
+    statementFollowers.insert(DOWNTO);
 
     relationalOperators.insert(EQUALS);
     relationalOperators.insert(LESS_THAN);
@@ -103,6 +105,7 @@ Node *Parser::parseStatement()
         //Looping statements
         case REPEAT :     stmtNode = parseRepeatStatement();     break;
         case WHILE :      stmtNode = parseWhileStatement();      break;
+        case FOR :        stmtNode = parseForStatement();         break;
 
         case IF :         stmtNode = parseIfStatement();         break;
 
@@ -242,11 +245,89 @@ Node *Parser::parseWhileStatement()
 
     if(currentToken->type != DO){
         syntaxError("Expected DO statement");
+        return nullptr;
     }
     currentToken = scanner->nextToken(); //Consume DO statement
     loopNode->adopt(parseStatement());
 
     return loopNode;
+}
+
+Node *Parser::parseForStatement(){
+    // Current token should now be FOR
+    Node *compoundNode = new Node(COMPOUND);
+    currentToken = scanner->nextToken();
+
+    //Initialization step
+    Node *initNode = parseAssignmentStatement();
+    compoundNode->adopt(initNode);
+
+    //Step node
+    Node *iterNode = new Node(ASSIGN);
+    iterNode->adopt(new Node(VARIABLE));
+    iterNode->children[0]->text = initNode->children[0]->text; //Get variable to modify
+
+
+    Node *compareNode = nullptr;
+    if(currentToken->type == TO){
+        currentToken = scanner->nextToken(); //Consume TO
+
+        //Create test case
+        compareNode = new Node(GT);
+        compareNode->adopt(new Node(VARIABLE));
+        compareNode->children[0]->text = initNode->children[0]->text;
+        compareNode->adopt(parseExpression());
+
+        //Increment at end of loop
+        Node *addNode = new Node(ADD);
+        addNode->adopt(new Node(VARIABLE));
+        addNode->children[0]->text = initNode->children[0]->text; //Point at variable
+        addNode->adopt(new Node(INTEGER_CONSTANT));
+        addNode->children[1]->value = Object(static_cast<long>(1));
+
+        iterNode->adopt(addNode);
+
+    }
+    else if(currentToken->type == DOWNTO){
+        currentToken = scanner->nextToken(); //Consume DOWNTO
+
+        //Create test case
+        compareNode = new Node(LT);
+        compareNode->adopt(new Node(VARIABLE));
+        compareNode->children[0]->text = initNode->children[0]->text;
+        compareNode->adopt(parseExpression());
+
+        //Decrement at end of loop
+        Node *addNode = new Node(SUBTRACT);
+        addNode->adopt(new Node(VARIABLE));
+        addNode->children[0]->text = initNode->children[0]->text; //Point at variable
+        addNode->adopt(new Node(INTEGER_CONSTANT));
+        addNode->children[1]->value = Object(static_cast<long>(1));
+
+        iterNode->adopt(addNode);
+    }
+    else{
+        //Missing range specifier
+
+        return nullptr;
+    }
+
+    //Create looping node
+    Node *loopNode = new Node(LOOP);
+    loopNode->adopt(new Node(TEST));
+    loopNode->children[0]->adopt(compareNode); //Adopt the comparison as a test
+
+    //Token should be DO
+    if(currentToken->type != DO){
+        syntaxError("Expected DO statement");
+        return nullptr;
+    }
+    currentToken = scanner->nextToken();
+    loopNode->adopt(parseStatement());
+    loopNode->adopt(iterNode);
+
+    compoundNode->adopt(loopNode);
+    return compoundNode;
 }
 
 Node *Parser::parseIfStatement(){
@@ -453,6 +534,7 @@ Node *Parser::parseExpression()
     if(expressionQueue.size() != 1){
         //Some error occurred
         semanticError("Mismatched Boolean operations");
+        return nullptr;
     }
     else{
         return expressionQueue.front();

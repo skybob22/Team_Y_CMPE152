@@ -23,7 +23,7 @@ public:
     bool   B;
 
     Object()             : L(0),     D(0.0),   S(""),    B(false) {}
-    Object(long value)   : L(value), D(0.0),   S(""),    B(false) {}
+    Object(long value)   : L(value), D(static_cast<double>(value)),   S(""),    B(false) {}
     Object(double value) : L(0),     D(value), S(""),    B(false) {}
     Object(string value) : L(0),     D(0.0),   S(value), B(false) {}
     Object(bool value)   : L(0),     D(0.0),   S(""),    B(value) {}

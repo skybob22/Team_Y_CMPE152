@@ -21,14 +21,14 @@ using namespace std;
 enum class NodeType
 {
     PROGRAM, COMPOUND, ASSIGN, LOOP, TEST, WRITE, WRITELN,
-    ADD, SUBTRACT, MULTIPLY, DIVIDE, EQ, LT,
+    ADD, SUBTRACT, MULTIPLY, DIVIDE, EQ, LT, GT, LE, GE, NE, NOT,
     VARIABLE, INTEGER_CONSTANT, REAL_CONSTANT, STRING_CONSTANT
 };
 
 static const string NODE_TYPE_STRINGS[] =
 {
     "PROGRAM", "COMPOUND", "ASSIGN", "LOOP", "TEST", "WRITE", "WRITELN",
-    "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "EQ", "LT",
+    "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "EQ", "LT", "GT", "LE", "GE", "NE", "NOT",
     "VARIABLE", "INTEGER_CONSTANT", "REAL_CONSTANT", "STRING_CONSTANT"
 };
 
@@ -45,6 +45,11 @@ constexpr NodeType MULTIPLY         = NodeType::MULTIPLY;
 constexpr NodeType DIVIDE           = NodeType::DIVIDE;
 constexpr NodeType EQ               = NodeType::EQ;
 constexpr NodeType LT               = NodeType::LT;
+constexpr NodeType GT               = NodeType::GT;
+constexpr NodeType LE               = NodeType::LE;
+constexpr NodeType GE               = NodeType::GE;
+constexpr NodeType NE               = NodeType::NE;
+constexpr NodeType NOT              = NodeType::NOT;
 constexpr NodeType VARIABLE         = NodeType::VARIABLE;
 constexpr NodeType INTEGER_CONSTANT = NodeType::INTEGER_CONSTANT;
 constexpr NodeType REAL_CONSTANT    = NodeType::REAL_CONSTANT;

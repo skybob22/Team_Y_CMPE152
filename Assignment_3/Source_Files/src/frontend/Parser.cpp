@@ -108,6 +108,7 @@ Node *Parser::parseStatement()
         case FOR :        stmtNode = parseForStatement();         break;
 
         case IF :         stmtNode = parseIfStatement();         break;
+        case CASE :       stmtNode = parseCaseStatement();       break;
 
         case WRITE :      stmtNode = parseWriteStatement();      break;
         case WRITELN :    stmtNode = parseWritelnStatement();    break;
@@ -133,6 +134,7 @@ Node *Parser::parseAssignmentStatement()
 
     lhsNode->text  = variableName;
     lhsNode->entry = variableId;
+    lhsNode->lineNumber = currentToken->lineNumber;
     assignmentNode->adopt(lhsNode);
 
     currentToken = scanner->nextToken();  // consume the LHS variable;
@@ -358,6 +360,59 @@ Node *Parser::parseIfStatement(){
     }
 
     return ifNode;
+}
+
+Node *Parser::parseCaseStatement(){
+    // Current token should be CASE
+
+    Node* caseNode = new Node(NodeType::CASE);
+    currentToken = scanner->nextToken(); //Consume CASE
+
+    //Get the expression to evaluates
+    caseNode->adopt(parseExpression());
+
+    if(currentToken->type != OF){
+        syntaxError("Expected OF statement");
+        return nullptr;
+    }
+    currentToken = scanner->nextToken(); //Consume OF
+
+
+    while(currentToken->type != END){
+        Node* branchNode = new Node(CASE_BRANCH);
+
+        //Grab the numeric constants
+        Node* caseConstants = new Node(CASE_CONSTANTS);
+        while(currentToken->type != COLON){
+            if(currentToken->type == INTEGER){
+                Node* constant = new Node(INTEGER_CONSTANT);
+                constant->lineNumber = currentToken->lineNumber;
+                constant->value = Object(currentToken->value.L);
+
+                //Add the current constant to the list
+                caseConstants->adopt(constant);
+            }
+            currentToken = scanner->nextToken();
+        }
+        currentToken = scanner->nextToken(); //Consume colon
+
+        //Add all the constants for the current branch to the branch
+        branchNode->adopt(caseConstants);
+
+        //Add the statement to execute
+        branchNode->adopt(parseStatement());
+        if(currentToken->type == SEMICOLON){
+            currentToken = scanner->nextToken();
+        }
+
+        //Adopt the branch node as one of the branches of the case statement
+        caseNode->adopt(branchNode);
+    }
+
+    //Current token should be END
+    currentToken = scanner->nextToken();
+
+    return caseNode;
 }
 
 Node *Parser::parseWriteStatement()

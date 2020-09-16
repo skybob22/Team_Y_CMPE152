@@ -26,6 +26,7 @@ void Parser::initialize()
     statementStarters.insert(BEGIN);
     statementStarters.insert(IDENTIFIER);
     statementStarters.insert(REPEAT);
+    statementStarters.insert(WHILE);
     statementStarters.insert(TokenType::WRITE);
     statementStarters.insert(TokenType::WRITELN);
 
@@ -36,6 +37,10 @@ void Parser::initialize()
 
     relationalOperators.insert(EQUALS);
     relationalOperators.insert(LESS_THAN);
+    relationalOperators.insert(GREATER_THAN);
+    relationalOperators.insert(LESS_EQUALS);
+    relationalOperators.insert(GREATER_EQUALS);
+    relationalOperators.insert(NOT_EQUALS);
 
     simpleExpressionOperators.insert(PLUS);
     simpleExpressionOperators.insert(MINUS);
@@ -91,7 +96,10 @@ Node *Parser::parseStatement()
     {
         case IDENTIFIER : stmtNode = parseAssignmentStatement(); break;
         case BEGIN :      stmtNode = parseCompoundStatement();   break;
+        //Looping statements
         case REPEAT :     stmtNode = parseRepeatStatement();     break;
+        case WHILE :      stmtNode = parseWhileStatement();      break;
+
         case WRITE :      stmtNode = parseWriteStatement();      break;
         case WRITELN :    stmtNode = parseWritelnStatement();    break;
         case SEMICOLON :  stmtNode = nullptr; break;  // empty statement
@@ -202,6 +210,37 @@ Node *Parser::parseRepeatStatement()
     return loopNode;
 }
 
+Node *Parser::parseWhileStatement()
+{
+    // The current token should now be WHILE
+
+    // Create a LOOP node with the test at the front
+    Node *loopNode = new Node(LOOP);
+    currentToken = scanner->nextToken(); // consume WHILE
+
+    //Creates a TEST node which adopts the test expression node
+    Node *testNode = new Node(TEST);
+    lineNumber = currentToken->lineNumber;
+    testNode->lineNumber = lineNumber;
+
+    //Invert the test condition
+    Node *invertedCondition = new Node(NodeType::NOT);
+    invertedCondition->adopt(parseExpression());
+    testNode->adopt(invertedCondition);
+
+    //Loop node adopts the test node as first child
+    loopNode->adopt(testNode);
+
+
+    if(currentToken->type != DO){
+        syntaxError("Missing DO statement");
+    }
+    currentToken = scanner->nextToken(); //Consume DO statement
+    loopNode->adopt(parseStatement());
+
+    return loopNode;
+}
+
 Node *Parser::parseWriteStatement()
 {
     // The current token should now be WRITE.
@@ -303,6 +342,10 @@ Node *Parser::parseExpression()
         TokenType tokenType = currentToken->type;
         Node *opNode = tokenType == EQUALS    ? new Node(EQ)
                     : tokenType == LESS_THAN ? new Node(LT)
+                    : tokenType == GREATER_THAN ? new Node(GT)
+                    : tokenType == LESS_EQUALS ? new Node(LE)
+                    : tokenType == GREATER_EQUALS ? new Node(GE)
+                    : tokenType == NOT_EQUALS ? new Node(NE)
                     :                          nullptr;
 
         currentToken = scanner->nextToken();  // consume relational operator

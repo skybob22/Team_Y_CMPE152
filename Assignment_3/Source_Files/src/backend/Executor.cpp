@@ -29,9 +29,14 @@ void Executor::initialize()
     singletons.insert(INTEGER_CONSTANT);
     singletons.insert(REAL_CONSTANT);
     singletons.insert(STRING_CONSTANT);
+    singletons.insert(NOT);
 
     relationals.insert(EQ);
     relationals.insert(LT);
+    relationals.insert(GT);
+    relationals.insert(LE);
+    relationals.insert(GE);
+    relationals.insert(NE);
 }
 
 Object Executor::visit(Node *node)
@@ -184,6 +189,13 @@ Object Executor::visitExpression(Node *expressionNode)
             case INTEGER_CONSTANT : return visitIntegerConstant(expressionNode);
             case REAL_CONSTANT    : return visitRealConstant(expressionNode);
             case STRING_CONSTANT  : return visitStringConstant(expressionNode);
+            case NOT              : {
+                //Get object with boolean value from expression
+                Object exprResult = visit(expressionNode->children[0]);
+                //Invert the result
+                exprResult.B = !exprResult.B;
+                return exprResult;
+            }
 
             default: return Object();
         }
@@ -202,6 +214,10 @@ Object Executor::visitExpression(Node *expressionNode)
         {
             case EQ : value = value1 == value2; break;
             case LT : value = value1 <  value2; break;
+            case GT : value = value1 >  value2; break;
+            case LE : value = value1 <= value2; break;
+            case GE : value = value1 >= value2; break;
+            case NE : value = value1 != value2; break;
 
             default : break;
         }

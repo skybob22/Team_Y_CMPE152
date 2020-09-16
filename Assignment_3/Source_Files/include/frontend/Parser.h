@@ -54,6 +54,7 @@ private:
     Node *parseAssignmentStatement();
     Node *parseCompoundStatement();
     Node *parseRepeatStatement();
+    Node *parseWhileStatement();
     Node *parseWriteStatement();
     Node *parseWritelnStatement();
     Node *parseExpression();

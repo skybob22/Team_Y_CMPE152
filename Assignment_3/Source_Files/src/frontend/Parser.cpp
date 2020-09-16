@@ -7,6 +7,7 @@
  */
 #include <string>
 #include <map>
+#include <deque>
 
 #include "frontend/Token.h"
 #include "frontend/Parser.h"
@@ -29,11 +30,13 @@ void Parser::initialize()
     statementStarters.insert(WHILE);
     statementStarters.insert(TokenType::WRITE);
     statementStarters.insert(TokenType::WRITELN);
+    statementStarters.insert(IF);
 
     statementFollowers.insert(SEMICOLON);
     statementFollowers.insert(END);
     statementFollowers.insert(UNTIL);
     statementFollowers.insert(END_OF_FILE);
+    statementFollowers.insert(THEN);
 
     relationalOperators.insert(EQUALS);
     relationalOperators.insert(LESS_THAN);
@@ -47,6 +50,7 @@ void Parser::initialize()
 
     termOperators.insert(STAR);
     termOperators.insert(SLASH);
+    termOperators.insert(DIV);
 }
 
 Node *Parser::parseProgram()
@@ -99,6 +103,8 @@ Node *Parser::parseStatement()
         //Looping statements
         case REPEAT :     stmtNode = parseRepeatStatement();     break;
         case WHILE :      stmtNode = parseWhileStatement();      break;
+
+        case IF :         stmtNode = parseIfStatement();         break;
 
         case WRITE :      stmtNode = parseWriteStatement();      break;
         case WRITELN :    stmtNode = parseWritelnStatement();    break;
@@ -216,6 +222,7 @@ Node *Parser::parseWhileStatement()
 
     // Create a LOOP node with the test at the front
     Node *loopNode = new Node(LOOP);
+    loopNode->lineNumber = currentToken->lineNumber;
     currentToken = scanner->nextToken(); // consume WHILE
 
     //Creates a TEST node which adopts the test expression node
@@ -225,6 +232,7 @@ Node *Parser::parseWhileStatement()
 
     //Invert the test condition
     Node *invertedCondition = new Node(NodeType::NOT);
+    invertedCondition->lineNumber = lineNumber;
     invertedCondition->adopt(parseExpression());
     testNode->adopt(invertedCondition);
 
@@ -233,12 +241,42 @@ Node *Parser::parseWhileStatement()
 
 
     if(currentToken->type != DO){
-        syntaxError("Missing DO statement");
+        syntaxError("Expected DO statement");
     }
     currentToken = scanner->nextToken(); //Consume DO statement
     loopNode->adopt(parseStatement());
 
     return loopNode;
+}
+
+Node *Parser::parseIfStatement(){
+    // The current token should now be IF
+    Node *ifNode = new Node(NodeType::IF);
+    currentToken = scanner->nextToken();
+
+    //Create a TEST node which adopts the target expression
+    Node *testNode = new Node(TEST);
+    lineNumber = currentToken->lineNumber;
+    testNode->lineNumber = lineNumber;
+
+    testNode->adopt(parseExpression());
+    ifNode->adopt(testNode);
+
+    if (currentToken->type != THEN){
+        syntaxError("Expected THEN statement");
+    }
+    currentToken = scanner->nextToken(); //Consume THEN statement
+
+    //Adopt the following statement;
+    ifNode->adopt(parseStatement());
+
+    //Check if there is an else statement
+    if(currentToken->type == ELSE){
+        currentToken = scanner->nextToken(); //Consume ELSE statement
+        ifNode->adopt(parseStatement());
+    }
+
+    return ifNode;
 }
 
 Node *Parser::parseWriteStatement()
@@ -331,37 +369,94 @@ void Parser::parseWriteArguments(Node *node)
 
 Node *Parser::parseExpression()
 {
-    // The current token should now be an identifier or a number.
+    std::deque<Node *> expressionQueue;
+    bool done = true;
+    do {
+        done = true;
 
-    // The expression's root node->
-    Node *exprNode = parseSimpleExpression();
+        //Check if the expression is inverted via NOT
+        if(currentToken->type == NOT){
+            Node *invertedNode = new Node(NodeType::NOT);
+            invertedNode->lineNumber=currentToken->lineNumber;
+            currentToken = scanner->nextToken(); //Consume NOT
 
-    // The current token might now be a relational operator.
-    if (relationalOperators.find(currentToken->type) != relationalOperators.end())
-    {
-        TokenType tokenType = currentToken->type;
-        Node *opNode = tokenType == EQUALS    ? new Node(EQ)
-                    : tokenType == LESS_THAN ? new Node(LT)
-                    : tokenType == GREATER_THAN ? new Node(GT)
-                    : tokenType == LESS_EQUALS ? new Node(LE)
-                    : tokenType == GREATER_EQUALS ? new Node(GE)
-                    : tokenType == NOT_EQUALS ? new Node(NE)
-                    :                          nullptr;
-
-        currentToken = scanner->nextToken();  // consume relational operator
-
-        // The relational operator Node *adopts the first simple expression
-        // Node *as its first child and the second simple expression node
-        // as its second child. Then it becomes the expression's root node->
-        if (opNode != nullptr)
-        {
-            opNode->adopt(exprNode);
-            opNode->adopt(parseSimpleExpression());
-            exprNode = opNode;
+            expressionQueue.push_back(invertedNode);
+            done = false;
+            continue;
         }
-    }
 
-    return exprNode;
+        // The current token should now be an identifier or a number.
+
+        // The expression's root node->
+        Node *exprNode = parseSimpleExpression();
+
+        // The current token might now be a relational operator.
+        if (relationalOperators.find(currentToken->type) != relationalOperators.end()) {
+            TokenType tokenType = currentToken->type;
+            Node *opNode = tokenType == EQUALS ? new Node(EQ)
+                : tokenType == LESS_THAN ? new Node(LT)
+                : tokenType == GREATER_THAN ? new Node(GT)
+                : tokenType == LESS_EQUALS ? new Node(LE)
+                : tokenType == GREATER_EQUALS? new Node(GE)
+                : tokenType == NOT_EQUALS ? new Node(NE)
+                : nullptr;
+
+            currentToken = scanner->nextToken();  // consume relational operator
+
+            // The relational operator Node *adopts the first simple expression
+            // Node *as its first child and the second simple expression node
+            // as its second child. Then it becomes the expression's root node->
+            if (opNode != nullptr) {
+                opNode->adopt(exprNode);
+                opNode->adopt(parseSimpleExpression());
+                exprNode = opNode;
+            }
+        }
+
+        if(!expressionQueue.empty() && expressionQueue.back()->type == NodeType::NOT) {
+            expressionQueue.back()->adopt(exprNode);
+        }
+        else{
+            expressionQueue.push_back(exprNode);
+        }
+
+        if(expressionQueue.size() == 3) {
+            //There should be an expression and a boolean operator
+            Node *leftChild = expressionQueue.front();
+            expressionQueue.pop_front();
+
+            Node *booleanNode = expressionQueue.front();
+            expressionQueue.pop_front();
+
+            Node * rightChild = expressionQueue.front();
+            expressionQueue.pop_front();
+
+            booleanNode->adopt(leftChild);
+            booleanNode->adopt(rightChild);
+            expressionQueue.push_back(booleanNode);
+        }
+
+        if(currentToken->type == AND){
+            expressionQueue.push_back(new Node(NodeType::AND));
+            currentToken = scanner->nextToken(); //Consume AND
+            done = false;
+            continue;
+        }
+        else if(currentToken->type == OR) {
+            expressionQueue.push_back(new Node(NodeType::OR));
+            currentToken = scanner->nextToken(); //Consume OR
+            done = false;
+            continue;
+        }
+    } while(!done);
+
+    if(expressionQueue.size() != 1){
+        //Some error occurred
+        semanticError("Mismatched Boolean operations");
+    }
+    else{
+        return expressionQueue.front();
+    }
 }
 
 Node *Parser::parseSimpleExpression()
@@ -404,6 +499,7 @@ Node *Parser::parseTerm()
     while (termOperators.find(currentToken->type) != termOperators.end())
     {
         Node *opNode = currentToken->type == STAR ? new Node(MULTIPLY)
+                                                : currentToken->type == DIV ? new Node(NodeType::DIV)
                                                 : new Node(DIVIDE);
 
         currentToken = scanner->nextToken();  // consume the operator

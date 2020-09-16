@@ -50,6 +50,7 @@ public:
 
         if (isalpha(ch))      return Token::Word(ch, source);
         else if (isdigit(ch)) return Token::Number(ch, source);
+        else if (ch == '-' && isdigit(source->peek())) return Token::Number(ch,source); //Special case for negative numbers
         else if (ch == '\'')  return Token::String(ch, source);
         else                  return Token::SpecialSymbol(ch, source);
     }

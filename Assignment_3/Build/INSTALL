@@ -18,7 +18,7 @@ Unit Tests:
 Application:
   Navigate to the root assignment directory
   To run the application run: './Build/[Application_Name]' [Any arguments needed to run]
-  For this case, an example would be './Build/Team_Y.app -scan ./Inputs/ScannerTest.txt'
+  For this case, an example would be './Build/Team_Y.app -execute ./Inputs/TestWhile.txt'
 
 Unit Tests:
   Navigate to the root assignment directory

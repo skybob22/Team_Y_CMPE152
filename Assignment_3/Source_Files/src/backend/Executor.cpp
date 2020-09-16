@@ -242,6 +242,18 @@ Object Executor::visitExpression(Node *expressionNode)
         }
     }
 
+    //Boolean expressions
+    if(expressionNode->type == AND){
+        bool value1 = visit(expressionNode->children[0]).B;
+        bool value2 = visit(expressionNode->children[1]).B;
+        return Object(value1 && value2);
+    }
+    else if(expressionNode->type == OR){
+        bool value1 = visit(expressionNode->children[0]).B;
+        bool value2 = visit(expressionNode->children[1]).B;
+        return Object(value1 || value2);
+    }
+
     double value1 = visit(expressionNode->children[0]).D;
     double value2 = visit(expressionNode->children[1]).D;
 

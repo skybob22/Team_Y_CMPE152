@@ -52,6 +52,7 @@ Object Executor::visit(Node *node)
         case WRITELN :  return visitStatement(node);
 
         case IF :       return visitIf(node);
+        case CASE :     return visitCase(node);
 
         case TEST :     return visitTest(node);
 
@@ -138,6 +139,28 @@ Object Executor::visitIf(Node* ifNode){
     }
 }
 
+Object Executor::visitCase(intermediate::Node *caseNode){
+    //Find the value to compare against
+    double expectedValue = visit(caseNode->children[0]).D;
+
+    bool done = false;
+    for(unsigned int i=1;i<caseNode->children.size() && !done;i++){
+        Node* branchNode = caseNode->children[i];
+
+        //Check if this is the branch to execute{
+        for(Node* constantNode : branchNode->children[0]->children){
+            if(constantNode->value.D == expectedValue){
+                visit(branchNode->children[1]); //Execute the statement associated with the branch
+
+                done = true;
+                break;
+            }
+        }
+    }
+
+    return Object();
+}
+
 Object Executor::visitTest(Node *testNode)
 {
     return visit(testNode->children[0]);
@@ -219,18 +242,6 @@ Object Executor::visitExpression(Node *expressionNode)
         }
     }
 
-    // Binary expressions.
-    /*std::vector<double> values(2);
-    for(unsigned int i=0;i<values.size();i++){
-        if(expressionNode->children[i]->type == VARIABLE){
-            string variableName = expressionNode->children[i]->text;
-            SymtabEntry *variableId = symtab->lookup(variableName);
-            values[i] = variableId->getValue();
-        }
-        else{
-            values[i] = visit(expressionNode->children[i]).D;
-        }
-    }*/
     double value1 = visit(expressionNode->children[0]).D;
     double value2 = visit(expressionNode->children[1]).D;
 

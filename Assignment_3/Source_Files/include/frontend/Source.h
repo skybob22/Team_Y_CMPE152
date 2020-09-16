@@ -101,9 +101,11 @@ public:
      */
     char peek()
     {
+        char current = currentCh;
         char nextCh = nextChar();
         hold = true;
         heldCh = nextCh;
+        currentCh = current;
 
         return nextCh;
     }

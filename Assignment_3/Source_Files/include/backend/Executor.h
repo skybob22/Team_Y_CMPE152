@@ -47,6 +47,7 @@ private:
     Object visitAssign(Node *assignNode);
     Object visitLoop(Node *loopNode);
     Object visitIf(Node *ifNode);
+    Object visitCase(Node *caseNode);
     Object visitTest(Node *testNode);
     Object visitWrite(Node *writeNode);
     Object visitWriteln(Node *writelnNode);

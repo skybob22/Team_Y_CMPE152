@@ -79,6 +79,12 @@ Token *Token::Word(char firstChar, Source *source)
 
 Token *Token::Number(char firstChar, Source *source)
 {
+    /*bool isNegative = false;
+    if(firstChar == '-'){
+        isNegative = true;
+        firstChar = source->nextChar();
+    }*/
+
     Token *token = new Token(firstChar);
     token->lineNumber = source->lineNumber();
     int pointCount = 0;
@@ -110,6 +116,10 @@ Token *Token::Number(char firstChar, Source *source)
 
     else tokenError(token, "Invalid number");
 
+    /*if(isNegative){
+        token->value.L = -1 * token->value.L;
+        token->value.D = -1 * token->value.D;
+    }*/
     return token;
 }
 

@@ -51,7 +51,9 @@ Object Executor::visit(Node *node)
         case WRITE :
         case WRITELN :  return visitStatement(node);
 
-        case TEST:      return visitTest(node);
+        case IF :       return visitIf(node);
+
+        case TEST :     return visitTest(node);
 
         default :       return visitExpression(node);
     }
@@ -118,6 +120,22 @@ Object Executor::visitLoop(Node *loopNode)
     } while (!b);
 
     return Object();
+}
+
+Object Executor::visitIf(Node* ifNode){
+    bool statementTrue = visitTest(ifNode->children[0]).B;
+
+    if(statementTrue){
+        return visit(ifNode->children[1]);
+    }
+    else{
+        if(ifNode->children.size() >= 3){
+            return visit(ifNode->children[2]);
+        }
+        else{
+            return Object();
+        }
+    }
 }
 
 Object Executor::visitTest(Node *testNode)

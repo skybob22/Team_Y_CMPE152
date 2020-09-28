@@ -13,7 +13,7 @@ ROOT_DIR := ..
 include $(BUILD_DIR)/Makefile.variable
 
 #Add linker flags for C++ antlr runtime
-LDFLAGS += -L$(ANTLR_RUNTIME_LIB) -static -lantlr4-runtime
+LDFLAGS += -L$(ANTLR_RUNTIME_LIB) -lantlr4-runtime
 
 #Adding paths to application names
 APP_PATH := $(BUILD_DIR)/$(APP_NAME)
@@ -60,7 +60,7 @@ railroad:
 
 #Target specific variable for includes, No debug flags
 release: INCLUDES += $(strip $(foreach DIR,$(ALL_SRC_DIR_APP),-I$(DIR))) -I $(ANTLR_RUNTIME_HEADER)
-release: antlr $(APP_PATH)
+release: $(APP_PATH)
 
 #Target specific variable for enabling debugging required for GDB
 debug: CXXFLAGS += -g
@@ -69,8 +69,7 @@ debug: release
 #Target specific variable for includes and enable debugging required for GDB
 unit-tests: INCLUDES += $(strip $(foreach DIR,$(ALL_SRC_DIR_APP) $(ALL_SRC_DIR_TEST),-I$(DIR))) -I $(ANTLR_RUNTIME_HEADER)
 unit-tests: CXXFLAGS += -g
-unit-tests: antlr
-	$(MAKE) $(APP_PATH)
+unit-tests: $(APP_PATH)
 
 #Clean is used to remove all the build files, e.g. forcing recompile
 clean:

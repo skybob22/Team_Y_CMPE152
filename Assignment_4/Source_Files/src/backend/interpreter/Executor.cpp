@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <cstdio>
 
 #include "Object.h"
 #include "backend/interpreter/Executor.h"
@@ -140,13 +142,64 @@ Object Executor::visitConstantList(Pcl4Parser::ConstantListContext *ctx){
 
 Object Executor::visitWriteStatement(Pcl4Parser::WriteStatementContext *ctx)
 {
-    cout << ctx->toString();
+    string retString = visitWriteArgumentList(ctx->writeArgumentsOn()->writeArgumentListOn()->writeArgumentList()).as<string>();
+    cout << retString;
     return nullptr;
+}
+
+Object Executor::visitWriteArgumentList(Pcl4Parser::WriteArgumentListContext *ctx){
+    string retString = "";
+    for(int i=0;i<ctx->writeArgument().size();i++){
+        retString = retString + visitWriteArgument(ctx->writeArgument(i)).as<string>();
+        if(i < ctx->writeArgument().size() -1){
+            retString = retString + " ";
+        }
+    }
+}
+
+Object Executor::visitWriteArgument(Pcl4Parser::WriteArgumentContext *ctx){
+    //TODO: I'm not sure if this will work, Need to get visitExpression working first to test
+    // The %.*s should tell it to take an argument for the padding width. I don't know how well this will work
+    antlrcpp::Any value = visitExpression(ctx->expression());
+    char printString[100];
+
+    if(value.is<string>()){
+        if(ctx->fieldWidth()) {
+            sprintf(printString,"%.*s", value.as<string>().c_str(),visitIntegerConstant(ctx->fieldWidth()->integerConstant()).as<int>() * -1);
+        }
+        else{
+            sprintf(printString,"%s",value.as<string>().c_str());
+        }
+    }
+    else if(value.is<int>()){
+        if(ctx->fieldWidth()) {
+            sprintf(printString,"%.*d", value.as<int>(),visitIntegerConstant(ctx->fieldWidth()->integerConstant()).as<int>() * -1);
+        }
+        else{
+            sprintf(printString,"%d", value.as<int>());
+        }
+    }
+    else if(value.is<double>()){
+        if(ctx->fieldWidth()) {
+            if(ctx->fieldWidth()->decimalPlaces()){
+                sprintf(printString,"%.*..*f", value.as<double>(),visitIntegerConstant(ctx->fieldWidth()->integerConstant()).as<int>() * -1,visitIntegerConstant(ctx->fieldWidth()->decimalPlaces()->integerConstant()).as<int>());
+            }
+            else{
+                sprintf(printString,"%.*f", value.as<double>(),visitIntegerConstant(ctx->fieldWidth()->integerConstant()).as<int>() * -1);
+            }
+        }
+        else{
+            sprintf(printString,"%f", value.as<double>());
+        }
+    }
+
+    return std::string(printString);
 }
 
 Object Executor::visitWritelnStatement(Pcl4Parser::WritelnStatementContext *ctx)
 {
-    cout << ctx->toString() << endl;
+    string retString = visitWriteArgumentList(ctx->writeArgumentsLn()->writeArgumentListLn()->writeArgumentList()).as<string>();
+    cout << retString << endl;
     return nullptr;
 }
 

@@ -38,6 +38,8 @@ public:
     Object visitConstantList(Pcl4Parser::ConstantListContext *ctx) override;
 
     Object visitWriteStatement(Pcl4Parser::WriteStatementContext *ctx) override;
+    Object visitWriteArgumentList(Pcl4Parser::WriteArgumentListContext *ctx) override;
+    Object visitWriteArgument(Pcl4Parser::WriteArgumentContext *ctx) override;
     Object visitWritelnStatement(Pcl4Parser::WritelnStatementContext *ctx) override;
     Object visitExpression(Pcl4Parser::ExpressionContext *ctx) override;
     Object visitVariable(Pcl4Parser::VariableContext *ctx) override;

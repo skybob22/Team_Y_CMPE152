@@ -6,6 +6,7 @@
 
 #include "antlr4-runtime.h"
 #include "Pcl4BaseVisitor.h"
+#include "intermediate/symtab/Symtab.h"
 
 #include "Object.h"
 
@@ -26,14 +27,27 @@ public:
     Object visitStatementList(Pcl4Parser::StatementListContext *ctx) override;
     Object visitCompoundStatement(Pcl4Parser::CompoundStatementContext *ctx) override;
     Object visitAssignmentStatement(Pcl4Parser::AssignmentStatementContext *ctx) override;
+
     Object visitRepeatStatement(Pcl4Parser::RepeatStatementContext *ctx) override;
+    Object visitWhileLoop(Pcl4Parser::WhileLoopContext *ctx) override;
+    Object visitForLoop(Pcl4Parser::ForLoopContext *ctx) override;
+
+    Object visitIfStatement(Pcl4Parser::IfStatementContext *ctx) override;
+    Object visitCaseStatement(Pcl4Parser::CaseStatementContext *ctx) override;
+    Object visitCaseBlock(Pcl4Parser::CaseBlockContext *ctx) override;
+    Object visitConstantList(Pcl4Parser::ConstantListContext *ctx) override;
+
     Object visitWriteStatement(Pcl4Parser::WriteStatementContext *ctx) override;
     Object visitWritelnStatement(Pcl4Parser::WritelnStatementContext *ctx) override;
     Object visitExpression(Pcl4Parser::ExpressionContext *ctx) override;
     Object visitVariable(Pcl4Parser::VariableContext *ctx) override;
     Object visitNumber(Pcl4Parser::NumberContext *ctx) override;
+    Object visitIntegerConstant(Pcl4Parser::IntegerConstantContext *ctx) override;
 
     // Complete this class!
+
+private:
+    intermediate::symtab::Symtab symbol_table;
 
 };
 

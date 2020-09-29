@@ -25,7 +25,7 @@ repeatStatement     : REPEAT statementList UNTIL expression ;
 
 
 whileLoop : WHILE expression DO statement;
-forLoop : FOR variable ':=' factor (TO | DOWNTO) factor DO statement;
+forLoop : FOR variable ':=' expression (TO | DOWNTO) expression DO statement;
 ifStatement : IF expression THEN statement (ELSE statement)?;
 
 caseStatement : CASE expression OF caseBlock+ END;

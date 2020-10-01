@@ -5,6 +5,7 @@ PreReqs:
 JavaC is required for generating syntax diagrams via the makefile
 The required C++ runtimes *should* be included in this project, but I cannot guarantee compatibility due to limited testing
 
+!IMPORTANT!
 Antlr:
   To generate the C++ antlr files run 'make antlr' which will create the required antlr header files in Source_Files/generated_source
   This needs to be done manually before running Release, Debug, or Unit_Tests (The makefile needs to parse through the directory to find source files before running)

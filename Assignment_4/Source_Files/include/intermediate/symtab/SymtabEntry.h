@@ -37,6 +37,13 @@ private:
     double value;
 
 public:
+    enum dtype{
+        i,
+        d
+    };
+
+    dtype type;
+
     /**
      * Constructor.
      * @param name the entry's name.

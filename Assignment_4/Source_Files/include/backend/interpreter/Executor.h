@@ -22,6 +22,12 @@ public:
     Executor() {}
     virtual ~Executor() {}
 
+    //Expression Parsing
+    Object visitExpression(Pcl4Parser::ExpressionContext *ctx) override;
+    Object visitSimpleExpression(Pcl4Parser::SimpleExpressionContext *ctx) override;
+    Object visitTerm(Pcl4Parser::TermContext *ctx) override;
+    Object visitFactor(Pcl4Parser::FactorContext *ctx) override;
+
     Object visitProgram(Pcl4Parser::ProgramContext *ctx) override;
     Object visitStatement(Pcl4Parser::StatementContext *ctx) override;
     Object visitStatementList(Pcl4Parser::StatementListContext *ctx) override;
@@ -41,7 +47,6 @@ public:
     Object visitWriteArgumentList(Pcl4Parser::WriteArgumentListContext *ctx) override;
     Object visitWriteArgument(Pcl4Parser::WriteArgumentContext *ctx) override;
     Object visitWritelnStatement(Pcl4Parser::WritelnStatementContext *ctx) override;
-    Object visitExpression(Pcl4Parser::ExpressionContext *ctx) override;
     Object visitVariable(Pcl4Parser::VariableContext *ctx) override;
     Object visitNumber(Pcl4Parser::NumberContext *ctx) override;
     Object visitIntegerConstant(Pcl4Parser::IntegerConstantContext *ctx) override;

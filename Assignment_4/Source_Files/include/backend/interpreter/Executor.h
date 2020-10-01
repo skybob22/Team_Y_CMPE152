@@ -50,6 +50,7 @@ public:
     Object visitVariable(Pcl4Parser::VariableContext *ctx) override;
     Object visitNumber(Pcl4Parser::NumberContext *ctx) override;
     Object visitIntegerConstant(Pcl4Parser::IntegerConstantContext *ctx) override;
+    Object visitRealConstant(Pcl4Parser::RealConstantContext *ctx) override;
 
     // Complete this class!
 

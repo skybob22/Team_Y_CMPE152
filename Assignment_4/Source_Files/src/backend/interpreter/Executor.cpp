@@ -159,8 +159,14 @@ Object Executor::visitConstantList(Pcl4Parser::ConstantListContext *ctx){
 
 Object Executor::visitWriteStatement(Pcl4Parser::WriteStatementContext *ctx)
 {
-    string retString = visitWriteArgumentList(ctx->writeArgumentsOn()->writeArgumentListOn()->writeArgumentList()).as<string>();
-    cout << retString;
+    if(ctx->writeArgumentsOn()) {
+        string retString = visitWriteArgumentList(
+                ctx->writeArgumentsOn()->writeArgumentListOn()->writeArgumentList()).as<string>();
+        cout << retString;
+    }
+    else{
+        cout << endl;
+    }
     return nullptr;
 }
 
@@ -356,6 +362,12 @@ Object Executor::visitNumber(Pcl4Parser::NumberContext *ctx)
 Object Executor::visitIntegerConstant(Pcl4Parser::IntegerConstantContext *ctx){
     string text = ctx->INTEGER()->getText();
     int value = stoi(text);
+    return value;
+}
+
+Object Executor::visitRealConstant(Pcl4Parser::RealConstantContext *ctx) {
+    string text = ctx->REAL()->getText();
+    double value = stod(text);
     return value;
 }
 

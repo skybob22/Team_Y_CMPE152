@@ -56,12 +56,12 @@ term
     : factor (mulOp factor)* ;
 
 factor
-    : variable              # variableExpression
-    | number                # numberExpression
-    | characterConstant     # characterFactor
-    | stringConstant        # stringFactor
-    | NOT factor            # notFactor
-    | '(' expression ')'    # parenthesizedExpression
+    : variable
+    | number
+    | characterConstant
+    | stringConstant
+    | NOT factor
+    | '(' expression ')'
     ;
 
 variable : IDENTIFIER ;

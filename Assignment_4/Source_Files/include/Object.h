@@ -73,4 +73,45 @@ inline string convertString(const string pascalString, bool needBackslash)
     return unquoted;
 }
 
+
+
+//Only works for ints, doubles, boolean
+template<typename T>
+T castObjTo(const Object &obj) {
+    T retVal;
+
+    if (obj.is<int>()) {
+        int val = obj.as<int>();
+        retVal = static_cast<T>(val);
+    } else if (obj.is<double>()) {
+        double val = obj.as<double>();
+        retVal = static_cast<T>(val);
+    } else if (obj.is<bool>()) {
+        bool val = obj.as<bool>();
+        retVal = static_cast<T>(val);
+    } else {
+        throw std::bad_cast();
+    }
+    return retVal;
+}
+
+//Inline to prevent multiple-definition error
+namespace custOp {
+//Define operators for the ANY objects
+    Object operator+(Object lhs, Object rhs);
+    Object operator-(Object lhs, Object rhs);
+    Object operator*(Object lhs, Object rhs);
+    Object operator/(Object lhs, Object rhs);
+    Object operator&&(Object lhs, Object rhs);
+    Object operator||(Object lhs, Object rhs);
+
+//Only works for ints, doubles, and bools
+    bool operator==(Object lhs, Object rhs);
+    bool operator!=(Object lhs, Object rhs);
+    bool operator>(Object lhs, Object rhs);
+    bool operator>=(Object lhs, Object rhs);
+    bool operator<(Object lhs, Object rhs);
+    bool operator<=(Object lhs, Object rhs);
+}
+
 #endif /* OBJECT_H_ */

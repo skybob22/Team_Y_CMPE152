@@ -7,6 +7,9 @@
 #include "intermediate/type/Typespec.h"
 #include "backend/converter/Converter.h"
 
+#include "intermediate/type/TypeChecker.h"
+#include <iostream>
+
 namespace backend { namespace converter {
 
 Object Converter::visitProgram(PascalParser::ProgramContext *ctx)
@@ -594,6 +597,132 @@ Object Converter::visitParenthesizedFactor(
     return "(" + visit(ctx->expression()).as<string>() + ")";
 }
 
+Object Converter::visitWhileStatement(PascalParser::WhileStatementContext *ctx)
+{
+    code.emitLine("while(" + visitExpression(ctx->expression()).as<string>() +")");
+    code.indent();
+    code.emitStart();
+    visitStatement(ctx->statement()); // <-Visit statement already handles the braces
+    code.dedent();
+    return nullptr;
+}
+
+Object Converter::visitForStatement(PascalParser::ForStatementContext *ctx)
+{
+    string loopVariable = visitVariable(ctx->variable()).as<string>();
+
+    code.emitStart("for(");
+
+    //Initial assignment
+    code.emit( loopVariable + "=" + visitExpression(ctx->expression(0)).as<string>() + ";");
+
+    string compSymbol;
+    string opSymbol;
+    //Incrementing count
+    if(ctx->TO()){
+        compSymbol = "<=";
+        opSymbol = "++";
+    }
+    //Decrementing count
+    else{
+        compSymbol = ">=";
+        opSymbol = "--";
+    }
+
+    //While condition
+    code.emit(loopVariable + compSymbol + visitExpression(ctx->expression(1)).as<string>() + ";");
+
+    //Variable Inc/Dec
+    code.emit(loopVariable + opSymbol);
+    code.emitEnd(")");
+
+    code.indent();
+    code.emitStart();
+    visitStatement(ctx->statement());
+    code.dedent();
+    return nullptr;
+}
+
+Object Converter::visitIfStatement(PascalParser::IfStatementContext *ctx)
+{
+    code.emitLine("if(" + visitExpression(ctx->expression()).as<string>() + ")");
+    //"Then" statement
+    code.indent();
+    code.emitStart();
+    visitTrueStatement(ctx->trueStatement());
+    code.dedent();
+
+    //"Else" statement (if exists)
+    if(ctx->ELSE()){
+        code.emitLine("else");
+        code.indent();
+        code.emitStart();
+        visitFalseStatement(ctx->falseStatement());
+        code.dedent();
+    }
+    return nullptr;
+}
+
+Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx)
+{
+    code.emitLine("switch(" + visitExpression(ctx->expression()).as<string>() + ")");
+    code.emitLine("{");
+    code.indent();
+
+    for(PascalParser::CaseBranchContext* branchCtx : ctx->caseBranchList()->caseBranch()){
+        if(!branchCtx->caseConstantList() || !branchCtx->statement()){
+            continue;
+        }
+
+        for(unsigned int i=0;i<branchCtx->caseConstantList()->caseConstant().size()-1;i++){
+            //Loop through all but the last one
+            PascalParser::ConstantContext* constantCtx = branchCtx->caseConstantList()->caseConstant(i)->constant();
+
+            Object constantObj = visitConstant(constantCtx);
+            stringstream constant;
+            //For some reason returning a string doesn't work
+            if(constantObj.is<int>()){
+                constant << to_string(constantObj.as<int>());
+            }
+            else if(constantObj.is<char>()){
+                constant << "'" << constantObj.as<char>() << "'";
+            }
+            else{
+                throw std::runtime_error("Cannot deduce type");
+            }
+
+            //In C++ each constant needs it's own case
+            code.emitLine("case " + constant.str() + ":");
+            //Dont emit the statement, will use "fall-though"
+        }
+        //Now emit the actual statement
+        Object constantObj = visitConstant(branchCtx->caseConstantList()->caseConstant().back()->constant());
+        stringstream constant;
+        //For some reason returning a string doesn't work
+        if(constantObj.is<int>()){
+            constant << to_string(constantObj.as<int>());
+        }
+        else if(constantObj.is<char>()){
+            constant << "'" << constantObj.as<char>() << "'";
+        }
+        else{
+            throw std::runtime_error("Cannot deduce type");
+        }
+
+        //string constant = visitConstant(branchCtx->caseConstantList()->caseConstant().back()->constant()).as<int>();
+        code.emitLine("case " + constant.str() + ":");
+        code.indent();
+        code.emitStart();
+        visitStatement(branchCtx->statement());
+        code.emitLine("break;");
+        code.dedent();
+    }
+
+    code.dedent();
+    code.emitLine("}");
+    return nullptr;
+}
+
 Object Converter::visitWriteStatement(PascalParser::WriteStatementContext *ctx)
 {
     code.emit("printf(");
@@ -785,6 +914,33 @@ Object Converter::visitReadArguments(PascalParser::ReadArgumentsContext *ctx)
     }
 
     return nullptr;
+}
+
+Object Converter::visitConstant(PascalParser::ConstantContext *ctx){
+    if(ctx->sign()){
+        if(ctx->unsignedNumber()){
+            Object num = visitUnsignedNumber(ctx->unsignedNumber());
+            if(num.is<double>()){
+                return -1 * num.as<double>();
+            }
+            else{
+                return -1 * num.as<int>();
+            }
+        }
+    }
+    else{
+        return visitChildren(ctx);
+    }
+}
+
+Object Converter::visitCharacterConstant(PascalParser::CharacterConstantContext *ctx){
+    cout << "characterConstant: " << ctx->getText()[1] << endl << flush;
+    return ctx->getText()[1];
+}
+
+Object Converter::visitIntegerConstant(PascalParser::IntegerConstantContext *ctx){
+    cout << "integerConstant: " << ctx->getText() << endl << flush;
+    return stoi(ctx->getText());
 }
 
 }} // namespace backend::converter

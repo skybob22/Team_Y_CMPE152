@@ -29,9 +29,9 @@ using namespace backend::converter;
 
 int main(int argc, const char *args[])
 {
-    if (argc != 3)
+    if (argc < 3 || argc > 4)
     {
-        cout << "USAGE: PascalJava option sourceFileName" << endl;
+        cout << "USAGE: PascalJava option sourceFileName [outputDirectory]" << endl;
         cout << "   option: -convert, -execute, or -compile" << endl;
         return -1;
     }
@@ -122,9 +122,15 @@ int main(int argc, const char *args[])
 
         case CONVERTER:
         {
-            // Pass 3: Convert from Pascal to Java.
+            //Get output directory if argument is provided
+            string outputDir = "";
+            if(argc == 4){
+                outputDir = string(args[3]);
+            }
+
+            // Pass 3: Convert from Pascal to C++.
             cout << endl << "PASS 3 Translation:" << endl;
-            Converter *pass3 = new Converter();
+            Converter *pass3 = new Converter(outputDir);
             pass3->visit(tree);
 
             cout << endl << "Object file \"" << pass3->getObjectFileName()

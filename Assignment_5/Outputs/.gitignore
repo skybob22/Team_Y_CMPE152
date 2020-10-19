@@ -1,2 +1,5 @@
 #Don't commit output files
-*.txt
+*
+!*.gitignore
+!Makefile
+!INSTALL

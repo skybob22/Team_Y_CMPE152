@@ -28,8 +28,8 @@ private:
 
 public:
     Converter(string outputDir="")
-        : programVariables(true), recordFields(false),
-          currentSeparator(""),code(outputDir)
+        : code(outputDir), programVariables(true),
+          recordFields(false), currentSeparator("")
     {
         typeNameTable["integer"] = "int";
         typeNameTable["real"]    = "double";
@@ -70,11 +70,18 @@ public:
     Object visitStringFactor(PascalParser::StringFactorContext *ctx) override;
     Object visitNotFactor(PascalParser::NotFactorContext *ctx) override;
     Object visitParenthesizedFactor(PascalParser::ParenthesizedFactorContext *ctx) override;
+    Object visitWhileStatement(PascalParser::WhileStatementContext *ctx) override;
+    Object visitForStatement(PascalParser::ForStatementContext *ctx) override;
+    Object visitIfStatement(PascalParser::IfStatementContext *ctx) override;
+    Object visitCaseStatement(PascalParser::CaseStatementContext *ctx) override;
     Object visitWriteStatement(PascalParser::WriteStatementContext *ctx) override;
     Object visitWritelnStatement(PascalParser::WritelnStatementContext *ctx) override;
     Object visitReadStatement(PascalParser::ReadStatementContext *ctx) override;
     Object visitReadlnStatement(PascalParser::ReadlnStatementContext *ctx) override;
     Object visitReadArguments(PascalParser::ReadArgumentsContext *ctx) override;
+    Object visitConstant(PascalParser::ConstantContext *ctx) override;
+    Object visitCharacterConstant(PascalParser::CharacterConstantContext *ctx) override;
+    Object visitIntegerConstant(PascalParser::IntegerConstantContext *ctx) override;
 
 private:
     // Map a Pascal datatype name to the C++ datatype name.

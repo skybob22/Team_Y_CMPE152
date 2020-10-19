@@ -1,0 +1,11 @@
+#==============================Building the converted program==============================#
+When trying to build the converted program make sure to navigate into the Outputs directory such that it is the working directory
+
+Make:
+  run 'make FILE=./[Name]' where [Name] is the name of the Cpp file to compile without the extention
+  ex: make FILE=./TestWhile
+
+#==============================Running the converted program==============================#
+After building the program with the instructions above, it will create a file [Name].a
+To run it, just invoke the file
+  ex: ./TestWhile.a

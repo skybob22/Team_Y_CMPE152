@@ -669,6 +669,8 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx)
     code.emitLine("{");
     code.indent();
 
+    Typespec *type = ctx->expression()->type;
+
     for(PascalParser::CaseBranchContext* branchCtx : ctx->caseBranchList()->caseBranch()){
         if(!branchCtx->caseConstantList() || !branchCtx->statement()){
             continue;
@@ -681,10 +683,10 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx)
             Object constantObj = visitConstant(constantCtx);
             stringstream constant;
             //For some reason returning a string doesn't work
-            if(constantObj.is<int>()){
+            if(type == Predefined::integerType){
                 constant << to_string(constantObj.as<int>());
             }
-            else if(constantObj.is<char>()){
+            else if(type == Predefined::charType){
                 constant << "'" << constantObj.as<char>() << "'";
             }
             else{
@@ -699,10 +701,10 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx)
         Object constantObj = visitConstant(branchCtx->caseConstantList()->caseConstant().back()->constant());
         stringstream constant;
         //For some reason returning a string doesn't work
-        if(constantObj.is<int>()){
+        if(type == Predefined::integerType){
             constant << to_string(constantObj.as<int>());
         }
-        else if(constantObj.is<char>()){
+        else if(type == Predefined::charType){
             constant << "'" << constantObj.as<char>() << "'";
         }
         else{
@@ -720,6 +722,58 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx)
 
     code.dedent();
     code.emitLine("}");
+    return nullptr;
+}
+
+Object Converter::visitProcedureCallStatement(PascalParser::ProcedureCallStatementContext *ctx)
+{
+    code.emit(ctx->procedureName()->getText() + "(");
+    if(ctx->argumentList()) {
+        visitArgumentList(ctx->argumentList());
+    }
+    //Procedure can't be called in middle of expression, so we know it is its own statement
+    code.emitEnd(");");
+    return nullptr;
+}
+
+Object Converter::visitFunctionCall(PascalParser::FunctionCallContext *ctx)
+{
+    code.emit(ctx->functionName()->getText() + "(");
+    if(ctx->argumentList()) {
+        visitArgumentList(ctx->argumentList());
+    }
+    //Individual function call is not a factor
+    code.emitEnd(");");
+    return nullptr;
+}
+
+Object Converter::visitFunctionCallFactor(PascalParser::FunctionCallFactorContext *ctx){
+    //Same as function call, but a factor is returned as a string
+    string functionStr;
+    functionStr.append(ctx->functionCall()->functionName()->getText() + "(");
+
+    if(ctx->functionCall()->argumentList()) {
+        for (unsigned int i = 0; i < ctx->functionCall()->argumentList()->argument().size(); i++) {
+            functionStr.append(visitExpression(ctx->functionCall()->argumentList()->argument(i)->expression()).as<string>());
+
+            if (i < ctx->functionCall()->argumentList()->argument().size() - 1) {
+                functionStr.append(",");
+            }
+        }
+    }
+    functionStr.append(")");
+    return functionStr;
+}
+
+Object Converter::visitArgumentList(PascalParser::ArgumentListContext *ctx)
+{
+    for(unsigned int i=0;i<ctx->argument().size();i++){
+       code.emit(visitExpression(ctx->argument(i)->expression()).as<string>());
+
+        if(i < ctx->argument().size()-1){
+            code.emit(",");
+        }
+    }
     return nullptr;
 }
 
@@ -934,13 +988,16 @@ Object Converter::visitConstant(PascalParser::ConstantContext *ctx){
 }
 
 Object Converter::visitCharacterConstant(PascalParser::CharacterConstantContext *ctx){
-    cout << "characterConstant: " << ctx->getText()[1] << endl << flush;
     return ctx->getText()[1];
 }
 
 Object Converter::visitIntegerConstant(PascalParser::IntegerConstantContext *ctx){
-    cout << "integerConstant: " << ctx->getText() << endl << flush;
     return stoi(ctx->getText());
+}
+
+Object Converter::visitEnumerationConstant(PascalParser::EnumerationConstantContext *ctx)
+{
+    return ctx->getText();
 }
 
 }} // namespace backend::converter

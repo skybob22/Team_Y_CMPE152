@@ -74,6 +74,10 @@ public:
     Object visitForStatement(PascalParser::ForStatementContext *ctx) override;
     Object visitIfStatement(PascalParser::IfStatementContext *ctx) override;
     Object visitCaseStatement(PascalParser::CaseStatementContext *ctx) override;
+    Object visitProcedureCallStatement(PascalParser::ProcedureCallStatementContext *ctx) override;
+    Object visitFunctionCall(PascalParser::FunctionCallContext *ctx) override;
+    Object visitFunctionCallFactor(PascalParser::FunctionCallFactorContext *ctx) override;
+    Object visitArgumentList(PascalParser::ArgumentListContext *ctx) override;
     Object visitWriteStatement(PascalParser::WriteStatementContext *ctx) override;
     Object visitWritelnStatement(PascalParser::WritelnStatementContext *ctx) override;
     Object visitReadStatement(PascalParser::ReadStatementContext *ctx) override;
@@ -82,6 +86,7 @@ public:
     Object visitConstant(PascalParser::ConstantContext *ctx) override;
     Object visitCharacterConstant(PascalParser::CharacterConstantContext *ctx) override;
     Object visitIntegerConstant(PascalParser::IntegerConstantContext *ctx) override;
+    Object visitEnumerationConstant(PascalParser::EnumerationConstantContext *ctx) override;
 
 private:
     // Map a Pascal datatype name to the C++ datatype name.

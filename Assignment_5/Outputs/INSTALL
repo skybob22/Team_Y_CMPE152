@@ -2,8 +2,8 @@
 When trying to build the converted program make sure to navigate into the Outputs directory such that it is the working directory
 
 Make:
-  run 'make FILE=./[Name]' where [Name] is the name of the Cpp file to compile without the extention
-  ex: make FILE=./TestWhile
+  run 'make FILE_NAME=./[Name]' where [Name] is the name of the Cpp file to compile without the extention
+  ex: make FILE_NAME=./TestWhile
 
 #==============================Running the converted program==============================#
 After building the program with the instructions above, it will create a file [Name].a

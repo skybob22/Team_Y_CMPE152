@@ -1,0 +1,8 @@
+*
+!.gitignore
+!TestWhile.pas
+!TestFor.pas
+!TestIf.pas
+!TestCase.pas
+!TestProcedure.pas
+!Newton3.pas

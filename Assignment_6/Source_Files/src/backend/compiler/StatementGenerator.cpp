@@ -60,7 +60,55 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
 
 void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 {
+
+
+    /*  Structure
+
+        Do comparison:
+        Execute? If yes, continue,
+        if no jump to label false:
+
+        //True:
+        code to execute
+        jump to done label
+
+        false Label:
+        code to execute
+
+        done label:
+
+    */
+
     /***** Complete this member function. *****/
+    //Labels for jumping around
+    Label* falseLabel = new Label();
+    Label* doneLabel = new Label();
+
+    //Evaluate expression
+    compiler->visitExpression(ctx->expression());
+
+    //Do comparison to see if expression is true
+    emit(Instruction::ICONST_0);
+    if(ctx->ELSE()) {
+        emit(Instruction::IF_ICMPEQ, falseLabel->getString());
+    }
+    else{
+        emit(Instruction::IF_ICMPEQ, doneLabel->getString());
+    }
+
+    //Execute if True, Fall through to next
+    compiler->visit(ctx->trueStatement());
+    emit(Instruction::GOTO,doneLabel->getString());
+
+    //Emit else statement if present
+    if(ctx->ELSE()){
+        //Label to jump to if false
+        emitLabel(falseLabel);
+        compiler->visit(ctx->falseStatement());
+    }
+
+    //Jump to when done with true section so to skip fals seciton
+    emitLabel(doneLabel);
 }
 
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)

@@ -94,6 +94,49 @@ void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+    std::vector<std::pair<PascalParser::CaseBranchContext*,Label*>> branchLabels;
+
+    //Add new labels for all the branches
+    for(PascalParser::CaseBranchContext* branch : ctx->caseBranchList()->caseBranch()){
+        branchLabels.emplace_back(branch,new Label);
+    }
+    Label* exitCase = new Label;
+
+    //Evaluate input expression
+    compiler->visit(ctx->expression());
+
+    emit(Instruction::LOOKUPSWITCH);
+
+    std::set<std::pair<int,Label*>> labelSet; //Used since labels have to be in order
+    //Add all the constants and associated labels
+    for(unsigned int i=0;i<branchLabels.size();i++){
+        if(!branchLabels[i].first->caseConstantList()){
+            continue;
+        }
+
+        //For each case statement, tell it what label to jump to
+        for(PascalParser::CaseConstantContext* constantCtx : branchLabels[i].first->caseConstantList()->caseConstant()){
+            labelSet.insert(std::make_pair(constantCtx->value, branchLabels[i].second));
+        }
+    }
+
+    //Output all the labels in order
+    for(auto entry : labelSet){
+        emitLabel(entry.first,entry.second);
+    }
+    emitLabel("default",exitCase);
+
+    //Create labels + code to execute for each branch
+    for(auto entry : branchLabels){
+        emitLabel(entry.second);
+        if(entry.first->statement() != nullptr) {
+            compiler->visit(entry.first->statement());
+        }
+        emit(Instruction::GOTO,exitCase->getString());
+    }
+
+    //Exit case(s)
+    emitLabel(exitCase);
 }
 
 void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)

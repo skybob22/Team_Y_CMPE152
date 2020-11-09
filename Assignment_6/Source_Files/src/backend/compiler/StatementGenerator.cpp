@@ -60,25 +60,6 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
 
 void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 {
-
-
-    /*  Structure
-
-        Do comparison:
-        Execute? If yes, continue,
-        if no jump to label false:
-
-        //True:
-        code to execute
-        jump to done label
-
-        false Label:
-        code to execute
-
-        done label:
-
-    */
-
     /***** Complete this member function. *****/
     //Labels for jumping around
     Label* falseLabel = new Label();
@@ -107,7 +88,7 @@ void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
         compiler->visit(ctx->falseStatement());
     }
 
-    //Jump to when done with true section so to skip fals seciton
+    //Jump to when done with true section so to skip false section
     emitLabel(doneLabel);
 }
 
@@ -134,6 +115,24 @@ void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
 void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+    Label* topLabel = new Label();
+    Label* breakoutLabel = new Label();
+
+    //Set up label to return to at top of loop
+    emitLabel(topLabel);
+
+    //Evaluate expression
+    compiler->visitExpression(ctx->expression());
+
+    //Do comparison to see if expression is true
+    emit(Instruction::ICONST_0);
+    emit(Instruction::IF_ICMPEQ, breakoutLabel->getString());
+
+    //Execute if true, fall through to next
+    compiler->visit(ctx->statement());
+    emit(Instruction::GOTO,topLabel->getString());
+
+    emitLabel(breakoutLabel); //Jump to here to exit loop
 }
 
 void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)

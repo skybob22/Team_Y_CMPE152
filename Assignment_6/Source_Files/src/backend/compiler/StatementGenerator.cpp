@@ -14,6 +14,27 @@ namespace backend { namespace compiler {
 using namespace std;
 using namespace intermediate;
 
+string StatementGenerator::typeToString(Typespec *type){
+    static std::map<Typespec*,string> typeMap= {
+            {Predefined::integerType,"I"},
+            {Predefined::charType,"C"},
+            {Predefined::booleanType,"Z"},
+            {Predefined::realType,"F"},
+            {Predefined::stringType,"S"},
+            {Predefined::undefinedType,"V"}
+    };
+    return typeMap[type];
+}
+
+void StatementGenerator::emitCast(Typespec* from, Typespec* to){
+    //There's probably a better way to do this, but...
+    if(from == Predefined::integerType){
+        if(to == Predefined::realType){
+            emit(Instruction::I2F);
+        }
+    }
+}
+
 void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext *ctx)
 {
     PascalParser::VariableContext *varCtx  = ctx->lhs()->variable();
@@ -189,73 +210,41 @@ void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 
     //Initial assignment
     compiler->visit(ctx->expression()[0]); //Get value to assign
-    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
-        //Using local variable
-        emit(Instruction::ISTORE,ctx->variable()->entry->getSlotNumber());
-    }
-    else{
-        //Using global variable
-        emit(Instruction::PUTSTATIC,programName+"/"+ctx->variable()->getText(),varType);
-    }
+    emitStoreValue(ctx->variable()->entry,ctx->variable()->type);
 
     //Begin loop
     emitLabel(topLabel);
+
     //Perform test
+    compiler->visit(ctx->expression()[1]); //Puts result on opstack
+    emit(Instruction::ICONST_1);
     if(ctx->TO()){
         //Counting up
-        compiler->visit(ctx->expression()[1]); //Puts result on opstack
-        emit(Instruction::ICONST_1);
         emit(Instruction::IADD); //Should go up to the number and stop when one above
     }
     else{
         //Counting down
-        compiler->visit(ctx->expression()[1]); //Puts result on opstack
-        emit(Instruction::ICONST_1);
         emit(Instruction::ISUB);
     }
-    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
-        //Using local variable
-        emit(Instruction::ILOAD, ctx->variable()->entry->getSlotNumber());
-    }
-    else{
-        //Using static/global variable
-        emit(Instruction::GETSTATIC,programName+"/"+ctx->variable()->getText(),varType);
-    }
+    emitLoadValue(ctx->variable()->entry);
+
     //If done, exit loop
     emit(Instruction::IF_ICMPEQ, exitLabel->getString());
 
     //Do statement in loop
     compiler->visit(ctx->statement());
 
-    //Increment variable and return to at top of loop
-    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
-        //Using local variable
-        emit(Instruction::ILOAD,ctx->variable()->entry->getSlotNumber());
-        emit(Instruction::ICONST_1);
-        if(ctx->TO()) {
-            //Counting up
-            emit(Instruction::IADD);
-        }
-        else{
-            //Counting down
-            emit(Instruction::ISUB);
-        }
-        emit(Instruction::ISTORE, ctx->variable()->entry->getSlotNumber());
+    emitLoadValue(ctx->variable()->entry);
+    emit(Instruction::ICONST_1);
+    if(ctx->TO()) {
+        //Counting up
+        emit(Instruction::IADD);
     }
     else{
-        //Using static/global variable
-        emit(Instruction::GETSTATIC,programName+"/"+ctx->variable()->getText(),varType);
-        emit(Instruction::ICONST_1);
-        if(ctx->TO()) {
-            //Counting up
-            emit(Instruction::IADD);
-        }
-        else{
-            //Counting down
-            emit(Instruction::ISUB);
-        }
-        emit(Instruction::PUTSTATIC,programName+"/"+ctx->variable()->getText(),varType);
+        //Counting down
+        emit(Instruction::ISUB);
     }
+    emitStoreValue(ctx->variable()->entry,ctx->variable()->type);
     emit(Instruction::GOTO,topLabel->getString());
 
     //Exit loop
@@ -265,17 +254,44 @@ void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+    emitCall(ctx->procedureName()->entry,ctx->argumentList());
 }
 
 void StatementGenerator::emitFunctionCall(PascalParser::FunctionCallContext *ctx)
 {
     /***** Complete this member function. *****/
+    emitCall(ctx->functionName()->entry,ctx->argumentList());
 }
 
 void StatementGenerator::emitCall(SymtabEntry *routineId,
                                   PascalParser::ArgumentListContext *argListCtx)
 {
     /***** Complete this member function. *****/
+    //Need to get datatypes of arguments
+    string argTypeString;
+
+    if(argListCtx){
+        std::vector<Typespec*> expectedArgType;
+        expectedArgType.reserve(argListCtx->argument().size());
+        for(auto argSymTabEntry : *routineId->getRoutineParameters()){
+            expectedArgType.push_back(argSymTabEntry->getType());
+            argTypeString += typeToString(argSymTabEntry->getType());
+        }
+
+        //for (PascalParser::ArgumentContext*  argCtx: ctx->argumentList()->argument()) {
+        for(unsigned int i=0;i<argListCtx->argument().size();i++){
+            auto argCtx = argListCtx->argument(i);
+            compiler->visit(argCtx->expression()); //Will put the arguments on the top of the argument stack
+            if(argCtx->expression()->type != expectedArgType[i]){
+                emitCast(argCtx->expression()->type,expectedArgType[i]);
+            }
+        }
+    }
+
+    //This is a bit of a hack since we know we will only have static methods
+    string retType = typeToString(routineId->getType());
+    string functionName = programName + "/" + routineId->getName() + "(" + argTypeString + ")" + (retType==""?"V":retType);
+    emit(Instruction::INVOKESTATIC,functionName);
 }
 
 void StatementGenerator::emitWrite(PascalParser::WriteStatementContext *ctx)

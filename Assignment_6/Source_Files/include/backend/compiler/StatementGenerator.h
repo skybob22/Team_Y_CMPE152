@@ -160,6 +160,11 @@ private:
      * @param needSkip true if need to skip the rest of the input line.
      */
     void emitRead(PascalParser::ReadArgumentsContext *argsCtx, bool needSkip);
+
+private:
+    //A couple utility tools
+    string typeToString(Typespec* type);
+    void emitCast(Typespec* from, Typespec* to);
 };
 
 }} // namespace backend::compiler

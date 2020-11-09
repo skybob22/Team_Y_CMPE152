@@ -216,7 +216,7 @@ void ProgramGenerator::emitMainEpilogue()
     emitLine();
 
     emitDirective(LIMIT_LOCALS, localVariables->count());
-    emitDirective(LIMIT_STACK,  localStack->capacity());
+    emitDirective(LIMIT_STACK,  static_cast<int>(localStack->capacity()*2));
     emitDirective(END_METHOD);
 
     close();  // the object file
@@ -323,7 +323,7 @@ void ProgramGenerator::emitRoutineEpilogue()
 {
     emitLine();
     emitDirective(LIMIT_LOCALS, localVariables->count());
-    emitDirective(LIMIT_STACK,  localStack->capacity());
+    emitDirective(LIMIT_STACK,  static_cast<int>(localStack->capacity()*1.5));
     emitDirective(END_METHOD);
 }
 

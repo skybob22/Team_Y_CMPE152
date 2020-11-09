@@ -1,4 +1,4 @@
-grammar Pascal_Java;../../
+grammar Pascal_Java;
 
 program           : programHeader block '.' ;
 programHeader     : PROGRAM programIdentifier programParameters? ';' ;

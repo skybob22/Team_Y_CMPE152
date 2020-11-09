@@ -61,7 +61,6 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
 void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 {
     /***** Complete this member function. *****/
-    //Labels for jumping around
     Label* falseLabel = new Label();
     Label* doneLabel = new Label();
 
@@ -116,7 +115,7 @@ void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 {
     /***** Complete this member function. *****/
     Label* topLabel = new Label();
-    Label* breakoutLabel = new Label();
+    Label* exitLabel = new Label();
 
     //Set up label to return to at top of loop
     emitLabel(topLabel);
@@ -126,18 +125,98 @@ void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 
     //Do comparison to see if expression is true
     emit(Instruction::ICONST_0);
-    emit(Instruction::IF_ICMPEQ, breakoutLabel->getString());
+    emit(Instruction::IF_ICMPEQ, exitLabel->getString());
 
     //Execute if true, fall through to next
     compiler->visit(ctx->statement());
     emit(Instruction::GOTO,topLabel->getString());
 
-    emitLabel(breakoutLabel); //Jump to here to exit loop
+    emitLabel(exitLabel); //Jump to here to exit loop
 }
 
 void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+    Label* topLabel = new Label();
+    Label* exitLabel = new Label();
+
+    string varType;
+    if(ctx->variable()->type == Predefined::integerType) varType = "I";
+    else if(ctx->variable()->type == Predefined::charType) varType = "C";
+
+    //Initial assignment
+    compiler->visit(ctx->expression()[0]); //Get value to assign
+    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
+        //Using local variable
+        emit(Instruction::ISTORE,ctx->variable()->entry->getSlotNumber());
+    }
+    else{
+        //Using global variable
+        emit(Instruction::PUTSTATIC,programName+"/"+ctx->variable()->getText(),varType);
+    }
+
+    //Begin loop
+    emitLabel(topLabel);
+    //Perform test
+    if(ctx->TO()){
+        //Counting up
+        compiler->visit(ctx->expression()[1]); //Puts result on opstack
+        emit(Instruction::ICONST_1);
+        emit(Instruction::IADD); //Should go up to the number and stop when one above
+    }
+    else{
+        //Counting down
+        compiler->visit(ctx->expression()[1]); //Puts result on opstack
+        emit(Instruction::ICONST_1);
+        emit(Instruction::ISUB);
+    }
+    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
+        //Using local variable
+        emit(Instruction::ILOAD, ctx->variable()->entry->getSlotNumber());
+    }
+    else{
+        //Using static/global variable
+        emit(Instruction::GETSTATIC,programName+"/"+ctx->variable()->getText(),varType);
+    }
+    //If done, exit loop
+    emit(Instruction::IF_ICMPEQ, exitLabel->getString());
+
+    //Do statement in loop
+    compiler->visit(ctx->statement());
+
+    //Increment variable and return to at top of loop
+    if(ctx->variable()->entry->getSymtab()->getNestingLevel() > 1) {
+        //Using local variable
+        emit(Instruction::ILOAD,ctx->variable()->entry->getSlotNumber());
+        emit(Instruction::ICONST_1);
+        if(ctx->TO()) {
+            //Counting up
+            emit(Instruction::IADD);
+        }
+        else{
+            //Counting down
+            emit(Instruction::ISUB);
+        }
+        emit(Instruction::ISTORE, ctx->variable()->entry->getSlotNumber());
+    }
+    else{
+        //Using static/global variable
+        emit(Instruction::GETSTATIC,programName+"/"+ctx->variable()->getText(),varType);
+        emit(Instruction::ICONST_1);
+        if(ctx->TO()) {
+            //Counting up
+            emit(Instruction::IADD);
+        }
+        else{
+            //Counting down
+            emit(Instruction::ISUB);
+        }
+        emit(Instruction::PUTSTATIC,programName+"/"+ctx->variable()->getText(),varType);
+    }
+    emit(Instruction::GOTO,topLabel->getString());
+
+    //Exit loop
+    emitLabel(exitLabel);
 }
 
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)

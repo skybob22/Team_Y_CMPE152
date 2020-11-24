@@ -204,10 +204,6 @@ void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
     Label* topLabel = new Label();
     Label* exitLabel = new Label();
 
-    string varType;
-    if(ctx->variable()->type == Predefined::integerType) varType = "I";
-    else if(ctx->variable()->type == Predefined::charType) varType = "C";
-
     //Initial assignment
     compiler->visit(ctx->expression()[0]); //Get value to assign
     emitStoreValue(ctx->variable()->entry,ctx->variable()->type);
@@ -278,7 +274,6 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
             argTypeString += typeToString(argSymTabEntry->getType());
         }
 
-        //for (PascalParser::ArgumentContext*  argCtx: ctx->argumentList()->argument()) {
         for(unsigned int i=0;i<argListCtx->argument().size();i++){
             auto argCtx = argListCtx->argument(i);
             compiler->visit(argCtx->expression()); //Will put the arguments on the top of the argument stack
@@ -290,7 +285,7 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
 
     //This is a bit of a hack since we know we will only have static methods
     string retType = typeToString(routineId->getType());
-    string functionName = programName + "/" + routineId->getName() + "(" + argTypeString + ")" + (retType==""?"V":retType);
+    string functionName = programName + "/" + routineId->getName() + "(" + argTypeString + ")" + (retType.empty()?"V":retType);
     emit(Instruction::INVOKESTATIC,functionName);
 }
 

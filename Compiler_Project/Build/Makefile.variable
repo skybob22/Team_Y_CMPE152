@@ -39,7 +39,7 @@ ANTLR_OUTPUT_DIR := $(CODE_DIR)/generated_source
 
 
 #Main files to include/exclude to fix potential issues with multiple mains
-APP_MAIN := $(APP_SRC_DIR)/Pascal.cpp
+APP_MAIN := $(APP_SRC_DIR)/C.cpp
 
 
 #All directories that need to be compiled here

@@ -1,6 +1,15 @@
+int GLOBALA;
+int GLOBALB = 7;
+
+int add(int in){
+  return in+1;
+}
+
+bool not(bool in){
+  return !in;
+}
 
 void main(){
-  for(int i=0;i<10;i++){
-    println("Value of i: ",i);
-  }
+  int i;
+  i = 1;
 }

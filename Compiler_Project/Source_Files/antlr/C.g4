@@ -33,8 +33,8 @@ emptyStatement : ;
 
 //====Declarations====//
 variableDeclaration
-    : typeIdentifier variableIdentifier (',' variableIdentifier)* #varDeclaration
-    | typeIdentifier variableIdentifier '[' length ']'            #arrDeclaration
+    : typeIdentifier variableIdentifier (',' variableIdentifier)*
+    | typeIdentifier variableIdentifier '[' length ']'
     ;
 length : INTEGER ;
 

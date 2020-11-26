@@ -97,6 +97,7 @@ int main(int argc, const char *args[])
     pass2->visit(tree);
 
     int error_count = pass2->getErrorCount();
+
     if (error_count > 0)
     {
         cout << endl << "There were " << error_count << " semantic errors."

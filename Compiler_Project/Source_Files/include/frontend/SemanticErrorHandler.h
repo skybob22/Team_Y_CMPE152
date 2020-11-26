@@ -36,7 +36,8 @@ enum class Error
     INVALID_REFERENCE_PARAMETER,
     INVALID_RETURN_TYPE,
     TOO_MANY_SUBSCRIPTS,
-    INVALID_FIELD
+    INVALID_FIELD,
+    FUNCTION_NOT_DEFINED
 };
 
 constexpr Error UNDECLARED_IDENTIFIER       = Error::UNDECLARED_IDENTIFIER;
@@ -61,6 +62,7 @@ constexpr Error INVALID_REFERENCE_PARAMETER = Error::INVALID_REFERENCE_PARAMETER
 constexpr Error INVALID_RETURN_TYPE         = Error::INVALID_RETURN_TYPE;
 constexpr Error TOO_MANY_SUBSCRIPTS         = Error::TOO_MANY_SUBSCRIPTS;
 constexpr Error INVALID_FIELD               = Error::INVALID_FIELD;
+constexpr Error FUNCTION_NOT_DEFINED        = Error::FUNCTION_NOT_DEFINED;
 
 class SemanticErrorHandler
 {
@@ -116,6 +118,8 @@ public:
                 "Too many subscripts";
         SEMANTIC_ERROR_MESSAGES[INVALID_FIELD] =
                 "Invalid field";
+        SEMANTIC_ERROR_MESSAGES[FUNCTION_NOT_DEFINED] =
+                "Function not defined";
     }
 
     int getCount() const { return count; }

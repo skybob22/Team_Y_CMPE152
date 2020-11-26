@@ -50,11 +50,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitDecrementVariable(CParser::DecrementVariableContext *ctx) override {
+  virtual antlrcpp::Any visitIncrementVariable(CParser::IncrementVariableContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitIrncrementVariable(CParser::IrncrementVariableContext *ctx) override {
+  virtual antlrcpp::Any visitDecrementVariable(CParser::DecrementVariableContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -119,10 +119,6 @@ public:
   }
 
   virtual antlrcpp::Any visitFunctionCall(CParser::FunctionCallContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitFunctionName(CParser::FunctionNameContext *ctx) override {
     return visitChildren(ctx);
   }
 

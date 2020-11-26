@@ -40,9 +40,9 @@ public:
 
     virtual antlrcpp::Any visitAssignVariable(CParser::AssignVariableContext *context) = 0;
 
-    virtual antlrcpp::Any visitDecrementVariable(CParser::DecrementVariableContext *context) = 0;
+    virtual antlrcpp::Any visitIncrementVariable(CParser::IncrementVariableContext *context) = 0;
 
-    virtual antlrcpp::Any visitIrncrementVariable(CParser::IrncrementVariableContext *context) = 0;
+    virtual antlrcpp::Any visitDecrementVariable(CParser::DecrementVariableContext *context) = 0;
 
     virtual antlrcpp::Any visitLhs(CParser::LhsContext *context) = 0;
 
@@ -75,8 +75,6 @@ public:
     virtual antlrcpp::Any visitReturnStatement(CParser::ReturnStatementContext *context) = 0;
 
     virtual antlrcpp::Any visitFunctionCall(CParser::FunctionCallContext *context) = 0;
-
-    virtual antlrcpp::Any visitFunctionName(CParser::FunctionNameContext *context) = 0;
 
     virtual antlrcpp::Any visitArgumentList(CParser::ArgumentListContext *context) = 0;
 

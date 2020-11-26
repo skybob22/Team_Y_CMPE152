@@ -95,11 +95,23 @@ namespace frontend {
         Object visitVariableDeclaration(CParser::VariableDeclarationContext *ctx) override;
         Object visitTypeIdentifier(CParser::TypeIdentifierContext *ctx) override;
         Object visitLhs(CParser::LhsContext *ctx) override;
+        Object visitAssignVariable(CParser::AssignVariableContext *ctx) override;
+        Object visitDecrementVariable(CParser::DecrementVariableContext *ctx) override;
+        Object visitIncrementVariable(CParser::IncrementVariableContext *ctx) override;
 
         Object visitFunctionDeclaration(CParser::FunctionDeclarationContext *ctx) override;
         Object visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx) override;
         Object visitParameterDeclarationsList(CParser::ParameterDeclarationsListContext *ctx) override;
         Object visitParameterDeclaration(CParser::ParameterDeclarationContext *ctx) override;
+
+        Object visitDoWhileLoop(CParser::DoWhileLoopContext *ctx) override;
+        Object visitWhileLoop(CParser::WhileLoopContext *ctx) override;
+        Object visitForLoop(CParser::ForLoopContext *ctx) override;
+        Object visitIfStatement(CParser::IfStatementContext *ctx) override;
+
+        Object visitFunctionCall(CParser::FunctionCallContext *ctx) override;
+        Object visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx) override;
+        Object visitReturnStatement(CParser::ReturnStatementContext *ctx) override;
 
         Object visitExpression(CParser::ExpressionContext *ctx) override;
         Object visitSimpleExpression(CParser::SimpleExpressionContext *ctx) override;

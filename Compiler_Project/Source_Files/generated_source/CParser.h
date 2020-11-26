@@ -36,15 +36,15 @@ public:
     RuleDoWhileLoop = 11, RuleWhileLoop = 12, RuleForLoop = 13, RuleIfStatement = 14, 
     RuleFunctionDefinition = 15, RuleFunctionDeclaration = 16, RuleFunctionIdentifier = 17, 
     RuleParameterDeclarationsList = 18, RuleParameterDeclaration = 19, RuleParameterIdentifier = 20, 
-    RuleReturnStatement = 21, RuleFunctionCall = 22, RuleFunctionName = 23, 
-    RuleArgumentList = 24, RuleArgument = 25, RulePrintStatement = 26, RulePrintLnStatement = 27, 
-    RulePrintList = 28, RulePrintItem = 29, RuleReadStatement = 30, RuleReadlnStatement = 31, 
-    RuleReadArguments = 32, RuleExpression = 33, RuleSimpleExpression = 34, 
-    RuleTerm = 35, RuleFactor = 36, RuleVariable = 37, RuleModifier = 38, 
-    RuleIndex = 39, RuleVariableIdentifier = 40, RuleNumber = 41, RuleUnsignedNumber = 42, 
-    RuleSign = 43, RuleIntegerConstant = 44, RuleRealConstant = 45, RuleRelOp = 46, 
-    RuleAddOp = 47, RuleMulOp = 48, RuleTypeIdentifier = 49, RuleCharacterConstant = 50, 
-    RuleStringConstant = 51
+    RuleReturnStatement = 21, RuleFunctionCall = 22, RuleArgumentList = 23, 
+    RuleArgument = 24, RulePrintStatement = 25, RulePrintLnStatement = 26, 
+    RulePrintList = 27, RulePrintItem = 28, RuleReadStatement = 29, RuleReadlnStatement = 30, 
+    RuleReadArguments = 31, RuleExpression = 32, RuleSimpleExpression = 33, 
+    RuleTerm = 34, RuleFactor = 35, RuleVariable = 36, RuleModifier = 37, 
+    RuleIndex = 38, RuleVariableIdentifier = 39, RuleNumber = 40, RuleUnsignedNumber = 41, 
+    RuleSign = 42, RuleIntegerConstant = 43, RuleRealConstant = 44, RuleRelOp = 45, 
+    RuleAddOp = 46, RuleMulOp = 47, RuleTypeIdentifier = 48, RuleCharacterConstant = 49, 
+    RuleStringConstant = 50
   };
 
   CParser(antlr4::TokenStream *input);
@@ -80,7 +80,6 @@ public:
   class ParameterIdentifierContext;
   class ReturnStatementContext;
   class FunctionCallContext;
-  class FunctionNameContext;
   class ArgumentListContext;
   class ArgumentContext;
   class PrintStatementContext;
@@ -236,9 +235,9 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  class  IrncrementVariableContext : public AssignmentStatementContext {
+  class  IncrementVariableContext : public AssignmentStatementContext {
   public:
-    IrncrementVariableContext(AssignmentStatementContext *ctx);
+    IncrementVariableContext(AssignmentStatementContext *ctx);
 
     VariableContext *variable();
 
@@ -344,10 +343,10 @@ public:
     ForLoopContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *FOR();
-    std::vector<StatementContext *> statement();
-    StatementContext* statement(size_t i);
     ExpressionContext *expression();
     ControlScopeContext *controlScope();
+    std::vector<StatementContext *> statement();
+    StatementContext* statement(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -360,14 +359,14 @@ public:
   public:
     IfStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *IF();
+    std::vector<antlr4::tree::TerminalNode *> IF();
+    antlr4::tree::TerminalNode* IF(size_t i);
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
     std::vector<ControlScopeContext *> controlScope();
     ControlScopeContext* controlScope(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> ELSEIF();
-    antlr4::tree::TerminalNode* ELSEIF(size_t i);
-    antlr4::tree::TerminalNode *ELSE();
+    std::vector<antlr4::tree::TerminalNode *> ELSE();
+    antlr4::tree::TerminalNode* ELSE(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -481,7 +480,7 @@ public:
   public:
     FunctionCallContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    FunctionNameContext *functionName();
+    FunctionIdentifierContext *functionIdentifier();
     ArgumentListContext *argumentList();
 
 
@@ -490,19 +489,6 @@ public:
   };
 
   FunctionCallContext* functionCall();
-
-  class  FunctionNameContext : public antlr4::ParserRuleContext {
-  public:
-    FunctionNameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *IDENTIFIER();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  FunctionNameContext* functionName();
 
   class  ArgumentListContext : public antlr4::ParserRuleContext {
   public:

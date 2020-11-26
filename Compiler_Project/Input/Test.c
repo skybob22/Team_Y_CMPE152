@@ -8,7 +8,10 @@ void main(){
   int i;
   i = 1;
   int j = 7;
-  float v = 0.25;
+  for(int k=0;k<10;k++){
+
+  }
+  return;
 }
 
 int add(int in){

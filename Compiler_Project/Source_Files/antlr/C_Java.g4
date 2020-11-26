@@ -25,8 +25,8 @@ emptyStatement : ;
 
 //====Declarations====//
 variableDeclaration
-    : typeIdentifier variableIdentifier (',' variableIdentifier)* #varDeclaration
-    | typeIdentifier variableIdentifier '[' length ']'            #arrDeclaration
+    : typeIdentifier variableIdentifier (',' variableIdentifier)*
+    | typeIdentifier variableIdentifier '[' length ']'
     ;
 length : INTEGER ;
 
@@ -37,9 +37,12 @@ assignmentStatement
     | variable '--' #irncrementVariable
     ;
 
-lhs : (variable | variableDeclaration) ;
-rhs : expression ;
+lhs
+    : variable
+    | variableDeclaration
+    ;
 
+rhs : expression ;
 
 //====Program flow/control statements====//
 controlScope : '{' (c_statement | controlStatement)* '}' ;
@@ -54,11 +57,11 @@ controlStatement
 
 doWhileLoop : DO controlScope WHILE '(' expression ')';
 whileLoop : WHILE '(' expression ')' controlScope ;
-forLoop : FOR '(' statement ';' expression ';' statement ')' controlScope ;
+forLoop : FOR '(' statement? ';' expression ';' statement? ')' controlScope ;
 ifStatement
     : IF '(' expression ')' controlScope
-      (ELSEIF '(' expression ')' controlScope)*
-      (ELSE '(' expression ')' controlScope)?
+      (ELSE IF '(' expression ')' controlScope)*
+      (ELSE controlScope)?
     ;
 
 //====Function declarations/definitions/calls====//
@@ -72,7 +75,8 @@ parameterDeclaration     : typeIdentifier parameterIdentifier;
 parameterIdentifier
    : IDENTIFIER ;
 
-returnStatement : RETURN expression;
+returnStatement
+    : RETURN expression?;
 
 functionCall : functionName '(' argumentList? ')' ;
 functionName

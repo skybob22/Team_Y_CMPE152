@@ -41,8 +41,8 @@ length : INTEGER ;
 //====Variable assignment====//
 assignmentStatement
     : lhs '=' rhs   #assignVariable
-    | variable '++' #decrementVariable
-    | variable '--' #irncrementVariable
+    | variable '++' #incrementVariable
+    | variable '--' #decrementVariable
     ;
 
 lhs locals [ Typespec *type = nullptr ]
@@ -65,11 +65,11 @@ controlStatement
 
 doWhileLoop : DO controlScope WHILE '(' expression ')';
 whileLoop : WHILE '(' expression ')' controlScope ;
-forLoop : FOR '(' statement ';' expression ';' statement ')' controlScope ;
+forLoop : FOR '(' statement? ';' expression ';' statement? ')' controlScope ;
 ifStatement
     : IF '(' expression ')' controlScope
-      (ELSEIF '(' expression ')' controlScope)*
-      (ELSE '(' expression ')' controlScope)?
+      (ELSE IF '(' expression ')' controlScope)*
+      (ELSE controlScope)?
     ;
 
 //====Function declarations/definitions/calls====//
@@ -83,11 +83,10 @@ parameterDeclaration     : typeIdentifier parameterIdentifier;
 parameterIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
    : IDENTIFIER ;
 
-returnStatement : RETURN expression;
+returnStatement
+    : RETURN expression?;
 
-functionCall : functionName '(' argumentList? ')' ;
-functionName
-    : IDENTIFIER ;
+functionCall : functionIdentifier '(' argumentList? ')' ;
 argumentList : argument ( ',' argument )* ;
 argument     : expression ;
 

@@ -272,7 +272,6 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
 
     symtabStack->pop();
     return nullptr;
-
 }
 
 Object Semantics::visitParameterDeclarationsList(CParser::ParameterDeclarationsListContext *ctx){
@@ -336,7 +335,7 @@ Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *
             CParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(i);
 
             int lineNumber = idCtx->getStart()->getLine();
-            string variableName = toLowerCase(idCtx->IDENTIFIER()->getText());
+            string variableName = idCtx->IDENTIFIER()->getText();
             SymtabEntry *variableId = symtabStack->lookupLocal(variableName);
 
             if (variableId == nullptr)
@@ -362,12 +361,11 @@ Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *
         }
     }
 
-
     return nullptr;
 }
 
 Object Semantics::visitTypeIdentifier(CParser::TypeIdentifierContext *ctx){
-    string typeName = toLowerCase(ctx->getText());
+    string typeName = ctx->getText();
     SymtabEntry *typeId = symtabStack->lookup(typeName);
 
     if (typeId != nullptr)
@@ -403,7 +401,230 @@ Object Semantics::visitLhs(CParser::LhsContext *ctx){
     else{
         CParser::VariableDeclarationContext *varDecCtx = ctx->variableDeclaration();
         visit(varDecCtx);
-        ctx->type = ctx->variableDeclaration()->variableIdentifier(0)->type;
+        ctx->type = ctx->variableDeclaration()->typeIdentifier()->type;;
+    }
+    return nullptr;
+}
+
+Object Semantics::visitAssignVariable(CParser::AssignVariableContext *ctx){
+    CParser::LhsContext *lhsCtx = ctx->lhs();
+    CParser::RhsContext *rhsCtx = ctx->rhs();
+
+    visitChildren(ctx);
+
+    Typespec *lhsType = lhsCtx->type;
+    Typespec *rhsType = rhsCtx->expression()->type;
+
+    if (!TypeChecker::areAssignmentCompatible(lhsType, rhsType))
+    {
+        error.flag(INCOMPATIBLE_ASSIGNMENT, ctx);
+    }
+
+    return nullptr;
+}
+
+Object Semantics::visitDecrementVariable(CParser::DecrementVariableContext *ctx){
+    CParser::VariableContext *vCtx = ctx->variable();
+    visit(vCtx);
+    if(vCtx->type->getForm() != SCALAR){
+        error.flag(TYPE_MUST_BE_NUMERIC,ctx);
+    }
+    return nullptr;
+}
+
+Object Semantics::visitIncrementVariable(CParser::IncrementVariableContext *ctx){
+    CParser::VariableContext *vCtx = ctx->variable();
+    visit(vCtx);
+    if(vCtx->type->getForm() != SCALAR){
+        error.flag(TYPE_MUST_BE_NUMERIC,ctx);
+    }
+    return nullptr;
+}
+
+Object Semantics::visitDoWhileLoop(CParser::DoWhileLoopContext *ctx){
+    CParser::ExpressionContext *exprCtx = ctx->expression();
+    visit(exprCtx);
+    Typespec *exprType = exprCtx->type;
+
+    if (!TypeChecker::isBoolean(exprType))
+    {
+        error.flag(TYPE_MUST_BE_BOOLEAN, exprCtx);
+    }
+
+    visit(ctx->controlScope());
+    return nullptr;
+}
+
+Object Semantics::visitWhileLoop(CParser::WhileLoopContext *ctx){
+    CParser::ExpressionContext *exprCtx = ctx->expression();
+    visit(exprCtx);
+    Typespec *exprType = exprCtx->type;
+
+    if (!TypeChecker::isBoolean(exprType))
+    {
+        error.flag(TYPE_MUST_BE_BOOLEAN, exprCtx);
+    }
+
+    visit(ctx->controlScope());
+    return nullptr;
+}
+
+Object Semantics::visitForLoop(CParser::ForLoopContext *ctx){
+    //Visit the init and end-loop statements
+    for(CParser::StatementContext *sCtx : ctx->statement()){
+        visit(sCtx);
+    }
+
+    CParser::ExpressionContext *exprCtx = ctx->expression();
+    visit(exprCtx);
+    Typespec *exprType = exprCtx->type;
+
+    if (!TypeChecker::isBoolean(exprType))
+    {
+        error.flag(TYPE_MUST_BE_BOOLEAN, exprCtx);
+    }
+
+    visit(ctx->controlScope());
+    return nullptr;
+}
+
+Object Semantics::visitIfStatement(CParser::IfStatementContext *ctx){
+    //Required if(condition)
+    CParser::ExpressionContext *exprCtx  = ctx->expression(0);
+    visit(exprCtx);
+    Typespec *expr_type = exprCtx->type;
+    if (!TypeChecker::isBoolean(expr_type))    {
+        error.flag(TYPE_MUST_BE_BOOLEAN, exprCtx);
+    }
+    visit(ctx->controlScope(0));
+
+    //Optional else if conditions
+    int numElseIf = ctx->IF().size() - 1;
+    //We know there is at least 1 'if', so the number of 'else if' is the number of 'if' - 1
+    for(int i=0;i<numElseIf;i++){
+        CParser::ExpressionContext *ie_exprCtx  = ctx->expression(1+i);
+        visit(ie_exprCtx);
+        Typespec *ie_expr_type = ie_exprCtx->type;
+        if (!TypeChecker::isBoolean(ie_expr_type))        {
+            error.flag(TYPE_MUST_BE_BOOLEAN, ie_exprCtx);
+        }
+        visit(ctx->controlScope(i+1));
+    }
+
+    //Optional else condition
+    //If number of 'if' and 'else' are different by more than 1, we know there is an else at the end
+    bool elsePresent = (ctx->IF().size() - 1) != ctx->ELSE().size();
+    if(elsePresent){
+        CParser::ExpressionContext *e_exprCtx  = ctx->expression().back();
+        visit(e_exprCtx);
+        Typespec *e_expr_type = e_exprCtx->type;
+        if (!TypeChecker::isBoolean(e_expr_type))        {
+            error.flag(TYPE_MUST_BE_BOOLEAN, e_exprCtx);
+        }
+        visit(ctx->controlScope().back());
+    }
+
+    return nullptr;
+}
+
+Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
+    //Can be treated like procedure call since we know in this case the value isn't being stored
+    CParser::FunctionIdentifierContext*nameCtx = ctx->functionIdentifier();
+    CParser::ArgumentListContext *listCtx = ctx->argumentList();
+    string name = toLowerCase(ctx->functionIdentifier()->getText());
+    SymtabEntry *procedureId = symtabStack->lookup(name);
+    bool badName = false;
+
+    if (procedureId == nullptr)
+    {
+        error.flag(UNDECLARED_IDENTIFIER, nameCtx);
+        badName = true;
+    }
+    else if (procedureId->getKind() != PROCEDURE)
+    {
+        error.flag(NAME_MUST_BE_PROCEDURE, nameCtx);
+        badName = true;
+    }
+
+    // Bad procedure name. Do a simple arguments check and then leave.
+    if (badName)
+    {
+        for (CParser::ArgumentContext *exprCtx : listCtx->argument())
+        {
+            visit(exprCtx);
+        }
+    }
+
+        // Good procedure name.
+    else
+    {
+        vector<SymtabEntry *> *parms = procedureId->getRoutineParameters();
+        checkCallArguments(listCtx, parms);
+    }
+
+    nameCtx->entry = procedureId;
+    return nullptr;
+}
+
+Object Semantics::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx){
+    CParser::FunctionCallContext *callCtx = ctx->functionCall();
+    CParser::FunctionIdentifierContext *nameCtx = callCtx->functionIdentifier();
+    CParser::ArgumentListContext *listCtx = callCtx->argumentList();
+    string name = toLowerCase(callCtx->functionIdentifier()->getText());
+    SymtabEntry *functionId = symtabStack->lookup(name);
+    bool badName = false;
+
+    ctx->type = Predefined::integerType;
+
+    if (functionId == nullptr)
+    {
+        error.flag(UNDECLARED_IDENTIFIER, nameCtx);
+        badName = true;
+    }
+    else if (functionId->getKind() != FUNCTION)
+    {
+        error.flag(NAME_MUST_BE_FUNCTION, nameCtx);
+        badName = true;
+    }
+
+    // Bad function name. Do a simple arguments check and then leave.
+    if (badName)
+    {
+        for (CParser::ArgumentContext *exprCtx : listCtx->argument())
+        {
+            visit(exprCtx);
+        }
+    }
+
+    // Good function name.
+    else
+    {
+        vector<SymtabEntry *> *parms = functionId->getRoutineParameters();
+        checkCallArguments(listCtx, parms);
+        ctx->type = functionId->getType();
+    }
+
+    nameCtx->entry = functionId;
+    nameCtx->type  = ctx->type;
+
+    return nullptr;
+}
+
+Object Semantics::visitReturnStatement(CParser::ReturnStatementContext *ctx){
+    Typespec* routineType = symtabStack->getLocalSymtab()->getOwner()->getType();
+    Kind routineKind = symtabStack->getLocalSymtab()->getOwner()->getKind();
+    if(ctx->expression()){
+        CParser::ExpressionContext *eCtx = ctx->expression();
+        visit(eCtx);
+        if(eCtx->type != routineType){
+            error.flag(INVALID_RETURN_TYPE,ctx);
+        }
+    }
+    else{
+        //Must be part of a function with return type void
+        if(routineType != nullptr && routineKind != PROCEDURE){
+            error.flag(INVALID_RETURN_TYPE,ctx);
+        }
     }
     return nullptr;
 }

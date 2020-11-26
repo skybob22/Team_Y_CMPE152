@@ -24,17 +24,14 @@ using namespace intermediate::symtab;
 using namespace intermediate::type;
 using namespace intermediate::util;
 
-int Semantics::typeCount(Typespec *type)
-{
+int Semantics::typeCount(Typespec *type){
     int count = 0;
 
-    if (type->getForm() == ENUMERATION)
-    {
+    if (type->getForm() == ENUMERATION){
         vector<SymtabEntry *> *constants = type->getEnumerationConstants();
         count = constants->size();
     }
-    else  // subrange
-    {
+    else{
         int minValue = type->getSubrangeMinValue();
         int maxValue = type->getSubrangeMaxValue();
         count = maxValue - minValue + 1;
@@ -49,15 +46,13 @@ void Semantics::checkCallArguments(
     int parmsCount = parms->size();
     int argsCount = listCtx != nullptr ? listCtx->argument().size() : 0;
 
-    if (parmsCount != argsCount)
-    {
+    if (parmsCount != argsCount){
         error.flag(ARGUMENT_COUNT_MISMATCH, listCtx);
         return;
     }
 
     // Check each argument against the corresponding parameter.
-    for (int i = 0; i < parmsCount; i++)
-    {
+    for (int i = 0; i < parmsCount; i++){
         CParser::ArgumentContext *argCtx = listCtx->argument()[i];
         CParser::ExpressionContext *exprCtx = argCtx->expression();
         visit(exprCtx);
@@ -68,45 +63,36 @@ void Semantics::checkCallArguments(
 
         // For a VAR parameter, the argument must be a variable
         // with the same datatype.
-        if (parmId->getKind() == REFERENCE_PARAMETER)
-        {
-            if (expressionIsVariable(exprCtx))
-            {
-                if (parmType != argType)
-                {
+        if (parmId->getKind() == REFERENCE_PARAMETER){
+            if (expressionIsVariable(exprCtx)){
+                if (parmType != argType){
                     error.flag(TYPE_MISMATCH, exprCtx);
                 }
             }
-            else
-            {
+            else{
                 error.flag(ARGUMENT_MUST_BE_VARIABLE, exprCtx);
             }
         }
 
             // For a value parameter, the argument type must be
             // assignment compatible with the parameter type.
-        else if (!TypeChecker::areAssignmentCompatible(parmType, argType))
-        {
+        else if (!TypeChecker::areAssignmentCompatible(parmType, argType)){
             error.flag(TYPE_MISMATCH, exprCtx);
         }
     }
 }
 
-bool Semantics::expressionIsVariable(CParser::ExpressionContext *exprCtx)
-{
+bool Semantics::expressionIsVariable(CParser::ExpressionContext *exprCtx){
     // Only a single simple expression?
-    if (exprCtx->simpleExpression().size() == 1)
-    {
+    if (exprCtx->simpleExpression().size() == 1){
         CParser::SimpleExpressionContext *simpleCtx =
                 exprCtx->simpleExpression()[0];
         // Only a single term?
-        if (simpleCtx->term().size() == 1)
-        {
+        if (simpleCtx->term().size() == 1){
             CParser::TermContext *termCtx = simpleCtx->term()[0];
 
             // Only a single factor?
-            if (termCtx->factor().size() == 1)
-            {
+            if (termCtx->factor().size() == 1){
                 return dynamic_cast<CParser::VariableFactorContext *>(
                                termCtx->factor()[0]) != nullptr;
             }
@@ -122,34 +108,47 @@ Typespec *Semantics::variableDatatype(CParser::VariableContext *varCtx,
     Typespec *type = varType;
 
     // Subscripts.
-    if (varCtx->modifier() != nullptr)
-    {
+    if (varCtx->modifier() != nullptr){
         CParser::IndexContext *indexCtx = varCtx->modifier()->index();
         // Get the subscript.
-        if (type->getForm() == ARRAY)
-        {
+        if (type->getForm() == ARRAY){
             Typespec *indexType = type->getArrayIndexType();
             CParser::ExpressionContext *exprCtx =
                     indexCtx->expression();
             visit(exprCtx);
 
-            if (indexType->baseType() != exprCtx->type->baseType())
-            {
+            if (indexType->baseType() != exprCtx->type->baseType()){
                 error.flag(TYPE_MISMATCH, exprCtx);
             }
 
             // Datatype of the next dimension.
             type = type->getArrayElementType();
         }
-        else
-        {
+        else{
             error.flag(TOO_MANY_SUBSCRIPTS, indexCtx);
         }
     }
 
     return type;
 }
+void Semantics::postErrorCheck(){
+    //Need to do this at the end of parsing
+    for(auto entry : symtabStack->getLocalSymtab()->sortedEntries()){
+        if(entry->getKind() == FUNCTION || entry->getKind() == PROCEDURE){
+            //Check if function or procedure do not have defined execuables (function body)
+            bool exPresent = entry->hasExecutable();
+            if(!exPresent){
+                int lineNumber = entry->getLineNumbers()->front();
+                string errorMessage = "Function '" + entry->getName() + "' is not defined";
+                error.flag(Error::FUNCTION_NOT_DEFINED,lineNumber,errorMessage);
+            }
+        }
+    }
+}
 
+int Semantics::getErrorCount() const{
+    return error.getCount();
+}
 
 
 Object Semantics::visitProgram(CParser::ProgramContext *ctx){
@@ -167,22 +166,20 @@ Object Semantics::visitProgram(CParser::ProgramContext *ctx){
     CrossReferencer crossReferencer;
     crossReferencer.print(symtabStack);
 
+    postErrorCheck();
+
     return nullptr;
 }
 
 Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *ctx){
     //TODO: Ideally should do parsing here instead of FunctionDefinition, move if time
     visit(ctx->typeIdentifier());
-    return nullptr;
-}
 
-Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx){
-    visit(ctx->functionDeclaration());
-    CParser::FunctionDeclarationContext *fdCtx = ctx->functionDeclaration();
-    CParser::FunctionIdentifierContext *idCtx = ctx->functionDeclaration()->functionIdentifier();
-    CParser::ParameterDeclarationsListContext *parameters = ctx->functionDeclaration()->parameterDeclarationsList();
+    CParser::FunctionIdentifierContext *idCtx = ctx->functionIdentifier();
+    CParser::ParameterDeclarationsListContext *parameters = ctx->parameterDeclarationsList();
+
     int lineNumber = idCtx->getStart()->getLine();
-    bool nonVoid = fdCtx->typeIdentifier()->type != Predefined::voidType;
+    bool nonVoid = ctx->typeIdentifier()->type != Predefined::voidType;
 
     Typespec *returnType = nullptr;
     string routineName;
@@ -190,8 +187,7 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
     routineName = idCtx->IDENTIFIER()->getText();
     SymtabEntry *routineId = symtabStack->lookupLocal(routineName);
 
-    if (routineId != nullptr)
-    {
+    if (routineId != nullptr){
         error.flag(REDECLARED_IDENTIFIER,
                    ctx->getStart()->getLine(), routineName);
         return nullptr;
@@ -212,8 +208,7 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
     symtab->setOwner(routineId);
 
 
-    if (parameters != nullptr)
-    {
+    if (parameters != nullptr){
         vector<SymtabEntry *> *parameterIds =
                 visit(parameters).as<vector<SymtabEntry *>*>();
         routineId->setRoutineParameters(parameterIds);
@@ -224,9 +219,8 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
         }
     }
 
-    if (nonVoid)
-    {
-        CParser::TypeIdentifierContext *typeIdCtx = fdCtx->typeIdentifier();
+    if (nonVoid){
+        CParser::TypeIdentifierContext *typeIdCtx = ctx->typeIdentifier();
         visit(typeIdCtx);
         returnType = typeIdCtx->type;
 
@@ -240,8 +234,7 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
         routineId->setType(returnType);
         idCtx->type = returnType;
     }
-    else
-    {
+    else{
         idCtx->type = Predefined::voidType;
     }
     idCtx->entry->appendLineNumber(lineNumber);
@@ -255,7 +248,25 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
         assocVarId->setSlotNumber(symtab->nextSlotNumber());
         assocVarId->setType(returnType);
     }*/
+    symtabStack->pop();
+    return nullptr;
+}
 
+Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx){
+    CParser::FunctionDeclarationContext *fdCtx = ctx->functionDeclaration();
+    string routineName = fdCtx->functionIdentifier()->getText();
+    SymtabEntry *routineId = symtabStack->lookupLocal(routineName);
+
+    //Combined declaration and definition
+    if (routineId == nullptr){
+        visit(fdCtx);
+        //Now that it has been visited, reload routineId
+        routineId = symtabStack->lookupLocal(routineName);
+    }
+    //Else, seperate declaration and definition
+
+    //Push the proper symtab stack
+    symtabStack->push(routineId->getRoutineSymtab());
     visit(ctx->controlScope());
     routineId->setExecutable(ctx->controlScope());
 

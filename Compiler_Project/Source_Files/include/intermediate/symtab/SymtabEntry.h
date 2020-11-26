@@ -304,6 +304,12 @@ public:
     }
 
     /**
+     * Detects whether the function has an assosiated executable or not
+     * @return Whether there is an executable present or not
+     */
+    bool hasExecutable() const { return info.routine.executable != nullptr;}
+
+    /**
      * Get the routine's executable code.
      * @return the executable code.
      */

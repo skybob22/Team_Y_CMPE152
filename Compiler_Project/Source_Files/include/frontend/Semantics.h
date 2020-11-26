@@ -60,6 +60,8 @@ namespace frontend {
         Typespec *variableDatatype(CParser::VariableContext *varCtx,
                                    Typespec *varType);
 
+        void postErrorCheck();
+
 
     public:
         Semantics(BackendMode mode) : mode(mode), programId(nullptr)
@@ -74,6 +76,7 @@ namespace frontend {
             (*typeTable)["boolean"] = Predefined::booleanType;
             (*typeTable)["char"]    = Predefined::charType;
             (*typeTable)["string"]  = Predefined::stringType;
+            (*typeTable)["void"]  = Predefined::voidType;
         }
 
         /**
@@ -86,7 +89,7 @@ namespace frontend {
          * Get the count of semantic errors.
          * @return the count.
          */
-        int getErrorCount() const { return error.getCount(); }
+        int getErrorCount() const;
 
         Object visitProgram(CParser::ProgramContext *ctx) override;
         Object visitVariableDeclaration(CParser::VariableDeclarationContext *ctx) override;

@@ -401,6 +401,7 @@ public:
     TypeIdentifierContext *typeIdentifier();
     FunctionIdentifierContext *functionIdentifier();
     ParameterDeclarationsListContext *parameterDeclarationsList();
+    antlr4::tree::TerminalNode *VOID();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

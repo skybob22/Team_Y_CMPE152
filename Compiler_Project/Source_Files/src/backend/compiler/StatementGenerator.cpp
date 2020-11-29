@@ -36,7 +36,6 @@ void StatementGenerator::emitCast(Typespec* from, Typespec* to){
     }
 }
 
-//FIXME: Debug this, likely isn't correct
 void StatementGenerator::emitAssignment(CParser::AssignVariableContext *ctx){
     SymtabEntry *varId;
     Typespec *varType;

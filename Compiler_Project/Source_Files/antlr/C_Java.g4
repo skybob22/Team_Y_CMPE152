@@ -66,7 +66,7 @@ ifStatement
 
 //====Function declarations/definitions/calls====//
 functionDefinition : functionDeclaration controlScope ;
-functionDeclaration : typeIdentifier functionIdentifier '(' parameterDeclarationsList? ')' ;
+functionDeclaration : typeIdentifier functionIdentifier '(' (parameterDeclarationsList | VOID)? ')' ;
 
 functionIdentifier
    : IDENTIFIER ;

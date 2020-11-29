@@ -5,7 +5,7 @@ int add(int in);
 bool not(bool in);
 void p(int in);
 
-void main(){
+void main(void){
   int j;
   for(int i=0;i<10;i++){
     if(i == 1){
@@ -27,8 +27,7 @@ void main(){
       println("f6");
     }
     else{
-      j = add(i);
-      //println(i);
+      println(add(i));
     }
   }
 }

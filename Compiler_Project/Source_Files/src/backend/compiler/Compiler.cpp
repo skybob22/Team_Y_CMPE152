@@ -111,13 +111,14 @@ Object Compiler::visitCharacterFactor(CParser::CharacterFactorContext *ctx){
 }
 
 Object Compiler::visitStringFactor(CParser::StringFactorContext *ctx){
-
-}
-
-Object Compiler::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx){
     string jasminString = convertString(ctx->getText(), true);
     expressionCode->emitLoadConstant(jasminString);
 
+    return nullptr;
+}
+
+Object Compiler::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx){
+    statementCode->emitFunctionCall(ctx->functionCall());
     return nullptr;
 }
 

@@ -22,6 +22,7 @@ namespace frontend {
     class Semantics : public CBaseVisitor
     {
     private:
+        string programName;
         BackendMode mode;
         SymtabStack *symtabStack;
         SymtabEntry *programId;
@@ -64,7 +65,7 @@ namespace frontend {
 
 
     public:
-        Semantics(BackendMode mode) : mode(mode), programId(nullptr)
+        Semantics(BackendMode mode,string programName) : mode(mode), programId(nullptr), programName(programName)
         {
             // Create and initialize the symbol table stack.
             symtabStack = new SymtabStack();

@@ -67,7 +67,7 @@ constexpr Kind UNDEFINED            = Kind::UNDEFINED;
  */
 enum class Routine
 {
-    DECLARED, FORWARD,
+    DECLARED, DEFINED, FORWARD,
     READ, READLN, WRITE, WRITELN,
     ABS, ARCTAN, CHR, COS, EXP, LN, ODD, ORD,
     EOF_FUNCTION, EOLN_FUNCTION,
@@ -75,6 +75,7 @@ enum class Routine
 };
 
 constexpr Routine DECLARED      = Routine::DECLARED;
+constexpr Routine DEFINED       = Routine::DEFINED;
 constexpr Routine FORWARD       = Routine::FORWARD;
 constexpr Routine READ          = Routine::READ;
 constexpr Routine READLN        = Routine::READLN;

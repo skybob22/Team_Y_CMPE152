@@ -82,7 +82,7 @@ public:
 
     virtual antlrcpp::Any visitPrintStatement(CParser::PrintStatementContext *context) = 0;
 
-    virtual antlrcpp::Any visitPrintLnStatement(CParser::PrintLnStatementContext *context) = 0;
+    virtual antlrcpp::Any visitPrintlnStatement(CParser::PrintlnStatementContext *context) = 0;
 
     virtual antlrcpp::Any visitPrintList(CParser::PrintListContext *context) = 0;
 

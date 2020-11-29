@@ -21,9 +21,45 @@ public:
     StatementGenerator(CodeGenerator *parent, Compiler *compiler,string outputDir="")
         : CodeGenerator(parent, compiler,outputDir) {}
 
+    void emitAssignment(CParser::AssignVariableContext *ctx);
+
+    void emitIncrement(CParser::IncrementVariableContext *ctx);
+
+    void emitDecrement(CParser::DecrementVariableContext *ctx);
+
+    void emitIf(CParser::IfStatementContext *ctx);
+
+    void emitDoWhile(CParser::DoWhileLoopContext *ctx);
+
+    void emitWhile(CParser::WhileLoopContext *ctx);
+
+    void emitFor(CParser::ForLoopContext *ctx);
+
+    void emitProcedureCall(CParser::FunctionCallContext *ctx);
+
+    void emitFunctionCall(CParser::FunctionCallContext *ctx);
+
+    void emitPrint(CParser::PrintStatementContext *ctx);
+
+    void emitPrintln(CParser::PrintlnStatementContext *ctx);
+
+    void emitRead(CParser::ReadStatementContext *ctx);
+
+    void emitReadln(CParser::ReadlnStatementContext *ctx);
+
+    void emitReturn(CParser::ReturnStatementContext *ctx);
 
 private:
 
+    void emitCall(SymtabEntry *routineId, CParser::ArgumentListContext *argListCtx);
+
+    void emitPrint(CParser::PrintListContext *argsCtx, bool needLF);
+
+    int createPrintFormat(CParser::PrintListContext *argsCtx, string& format,bool needLF);
+
+    void emitArgumentsArray(CParser::PrintListContext *argsCtx,int exprCount);
+
+    void emitRead(CParser::ReadArgumentsContext *argsCtx, bool needSkip);
 
 private:
     //A couple utility tools

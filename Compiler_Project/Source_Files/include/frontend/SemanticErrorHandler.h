@@ -17,6 +17,7 @@ enum class Error
 {
     UNDECLARED_IDENTIFIER,
     REDECLARED_IDENTIFIER,
+    REDEFINED_IDENTIFIER,
     INVALID_CONSTANT,
     INVALID_SIGN,
     INVALID_TYPE,
@@ -42,6 +43,7 @@ enum class Error
 
 constexpr Error UNDECLARED_IDENTIFIER       = Error::UNDECLARED_IDENTIFIER;
 constexpr Error REDECLARED_IDENTIFIER       = Error::REDECLARED_IDENTIFIER;
+constexpr Error REDEFINED_IDENTIFIER        = Error::REDEFINED_IDENTIFIER;
 constexpr Error INVALID_CONSTANT            = Error::INVALID_CONSTANT;
 constexpr Error INVALID_SIGN                = Error::INVALID_SIGN;
 constexpr Error INVALID_TYPE                = Error::INVALID_TYPE;
@@ -78,6 +80,8 @@ public:
                 "Undeclared identifier";
         SEMANTIC_ERROR_MESSAGES[REDECLARED_IDENTIFIER] =
                 "Redeclared identifier";
+        SEMANTIC_ERROR_MESSAGES[REDEFINED_IDENTIFIER] =
+                "Redefined identifier";
         SEMANTIC_ERROR_MESSAGES[INVALID_CONSTANT] =
                 "Invalid constant";
         SEMANTIC_ERROR_MESSAGES[INVALID_SIGN] =

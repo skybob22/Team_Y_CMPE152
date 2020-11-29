@@ -91,9 +91,19 @@ int main(int argc, const char *args[])
         cout << "There were no syntax errors." << endl;
     }
 
+    string programName = sourceFileName;
+    int delim = programName.rfind('/');
+    if(delim > 0 and delim < programName.length()-1){
+        programName = programName.substr(delim+1);
+    }
+    delim = programName.find('.');
+    if(delim > 0 and delim < programName.length()){
+        programName = programName.substr(0,delim);
+    }
+
     // Pass 2: Create symbol tables and set parse tree node datatypes.
     cout << endl << "PASS 2 Semantics:" << endl ;
-    Semantics *pass2 = new Semantics(mode);
+    Semantics *pass2 = new Semantics(mode,programName);
     pass2->visit(tree);
 
     int error_count = pass2->getErrorCount();
@@ -112,21 +122,24 @@ int main(int argc, const char *args[])
     // Pass 3: Translation.
     switch (mode)
     {
-        case COMPILER:
-        {
-            string outputDir = "";
+        case COMPILER:{
+            string outputFile = "";
             if(argc == 4){
-                outputDir = string(args[3]);
+                outputFile = string(args[3]);
             }
 
             // Pass 3: Compile the Pascal program.
             cout << endl << "PASS 3 Compilation: ";
             SymtabEntry *programId = pass2->getProgramId();
-            Compiler *pass3 = new Compiler(programId,outputDir);
+            Compiler *pass3 = new Compiler(programId,outputFile);
             pass3->visit(tree);
 
             cout << "Object file \"" << pass3->getObjectFileName()
                  << "\" created." << endl;
+            break;
+        }
+        default:{
+            return 1;
             break;
         }
     }

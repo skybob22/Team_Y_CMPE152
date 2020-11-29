@@ -136,7 +136,7 @@ void Semantics::postErrorCheck(){
     for(auto entry : symtabStack->getLocalSymtab()->sortedEntries()){
         if(entry->getKind() == FUNCTION || entry->getKind() == PROCEDURE){
             //Check if function or procedure do not have defined execuables (function body)
-            bool exPresent = entry->hasExecutable();
+            bool exPresent = entry->getRoutineCode() == DEFINED;
             if(!exPresent){
                 int lineNumber = entry->getLineNumbers()->front();
                 string errorMessage = "Function '" + entry->getName() + "' is not defined";
@@ -152,11 +152,10 @@ int Semantics::getErrorCount() const{
 
 
 Object Semantics::visitProgram(CParser::ProgramContext *ctx){
-    //C doesn't have a defined program name, pick so just pick something to prevent crashing
-    string programName = "PROGRAM";
-
+    //C doesn't have a defined program name, pick so use input when creating the object to extract filename
     programId = symtabStack->enterLocal(programName, PROGRAM);
     programId->setRoutineSymtab(symtabStack->push());
+    ctx->entry = programId;
 
     symtabStack->setProgramId(programId);
     symtabStack->getLocalSymtab()->setOwner(programId);
@@ -263,12 +262,25 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
         //Now that it has been visited, reload routineId
         routineId = symtabStack->lookupLocal(routineName);
     }
-    //Else, seperate declaration and definition
+    else{
+        //Update the identifier to have the Symtab and Type of the declaration
+        ctx->functionDeclaration()->functionIdentifier()->entry = routineId;
+        ctx->functionDeclaration()->functionIdentifier()->type = routineId->getType();
+    }
+    //Else, separate declaration and definition
+
+    //Check if function is already defined
+    if(routineId->getRoutineCode() == DEFINED){
+        error.flag(REDEFINED_IDENTIFIER,
+                   ctx->getStart()->getLine(), routineName);
+        return nullptr;
+    }
 
     //Push the proper symtab stack
     symtabStack->push(routineId->getRoutineSymtab());
     visit(ctx->controlScope());
     routineId->setExecutable(ctx->controlScope());
+    routineId->setRoutineCode(DEFINED);
 
     symtabStack->pop();
     return nullptr;

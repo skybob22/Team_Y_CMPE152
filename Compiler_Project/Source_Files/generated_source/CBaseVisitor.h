@@ -134,7 +134,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitPrintLnStatement(CParser::PrintLnStatementContext *ctx) override {
+  virtual antlrcpp::Any visitPrintlnStatement(CParser::PrintlnStatementContext *ctx) override {
     return visitChildren(ctx);
   }
 

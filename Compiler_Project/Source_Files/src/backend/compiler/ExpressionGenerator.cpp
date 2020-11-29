@@ -51,8 +51,8 @@ void ExpressionGenerator::emitExpression(CParser::ExpressionContext *ctx){
         {
             emitSimpleExpression(simpleCtx2);
 
-            if      (op == "=" ) emit(IF_ICMPEQ, trueLabel);
-            else if (op == "<>") emit(IF_ICMPNE, trueLabel);
+            if      (op == "==" ) emit(IF_ICMPEQ, trueLabel);
+            else if (op == "!=") emit(IF_ICMPNE, trueLabel);
             else if (op == "<" ) emit(IF_ICMPLT, trueLabel);
             else if (op == "<=") emit(IF_ICMPLE, trueLabel);
             else if (op == ">" ) emit(IF_ICMPGT, trueLabel);

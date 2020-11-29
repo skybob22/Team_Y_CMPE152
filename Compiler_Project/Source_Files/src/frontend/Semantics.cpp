@@ -919,7 +919,7 @@ Object Semantics::visitVariable(CParser::VariableContext *ctx){
 
 Object Semantics::visitVariableIdentifier(CParser::VariableIdentifierContext *ctx){
 
-    string variableName = toLowerCase(ctx->IDENTIFIER()->getText());
+    string variableName = ctx->IDENTIFIER()->getText();
     SymtabEntry *variableId = symtabStack->lookup(variableName);
 
     if (variableId != nullptr)

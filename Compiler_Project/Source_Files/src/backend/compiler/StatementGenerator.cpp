@@ -113,12 +113,12 @@ void StatementGenerator::emitIf(CParser::IfStatementContext *ctx){
     for(unsigned int i=0;i<numElseIf;i++){
         Label* skipOver = new Label();
         //Evaluate expression
-        compiler->visitExpression(ctx->expression()[1+i]);
+        compiler->visitExpression(ctx->expression(1+i));
         emit(Instruction::ICONST_0);
         emit(Instruction::IF_ICMPEQ,skipOver->getString());
 
         //Execute if True, Fall through to next
-        compiler->visit(ctx->controlScope()[1+i]);
+        compiler->visit(ctx->controlScope(1+i));
         emit(Instruction::GOTO,doneLabel->getString());
         emitLabel(skipOver);
     }

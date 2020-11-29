@@ -233,14 +233,14 @@ void StatementGenerator::emitReturn(CParser::ReturnStatementContext *ctx) {
 }
 
 void StatementGenerator::emitPrint(CParser::PrintStatementContext *ctx){
-    emitPrint(ctx->printList(), false);
+    emitPrint(ctx->printArguments(), false);
 }
 
 void StatementGenerator::emitPrintln(CParser::PrintlnStatementContext *ctx){
-    emitPrint(ctx->printList(), true);
+    emitPrint(ctx->printArguments(), true);
 }
 
-void StatementGenerator::emitPrint(CParser::PrintListContext *argsCtx, bool needLF){
+void StatementGenerator::emitPrint(CParser::PrintArgumentsContext *argsCtx, bool needLF){
     emit(GETSTATIC, "java/lang/System/out", "Ljava/io/PrintStream;");
 
     // WRITELN with no arguments.
@@ -280,32 +280,45 @@ void StatementGenerator::emitPrint(CParser::PrintListContext *argsCtx, bool need
     }
 }
 
-//FIXME: Likely broken
-int StatementGenerator::createPrintFormat(CParser::PrintListContext *argsCtx, string& format, bool needLF){
+int StatementGenerator::createPrintFormat(CParser::PrintArgumentsContext *argsCtx, string& format, bool needLF){
     int exprCount = 0;
     format += "\"";
 
     // Loop over the write arguments.
-    for (CParser::PrintItemContext *argCtx : argsCtx->printItem())
+    for (CParser::PrintArgumentContext *argCtx : argsCtx->printArgument())
     {
-        if(argCtx->stringConstant()){
-            string argText = argCtx->getText();
-            format += convertString(argText, true);
-        }
+        Typespec *type = argCtx->expression()->type;
+        string argText = argCtx->getText();
 
-        else{
-            Typespec *type = argCtx->expression()->type;
-            string argText = argCtx->getText();
+        // Append any literal strings.
+        if (argText[0] == '\"') format += convertString(argText, true);
 
+            // For any other expressions, append a field specifier.
+        else
+        {
             exprCount++;
             format.append("%");
 
+            CParser::FieldWidthContext *fwCtx = argCtx->fieldWidth();
+            if (fwCtx != nullptr)
+            {
+                string sign = (   (fwCtx->sign() != nullptr)
+                                  && (fwCtx->sign()->getText() == "-")) ? "-" : "";
+                format += sign + fwCtx->integerConstant()->getText();
+
+                CParser::DecimalPlacesContext *dpCtx =
+                        fwCtx->decimalPlaces();
+                if (dpCtx != nullptr)
+                {
+                    format += "." + dpCtx->integerConstant()->getText();
+                }
+            }
 
             string typeFlag = type == Predefined::integerType ? "d"
-              : type == Predefined::realType ? "f"
-                : type == Predefined::booleanType ? "b"
-                    : type == Predefined::charType ? "c"
-                        : "s";
+                : type == Predefined::realType    ?     "f"
+                    : type == Predefined::booleanType ?     "b"
+                        : type == Predefined::charType    ?     "c"
+                            :                                       "s";
             format += typeFlag;
         }
     }
@@ -315,7 +328,7 @@ int StatementGenerator::createPrintFormat(CParser::PrintListContext *argsCtx, st
     return exprCount;
 }
 
-void StatementGenerator::emitArgumentsArray(CParser::PrintListContext *argsCtx, int exprCount){
+void StatementGenerator::emitArgumentsArray(CParser::PrintArgumentsContext *argsCtx, int exprCount){
     // Create the arguments array.
     emitLoadConstant(exprCount);
     emit(ANEWARRAY, "java/lang/Object");
@@ -323,19 +336,16 @@ void StatementGenerator::emitArgumentsArray(CParser::PrintListContext *argsCtx, 
     int index = 0;
 
     // Loop over the write arguments to fill the arguments array.
-    for (CParser::PrintItemContext *argCtx : argsCtx->printItem())
+    for (CParser::PrintArgumentContext *argCtx :
+            argsCtx->printArgument())
     {
-        if(argCtx->stringConstant()){
-            continue;
-        }
-
         string argText = argCtx->getText();
         CParser::ExpressionContext *exprCtx = argCtx->expression();
         Typespec *type = exprCtx->type->baseType();
 
         // Skip string constants, which were made part of
         // the format string.
-        if (argText[0] != '\'')
+        if (argText[0] != '\"')
         {
             emit(DUP);
             emitLoadConstant(index++);

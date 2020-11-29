@@ -22,11 +22,12 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, INT = 25, BOOL = 26, 
-    FLOAT = 27, VOID = 28, DO = 29, WHILE = 30, FOR = 31, IF = 32, ELSEIF = 33, 
-    ELSE = 34, SWITCH = 35, PRINT = 36, PRINTLN = 37, READ = 38, READLN = 39, 
-    RETURN = 40, SINGLEQUOTE = 41, DOUBLEQUOTE = 42, DOUBLESLASH = 43, NEWLINE = 44, 
-    WS = 45, IDENTIFIER = 46, INTEGER = 47, REAL = 48, COMMENT = 49
+    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, INT = 26, 
+    BOOL = 27, FLOAT = 28, VOID = 29, DO = 30, WHILE = 31, FOR = 32, IF = 33, 
+    ELSEIF = 34, ELSE = 35, SWITCH = 36, PRINT = 37, PRINTLN = 38, READ = 39, 
+    READLN = 40, RETURN = 41, SINGLEQUOTE = 42, DOUBLEQUOTE = 43, DOUBLESLASH = 44, 
+    IDENTIFIER = 45, INTEGER = 46, REAL = 47, CHARACTER = 48, STRING = 49, 
+    NEWLINE = 50, WS = 51, COMMENT = 52
   };
 
   enum {
@@ -38,13 +39,14 @@ public:
     RuleParameterDeclarationsList = 18, RuleParameterDeclaration = 19, RuleParameterIdentifier = 20, 
     RuleReturnStatement = 21, RuleFunctionCall = 22, RuleArgumentList = 23, 
     RuleArgument = 24, RulePrintStatement = 25, RulePrintlnStatement = 26, 
-    RulePrintList = 27, RulePrintItem = 28, RuleReadStatement = 29, RuleReadlnStatement = 30, 
-    RuleReadArguments = 31, RuleExpression = 32, RuleSimpleExpression = 33, 
-    RuleTerm = 34, RuleFactor = 35, RuleVariable = 36, RuleModifier = 37, 
-    RuleIndex = 38, RuleVariableIdentifier = 39, RuleNumber = 40, RuleUnsignedNumber = 41, 
-    RuleSign = 42, RuleIntegerConstant = 43, RuleRealConstant = 44, RuleRelOp = 45, 
-    RuleAddOp = 46, RuleMulOp = 47, RuleTypeIdentifier = 48, RuleCharacterConstant = 49, 
-    RuleStringConstant = 50
+    RulePrintArguments = 27, RulePrintArgument = 28, RuleFieldWidth = 29, 
+    RuleDecimalPlaces = 30, RuleReadStatement = 31, RuleReadlnStatement = 32, 
+    RuleReadArguments = 33, RuleExpression = 34, RuleSimpleExpression = 35, 
+    RuleTerm = 36, RuleFactor = 37, RuleVariable = 38, RuleModifier = 39, 
+    RuleIndex = 40, RuleVariableIdentifier = 41, RuleNumber = 42, RuleUnsignedNumber = 43, 
+    RuleSign = 44, RuleIntegerConstant = 45, RuleRealConstant = 46, RuleRelOp = 47, 
+    RuleAddOp = 48, RuleMulOp = 49, RuleTypeIdentifier = 50, RuleCharacterConstant = 51, 
+    RuleStringConstant = 52
   };
 
   CParser(antlr4::TokenStream *input);
@@ -84,8 +86,10 @@ public:
   class ArgumentContext;
   class PrintStatementContext;
   class PrintlnStatementContext;
-  class PrintListContext;
-  class PrintItemContext;
+  class PrintArgumentsContext;
+  class PrintArgumentContext;
+  class FieldWidthContext;
+  class DecimalPlacesContext;
   class ReadStatementContext;
   class ReadlnStatementContext;
   class ReadArgumentsContext;
@@ -523,7 +527,7 @@ public:
     PrintStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *PRINT();
-    PrintListContext *printList();
+    PrintArgumentsContext *printArguments();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -537,7 +541,7 @@ public:
     PrintlnStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *PRINTLN();
-    PrintListContext *printList();
+    PrintArgumentsContext *printArguments();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -546,33 +550,61 @@ public:
 
   PrintlnStatementContext* printlnStatement();
 
-  class  PrintListContext : public antlr4::ParserRuleContext {
+  class  PrintArgumentsContext : public antlr4::ParserRuleContext {
   public:
-    PrintListContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    PrintArgumentsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<PrintItemContext *> printItem();
-    PrintItemContext* printItem(size_t i);
+    std::vector<PrintArgumentContext *> printArgument();
+    PrintArgumentContext* printArgument(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  PrintListContext* printList();
+  PrintArgumentsContext* printArguments();
 
-  class  PrintItemContext : public antlr4::ParserRuleContext {
+  class  PrintArgumentContext : public antlr4::ParserRuleContext {
   public:
-    PrintItemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    PrintArgumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     ExpressionContext *expression();
-    StringConstantContext *stringConstant();
+    FieldWidthContext *fieldWidth();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  PrintItemContext* printItem();
+  PrintArgumentContext* printArgument();
+
+  class  FieldWidthContext : public antlr4::ParserRuleContext {
+  public:
+    FieldWidthContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    IntegerConstantContext *integerConstant();
+    SignContext *sign();
+    DecimalPlacesContext *decimalPlaces();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  FieldWidthContext* fieldWidth();
+
+  class  DecimalPlacesContext : public antlr4::ParserRuleContext {
+  public:
+    DecimalPlacesContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    IntegerConstantContext *integerConstant();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  DecimalPlacesContext* decimalPlaces();
 
   class  ReadStatementContext : public antlr4::ParserRuleContext {
   public:
@@ -927,8 +959,7 @@ public:
   public:
     CharacterConstantContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> SINGLEQUOTE();
-    antlr4::tree::TerminalNode* SINGLEQUOTE(size_t i);
+    antlr4::tree::TerminalNode *CHARACTER();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -941,8 +972,7 @@ public:
   public:
     StringConstantContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> DOUBLEQUOTE();
-    antlr4::tree::TerminalNode* DOUBLEQUOTE(size_t i);
+    antlr4::tree::TerminalNode *STRING();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

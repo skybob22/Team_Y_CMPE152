@@ -22,11 +22,12 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, INT = 25, BOOL = 26, 
-    FLOAT = 27, VOID = 28, DO = 29, WHILE = 30, FOR = 31, IF = 32, ELSEIF = 33, 
-    ELSE = 34, SWITCH = 35, PRINT = 36, PRINTLN = 37, READ = 38, READLN = 39, 
-    RETURN = 40, SINGLEQUOTE = 41, DOUBLEQUOTE = 42, DOUBLESLASH = 43, NEWLINE = 44, 
-    WS = 45, IDENTIFIER = 46, INTEGER = 47, REAL = 48, COMMENT = 49
+    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, INT = 26, 
+    BOOL = 27, FLOAT = 28, VOID = 29, DO = 30, WHILE = 31, FOR = 32, IF = 33, 
+    ELSEIF = 34, ELSE = 35, SWITCH = 36, PRINT = 37, PRINTLN = 38, READ = 39, 
+    READLN = 40, RETURN = 41, SINGLEQUOTE = 42, DOUBLEQUOTE = 43, DOUBLESLASH = 44, 
+    IDENTIFIER = 45, INTEGER = 46, REAL = 47, CHARACTER = 48, STRING = 49, 
+    NEWLINE = 50, WS = 51, COMMENT = 52
   };
 
   CLexer(antlr4::CharStream *input);

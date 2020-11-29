@@ -10,22 +10,23 @@ void main(){
       println("f1");
     }
     else if(i == 2){
-      println("f2");
+       println("f2");
     }
     else if(i == 3){
-      println("f2");
+      println("f3");
     }
     else if(i == 4){
-      println("f2");
+      println("f4");
     }
     else if(i == 5){
-      println("f2");
+      println("f5");
     }
     else if(i == 6){
-      println("f2");
+      println("f6");
     }
     else{
-      println(i);
+      int j = i;
+      println(j);
     }
   }
 }

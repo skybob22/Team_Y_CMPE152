@@ -114,10 +114,8 @@ void ProgramGenerator::emitConstructor(){
 void ProgramGenerator::emitSubroutines(CParser::ProgramContext *ctx){
     for(CParser::FunctionDefinitionContext *fCtx : ctx->functionDefinition()){
         string fName = fCtx->functionDeclaration()->functionIdentifier()->getText();
-        if(fCtx->functionDeclaration()->functionIdentifier()->getText() != "main"){
-            compiler = new Compiler(compiler);
-            compiler->visit(fCtx);
-        }
+        compiler = new Compiler(compiler);
+        compiler->visit(fCtx);
     }
 }
 
@@ -136,12 +134,10 @@ void ProgramGenerator::emitMainMethod(CParser::ProgramContext *ctx){
     // Emit code for main method
     emitLine();
 
-    //Find the main method among the list of functions
-    for(CParser::FunctionDefinitionContext *fCtx : ctx->functionDefinition()){
-        if(fCtx->functionDeclaration()->functionIdentifier()->getText() == "main"){
-            compiler->visit(fCtx->controlScope());
-        }
-    }
+    //Emit code to call main method
+    // In C Main method is always "void main()"
+    string mainFunction = programName + "/" + "main" + "(" + "" + ")" + "V";
+    emit(Instruction::INVOKESTATIC,mainFunction);
 
     emitMainEpilogue();
 }

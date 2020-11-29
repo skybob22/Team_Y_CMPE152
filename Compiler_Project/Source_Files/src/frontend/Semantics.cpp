@@ -929,8 +929,8 @@ Object Semantics::visitVariableIdentifier(CParser::VariableIdentifierContext *ct
     if (variableId != nullptr)
     {
         int lineNumber = ctx->getStart()->getLine();
-        ctx->type = variableId->getType();
         ctx->entry = variableId;
+        ctx->type = variableId->getType();
         variableId->appendLineNumber(lineNumber);
 
         Kind kind = variableId->getKind();

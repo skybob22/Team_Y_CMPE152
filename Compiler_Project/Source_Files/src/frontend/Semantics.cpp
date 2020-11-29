@@ -235,6 +235,7 @@ Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *
     }
     else{
         idCtx->type = Predefined::voidType;
+        routineId->setType(Predefined::voidType);
     }
     idCtx->entry->appendLineNumber(lineNumber);
 
@@ -264,6 +265,7 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
     }
     else{
         //Update the identifier to have the Symtab and Type of the declaration
+        auto a = routineId;
         ctx->functionDeclaration()->functionIdentifier()->entry = routineId;
         ctx->functionDeclaration()->functionIdentifier()->type = routineId->getType();
     }
@@ -552,7 +554,7 @@ Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
         error.flag(UNDECLARED_IDENTIFIER, nameCtx);
         badName = true;
     }
-    else if (procedureId->getKind() != PROCEDURE)
+    else if (procedureId->getKind() != PROCEDURE && procedureId->getKind() != FUNCTION)
     {
         error.flag(NAME_MUST_BE_PROCEDURE, nameCtx);
         badName = true;
@@ -572,6 +574,8 @@ Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
     {
         vector<SymtabEntry *> *parms = procedureId->getRoutineParameters();
         checkCallArguments(listCtx, parms);
+        ctx->functionIdentifier()->entry = procedureId;
+        ctx->functionIdentifier()->type = procedureId->getType();
     }
 
     nameCtx->entry = procedureId;

@@ -3,8 +3,10 @@ int GLOBALB = 7;
 
 int add(int in);
 bool not(bool in);
+void p(int in);
 
 void main(){
+  int j;
   for(int i=0;i<10;i++){
     if(i == 1){
       println("f1");
@@ -25,10 +27,15 @@ void main(){
       println("f6");
     }
     else{
-      int j = i;
-      println(j);
+      j = add(i);
+      //println(i);
     }
   }
+}
+
+void p(int in){
+  println("In: ",in);
+  return;
 }
 
 int add(int in){

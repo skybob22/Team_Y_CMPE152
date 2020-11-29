@@ -558,28 +558,29 @@ string CodeGenerator::typeDescriptor(SymtabEntry *id)
     Typespec *type = id->getType();
     return type != nullptr ? typeDescriptor(type) : "V";
 }
-string CodeGenerator::typeDescriptor(Typespec *pascalType)
+string CodeGenerator::typeDescriptor(Typespec *CType)
 {
-    Form form = pascalType->getForm();
+    Form form = CType->getForm();
     string descriptor;
 
     while (form == ARRAY)
     {
         descriptor += "[";
-        pascalType =  pascalType->getArrayElementType();
-        form = pascalType->getForm();
+        CType =  CType->getArrayElementType();
+        form = CType->getForm();
     }
 
-    pascalType = pascalType->baseType();
+    CType = CType->baseType();
     string str;
 
-    if      (pascalType == Predefined::integerType) str = "I";
-    else if (pascalType == Predefined::realType)    str = "F";
-    else if (pascalType == Predefined::booleanType) str = "Z";
-    else if (pascalType == Predefined::charType)    str = "C";
-    else if (pascalType == Predefined::stringType)  str = "Ljava/lang/String;";
+    if      (CType == Predefined::integerType) str = "I";
+    else if (CType == Predefined::realType)    str = "F";
+    else if (CType == Predefined::booleanType) str = "Z";
+    else if (CType == Predefined::voidType)    str = "V";
+    else if (CType == Predefined::charType)    str = "C";
+    else if (CType == Predefined::stringType)  str = "Ljava/lang/String;";
     else if (form == ENUMERATION)                  str = "I";
-    else /* (form == RECORD) */ str = "L" + pascalType->getRecordTypePath() + ";";
+    else /* (form == RECORD) */ str = "L" + CType->getRecordTypePath() + ";";
 
     descriptor += str;
     return descriptor;

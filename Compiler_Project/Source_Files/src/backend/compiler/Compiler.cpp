@@ -10,7 +10,7 @@ Object Compiler::visitProgram(CParser::ProgramContext *ctx){
 }
 
 Object Compiler::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx){
-    createNewGenerators(programCode);
+    createNewGenerators(code);
     programCode->emitRoutine(ctx);
     return nullptr;
 }
@@ -61,6 +61,12 @@ Object Compiler::visitForLoop(CParser::ForLoopContext *ctx){
 
 Object Compiler::visitFunctionCall(CParser::FunctionCallContext *ctx){
     statementCode->emitFunctionCall(ctx);
+    auto b = ctx->functionIdentifier()->getText();
+    auto a = ctx->functionIdentifier()->type;
+    if(ctx->functionIdentifier()->type != Predefined::voidType) {
+        //We don't want to use the result, so remove it from the stack
+        statementCode->emit(Instruction::POP);
+    }
     return nullptr;
 }
 

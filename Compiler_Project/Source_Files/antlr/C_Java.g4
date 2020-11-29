@@ -145,8 +145,8 @@ typeIdentifier
       VOID ;
 
 
-characterConstant : SINGLEQUOTE (~SINGLEQUOTE)? SINGLEQUOTE ;
-stringConstant    : DOUBLEQUOTE (~DOUBLEQUOTE)* DOUBLEQUOTE ;
+characterConstant : CHARACTER ;
+stringConstant    : STRING ;
 
 //====Lexor Fragments/Word Recognition====//
 fragment A : 'a' ;
@@ -198,9 +198,6 @@ SINGLEQUOTE  : '\'' ;
 DOUBLEQUOTE  : '"' ;
 DOUBLESLASH  : '//' ;
 
-NEWLINE : '\r'? '\n' -> skip ;
-WS      : [ \t]+ -> skip ;
-
 IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
 INTEGER    : [0-9]+ ;
 
@@ -208,5 +205,17 @@ REAL       : INTEGER '.' INTEGER
            | INTEGER ('e' | 'E') ('+' | '-')? INTEGER
            | INTEGER '.' INTEGER ('e' | 'E') ('+' | '-')? INTEGER
            ;
+
+CHARACTER : SINGLEQUOTE CHARACTER_CHAR SINGLEQUOTE;
+STRING : DOUBLEQUOTE STRING_CHAR* DOUBLEQUOTE;
+
+fragment CHARACTER_CHAR : ~('\'');
+fragment STRING_CHAR
+    : DOUBLEQUOTE DOUBLEQUOTE
+    | ~('"')
+    ;
+
+NEWLINE : '\r'? '\n' -> skip ;
+WS      : [ \t]+ -> skip ;
 
 COMMENT : DOUBLESLASH ~[\r\n]* -> skip ;

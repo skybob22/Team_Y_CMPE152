@@ -53,11 +53,11 @@ private:
 
     void emitCall(SymtabEntry *routineId, CParser::ArgumentListContext *argListCtx);
 
-    void emitPrint(CParser::PrintListContext *argsCtx, bool needLF);
+    void emitPrint(CParser::PrintArgumentsContext *argsCtx, bool needLF);
 
-    int createPrintFormat(CParser::PrintListContext *argsCtx, string& format,bool needLF);
+    int createPrintFormat(CParser::PrintArgumentsContext *argsCtx, string& format,bool needLF);
 
-    void emitArgumentsArray(CParser::PrintListContext *argsCtx,int exprCount);
+    void emitArgumentsArray(CParser::PrintArgumentsContext *argsCtx,int exprCount);
 
     void emitRead(CParser::ReadArgumentsContext *argsCtx, bool needSkip);
 

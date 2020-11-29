@@ -138,11 +138,19 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitPrintList(CParser::PrintListContext *ctx) override {
+  virtual antlrcpp::Any visitPrintArguments(CParser::PrintArgumentsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitPrintItem(CParser::PrintItemContext *ctx) override {
+  virtual antlrcpp::Any visitPrintArgument(CParser::PrintArgumentContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitFieldWidth(CParser::FieldWidthContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitDecimalPlaces(CParser::DecimalPlacesContext *ctx) override {
     return visitChildren(ctx);
   }
 

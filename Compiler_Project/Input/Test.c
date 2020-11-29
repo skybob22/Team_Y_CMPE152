@@ -6,10 +6,27 @@ bool not(bool in);
 
 void main(){
   for(int i=0;i<10;i++){
-    if(i > 5){
-      println("fizz");
+    if(i == 1){
+      println("f1");
     }
-    println(i);
+    else if(i == 2){
+      println("f2");
+    }
+    else if(i == 3){
+      println("f2");
+    }
+    else if(i == 4){
+      println("f2");
+    }
+    else if(i == 5){
+      println("f2");
+    }
+    else if(i == 6){
+      println("f2");
+    }
+    else{
+      println(i);
+    }
   }
 }
 

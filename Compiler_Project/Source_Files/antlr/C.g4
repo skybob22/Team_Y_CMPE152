@@ -95,10 +95,13 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement: PRINT '(' printList ')' ;
-printlnStatement: PRINTLN '(' printList ')' ;
-printList : printItem (',' printItem)* ;
-printItem : expression | stringConstant ;
+printStatement   : PRINT printArguments ;
+printlnStatement : PRINTLN printArguments? ;
+printArguments   : '(' printArgument (',' printArgument)* ')' ;
+printArgument    : expression (':' fieldWidth)? ;
+fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
+decimalPlaces    : integerConstant ;
+
 //====Readin (So we can get input)====//
 readStatement : READ '(' readArguments ')' ;
 readlnStatement : READLN '(' readArguments ')' ;
@@ -152,8 +155,8 @@ typeIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
       VOID ;
 
 
-characterConstant : SINGLEQUOTE (~SINGLEQUOTE)? SINGLEQUOTE ;
-stringConstant    : DOUBLEQUOTE (~DOUBLEQUOTE)* DOUBLEQUOTE ;
+characterConstant : CHARACTER ;
+stringConstant    : STRING ;
 
 //====Lexor Fragments/Word Recognition====//
 fragment A : 'a' ;
@@ -205,9 +208,6 @@ SINGLEQUOTE  : '\'' ;
 DOUBLEQUOTE  : '"' ;
 DOUBLESLASH  : '//' ;
 
-NEWLINE : '\r'? '\n' -> skip ;
-WS      : [ \t]+ -> skip ;
-
 IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
 INTEGER    : [0-9]+ ;
 
@@ -215,5 +215,17 @@ REAL       : INTEGER '.' INTEGER
            | INTEGER ('e' | 'E') ('+' | '-')? INTEGER
            | INTEGER '.' INTEGER ('e' | 'E') ('+' | '-')? INTEGER
            ;
+
+CHARACTER : SINGLEQUOTE CHARACTER_CHAR SINGLEQUOTE;
+STRING : DOUBLEQUOTE STRING_CHAR* DOUBLEQUOTE;
+
+fragment CHARACTER_CHAR : ~('\'');
+fragment STRING_CHAR
+    : DOUBLEQUOTE DOUBLEQUOTE
+    | ~('"')
+    ;
+
+NEWLINE : '\r'? '\n' -> skip ;
+WS      : [ \t]+ -> skip ;
 
 COMMENT : DOUBLESLASH ~[\r\n]* -> skip ;

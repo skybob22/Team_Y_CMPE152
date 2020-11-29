@@ -84,9 +84,13 @@ public:
 
     virtual antlrcpp::Any visitPrintlnStatement(CParser::PrintlnStatementContext *context) = 0;
 
-    virtual antlrcpp::Any visitPrintList(CParser::PrintListContext *context) = 0;
+    virtual antlrcpp::Any visitPrintArguments(CParser::PrintArgumentsContext *context) = 0;
 
-    virtual antlrcpp::Any visitPrintItem(CParser::PrintItemContext *context) = 0;
+    virtual antlrcpp::Any visitPrintArgument(CParser::PrintArgumentContext *context) = 0;
+
+    virtual antlrcpp::Any visitFieldWidth(CParser::FieldWidthContext *context) = 0;
+
+    virtual antlrcpp::Any visitDecimalPlaces(CParser::DecimalPlacesContext *context) = 0;
 
     virtual antlrcpp::Any visitReadStatement(CParser::ReadStatementContext *context) = 0;
 

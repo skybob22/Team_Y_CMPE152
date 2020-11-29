@@ -37,7 +37,7 @@ public:
     RuleFunctionDefinition = 15, RuleFunctionDeclaration = 16, RuleFunctionIdentifier = 17, 
     RuleParameterDeclarationsList = 18, RuleParameterDeclaration = 19, RuleParameterIdentifier = 20, 
     RuleReturnStatement = 21, RuleFunctionCall = 22, RuleArgumentList = 23, 
-    RuleArgument = 24, RulePrintStatement = 25, RulePrintLnStatement = 26, 
+    RuleArgument = 24, RulePrintStatement = 25, RulePrintlnStatement = 26, 
     RulePrintList = 27, RulePrintItem = 28, RuleReadStatement = 29, RuleReadlnStatement = 30, 
     RuleReadArguments = 31, RuleExpression = 32, RuleSimpleExpression = 33, 
     RuleTerm = 34, RuleFactor = 35, RuleVariable = 36, RuleModifier = 37, 
@@ -83,7 +83,7 @@ public:
   class ArgumentListContext;
   class ArgumentContext;
   class PrintStatementContext;
-  class PrintLnStatementContext;
+  class PrintlnStatementContext;
   class PrintListContext;
   class PrintItemContext;
   class ReadStatementContext;
@@ -111,6 +111,7 @@ public:
 
   class  ProgramContext : public antlr4::ParserRuleContext {
   public:
+    SymtabEntry * entry = nullptr;
     ProgramContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<FunctionDefinitionContext *> functionDefinition();
@@ -149,7 +150,7 @@ public:
     VariableDeclarationContext *variableDeclaration();
     ControlStatementContext *controlStatement();
     PrintStatementContext *printStatement();
-    PrintLnStatementContext *printLnStatement();
+    PrintlnStatementContext *printlnStatement();
     ReadStatementContext *readStatement();
     ReadlnStatementContext *readlnStatement();
     FunctionCallContext *functionCall();
@@ -522,8 +523,7 @@ public:
     PrintStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *PRINT();
-    std::vector<PrintListContext *> printList();
-    PrintListContext* printList(size_t i);
+    PrintListContext *printList();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -532,20 +532,19 @@ public:
 
   PrintStatementContext* printStatement();
 
-  class  PrintLnStatementContext : public antlr4::ParserRuleContext {
+  class  PrintlnStatementContext : public antlr4::ParserRuleContext {
   public:
-    PrintLnStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    PrintlnStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *PRINTLN();
-    std::vector<PrintListContext *> printList();
-    PrintListContext* printList(size_t i);
+    PrintListContext *printList();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  PrintLnStatementContext* printLnStatement();
+  PrintlnStatementContext* printlnStatement();
 
   class  PrintListContext : public antlr4::ParserRuleContext {
   public:
@@ -565,7 +564,7 @@ public:
   public:
     PrintItemContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    VariableContext *variable();
+    ExpressionContext *expression();
     StringConstantContext *stringConstant();
 
 

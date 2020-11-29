@@ -5,13 +5,12 @@ int add(int in);
 bool not(bool in);
 
 void main(){
-  int i;
-  i = 1;
-  int j = 7;
-  for(int k=0;k<10;k++){
-
+  for(int i=0;i<10;i++){
+    if(i > 5){
+      println("fizz");
+    }
+    println(i);
   }
-  return;
 }
 
 int add(int in){

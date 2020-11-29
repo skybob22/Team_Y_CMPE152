@@ -16,6 +16,21 @@ public:
     ExpressionGenerator(CodeGenerator *parent, Compiler *compiler,string outputDir="")
         : CodeGenerator(parent, compiler,outputDir) {}
 
+    void emitExpression(CParser::ExpressionContext *ctx);
+
+    void emitSimpleExpression(CParser::SimpleExpressionContext *ctx);
+
+    void emitTerm(CParser::TermContext *ctx);
+
+    void emitNotFactor(CParser::NotFactorContext *ctx);
+
+    void emitLoadValue(CParser::VariableContext *varCtx);
+
+    Typespec *emitLoadVariable(CParser::VariableContext *varCtx);
+
+    void emitLoadIntegerConstant(CParser::NumberContext *intCtx);
+
+    void emitLoadRealConstant(CParser::NumberContext *realCtx);
 
 private:
 

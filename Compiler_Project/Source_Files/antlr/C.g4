@@ -9,7 +9,8 @@ grammar C;
 }
 
 //====Starting point====//
-program : (functionDefinition | functionDeclaration | c_statement)+ ;
+program locals [SymtabEntry *entry = nullptr]
+    : (functionDefinition | functionDeclaration | c_statement)+ ;
 
 //====General Statements====//
 c_statement
@@ -22,7 +23,7 @@ statement
     | variableDeclaration
     | controlStatement
     | printStatement
-    | printLnStatement
+    | printlnStatement
     | readStatement
     | readlnStatement
     | functionCall
@@ -94,10 +95,10 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement: PRINT '(' printList* ')' ;
-printLnStatement: PRINTLN '(' printList* ')' ;
+printStatement: PRINT '(' printList ')' ;
+printlnStatement: PRINTLN '(' printList ')' ;
 printList : printItem (',' printItem)* ;
-printItem : variable | stringConstant ;
+printItem : expression | stringConstant ;
 //====Readin (So we can get input)====//
 readStatement : READ '(' readArguments ')' ;
 readlnStatement : READLN '(' readArguments ')' ;

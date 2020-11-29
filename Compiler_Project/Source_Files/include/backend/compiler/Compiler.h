@@ -35,9 +35,9 @@ namespace backend { namespace compiler {
              * Constructor for the base compiler.
              * @param programId the symtab entry for the program name.
              */
-            Compiler(SymtabEntry *programId,string outputDir="")
+            Compiler(SymtabEntry *programId,string outputFile="")
                     : programId(programId), programName(programId->getName()),
-                      code(new CodeGenerator(programName, "j", this,outputDir)),
+                      code(new CodeGenerator(programName, "j", this,outputFile)),
                       programCode(nullptr), statementCode(nullptr),
                       expressionCode(nullptr) {}
 
@@ -45,7 +45,7 @@ namespace backend { namespace compiler {
              * Constructor for child compilers of procedures and functions.
              * @param parent the parent compiler.
              */
-            Compiler(Compiler *parent,string outputDir="")
+            Compiler(Compiler *parent,string outputFile="")
                     : programId(parent->programId), programName(parent->programName),
                       code(parent->code), programCode(parent->programCode),
                       statementCode(nullptr), expressionCode(nullptr) {}
@@ -56,6 +56,32 @@ namespace backend { namespace compiler {
              * @return the file name.
              */
             string getObjectFileName() { return code->getObjectFileName(); }
+
+            Object visitProgram(CParser::ProgramContext *ctx) override;
+            Object visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx) override;
+            Object visitStatement(CParser::StatementContext *ctx) override;
+            Object visitAssignVariable(CParser::AssignVariableContext *ctx) override;
+            Object visitIncrementVariable(CParser::IncrementVariableContext *ctx) override;
+            Object visitDecrementVariable(CParser::DecrementVariableContext *ctx) override;
+            Object visitIfStatement(CParser::IfStatementContext *ctx) override;
+            Object visitDoWhileLoop(CParser::DoWhileLoopContext *ctx) override;
+            Object visitWhileLoop(CParser::WhileLoopContext *ctx) override;
+            Object visitForLoop(CParser::ForLoopContext *ctx) override;
+            Object visitFunctionCall(CParser::FunctionCallContext *ctx) override;
+            Object visitReturnStatement(CParser::ReturnStatementContext *ctx) override;
+            Object visitExpression(CParser::ExpressionContext *ctx) override;
+            Object visitVariableFactor(CParser::VariableFactorContext *ctx) override;
+            Object visitVariable(CParser::VariableContext *ctx) override;
+            Object visitNumberFactor(CParser::NumberFactorContext *ctx) override;
+            Object visitCharacterFactor(CParser::CharacterFactorContext *ctx) override;
+            Object visitStringFactor(CParser::StringFactorContext *ctx) override;
+            Object visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx) override;
+            Object visitNotFactor(CParser::NotFactorContext *ctx) override;
+            Object visitParenthesizedFactor(CParser::ParenthesizedFactorContext *ctx) override;
+            Object visitPrintStatement(CParser::PrintStatementContext *ctx) override;
+            Object visitPrintlnStatement(CParser::PrintlnStatementContext *ctx) override;
+            Object visitReadStatement(CParser::ReadStatementContext *ctx) override;
+            Object visitReadlnStatement(CParser::ReadlnStatementContext *ctx) override;
 
 
         private:

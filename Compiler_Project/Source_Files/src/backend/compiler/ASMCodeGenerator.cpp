@@ -586,32 +586,32 @@ string CodeGenerator::typeDescriptor(Typespec *CType)
     return descriptor;
 }
 
-string CodeGenerator::objectTypeName(Typespec *pascalType)
+string CodeGenerator::objectTypeName(Typespec *CType)
 {
-    Form form = pascalType->getForm();
+    Form form = CType->getForm();
     string typeName;
     bool isArray = false;
 
     while (form == ARRAY)
     {
         typeName += "[";
-        pascalType = pascalType->getArrayElementType();
-        form = pascalType->getForm();
+        CType = CType->getArrayElementType();
+        form = CType->getForm();
         isArray = true;
     }
 
     if (isArray)  typeName += "L";
 
-    pascalType = pascalType->baseType();
+    CType = CType->baseType();
     string str;
 
-    if      (pascalType == Predefined::integerType) str = "java/lang/Integer";
-    else if (pascalType == Predefined::realType)    str = "java/lang/Float";
-    else if (pascalType == Predefined::booleanType) str = "java/lang/Boolean";
-    else if (pascalType == Predefined::charType)    str = "java/lang/Character";
-    else if (pascalType == Predefined::stringType)  str = "Ljava/lang/String;";
+    if      (CType == Predefined::integerType) str = "java/lang/Integer";
+    else if (CType == Predefined::realType)    str = "java/lang/Float";
+    else if (CType == Predefined::booleanType) str = "java/lang/Boolean";
+    else if (CType == Predefined::charType)    str = "java/lang/Character";
+    else if (CType == Predefined::stringType)  str = "Ljava/lang/String;";
     else if (form == ENUMERATION)                  str = "java/lang/Integer";
-    else /* (form == RECORD) */ str = "L" + pascalType->getRecordTypePath() + ";";
+    else /* (form == RECORD) */ str = "L" + CType->getRecordTypePath() + ";";
 
     typeName += str;
     if (isArray) typeName += ";";

@@ -1,46 +1,27 @@
-int GLOBALA;
-int GLOBALB = 7;
-
-int add(int in);
-bool not(bool in);
-void p(int in);
+int fib(int in);
 
 void main(void){
-  int j;
-  for(int i=0;i<10;i++){
-    if(i == 1){
-      println("f1");
+  int i=0;
+  do{
+    print("Please Enter Number:");
+    read(i);
+
+    int fib_n;
+    if(i >= 0){
+      fib_n = fib(i);
+      println("The ",i,"th fibbonachi number is: ",fib_n);
     }
-    else if(i == 2){
-       println("f2");
-    }
-    else if(i == 3){
-      println("f3");
-    }
-    else if(i == 4){
-      println("f4");
-    }
-    else if(i == 5){
-      println("f5");
-    }
-    else if(i == 6){
-      println("f6");
-    }
-    else{
-      println(add(i));
-    }
+  }while(i!=-1);
+}
+
+int fib(int in){
+  if(in == 0){
+    return 0;
   }
-}
-
-void p(int in){
-  println("In: ",in);
-  return;
-}
-
-int add(int in){
-  return in+1;
-}
-
-bool not(bool in){
-  return !in;
+  else if(in == 1){
+    return 1;
+  }
+  else{
+    return fib(in-2) + fib(in-1);
+  }
 }

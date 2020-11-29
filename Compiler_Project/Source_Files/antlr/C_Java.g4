@@ -198,7 +198,7 @@ SINGLEQUOTE  : '\'' ;
 DOUBLEQUOTE  : '"' ;
 DOUBLESLASH  : '//' ;
 
-IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
+IDENTIFIER : [a-zA-Z][a-zA-Z0-9_]* ;
 INTEGER    : [0-9]+ ;
 
 REAL       : INTEGER '.' INTEGER

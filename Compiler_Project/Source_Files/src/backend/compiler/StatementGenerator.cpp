@@ -139,8 +139,8 @@ void StatementGenerator::emitDoWhile(CParser::DoWhileLoopContext *ctx){
 
     compiler->visit(ctx->controlScope());
     compiler->visit(ctx->expression());
-    emit(IFNE, loopExitLabel);
-    emit(GOTO, loopTopLabel);
+    emit(Instruction::ICONST_1);
+    emit(Instruction::IF_ICMPEQ, loopTopLabel->getString());
 
     emitLabel(loopExitLabel);
 }
@@ -385,19 +385,19 @@ void StatementGenerator::emitRead(CParser::ReadArgumentsContext *argsCtx, bool n
         {
             emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
             emit(INVOKEVIRTUAL, "java/util/Scanner/nextInt()I");
-            emitStoreValue(varCtx->entry, nullptr);
+            emitStoreValue(varCtx->entry, varCtx->type);
         }
         else if (varType == Predefined::realType)
         {
             emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
             emit(INVOKEVIRTUAL, "java/util/Scanner/nextFloat()F");
-            emitStoreValue(varCtx->entry, nullptr);
+            emitStoreValue(varCtx->entry, varCtx->type);
         }
         else if (varType == Predefined::booleanType)
         {
             emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
             emit(INVOKEVIRTUAL, "java/util/Scanner/nextBoolean()Z");
-            emitStoreValue(varCtx->entry, nullptr);
+            emitStoreValue(varCtx->entry, varCtx->type);
         }
         else if (varType == Predefined::charType)
         {
@@ -411,7 +411,7 @@ void StatementGenerator::emitRead(CParser::ReadArgumentsContext *argsCtx, bool n
             emit(INVOKEVIRTUAL, "java/util/Scanner/next()Ljava/lang/String;");
             emit(ICONST_0);
             emit(INVOKEVIRTUAL, "java/lang/String/charAt(I)C");
-            emitStoreValue(varCtx->entry, nullptr);
+            emitStoreValue(varCtx->entry, varCtx->type);
 
             emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
             emit(INVOKEVIRTUAL, "java/util/Scanner/reset()Ljava/util/Scanner;");
@@ -421,7 +421,7 @@ void StatementGenerator::emitRead(CParser::ReadArgumentsContext *argsCtx, bool n
         {
             emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
             emit(INVOKEVIRTUAL, "java/util/Scanner/next()Ljava/lang/String;");
-            emitStoreValue(varCtx->entry, nullptr);
+            emitStoreValue(varCtx->entry, varCtx->type);
         }
     }
 

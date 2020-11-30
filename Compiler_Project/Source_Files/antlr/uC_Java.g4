@@ -28,7 +28,7 @@ variableDeclaration
     : typeIdentifier variableIdentifier (',' variableIdentifier)*
     | typeIdentifier variableIdentifier ('[' length ']')*
     ;
-length : INTEGER ;
+length : expression ;
 
 //====Variable assignment====//
 assignmentStatement

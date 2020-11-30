@@ -38,7 +38,7 @@ variableDeclaration
     : typeIdentifier variableIdentifier (',' variableIdentifier)*
     | typeIdentifier variableIdentifier ('[' length ']')*
     ;
-length : INTEGER ;
+length : expression ;
 
 //====Variable assignment====//
 assignmentStatement
@@ -116,7 +116,10 @@ readArguments : variable ( ',' variable )* ;
 
 //====Expressions,factors, etc.====//
 expression locals [ Typespec *type = nullptr ]
-    : simpleExpression (relOp simpleExpression)? ;
+    : simpleExpression (relOp simpleExpression)?
+    | expression '?' expression ':' expression
+    ;
+
 
 simpleExpression locals [ Typespec *type = nullptr ]
     : sign? term (addOp term)* ;

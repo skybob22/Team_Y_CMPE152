@@ -390,9 +390,16 @@ Object Semantics::visitVariableDeclaration(uCParser::VariableDeclarationContext 
             int count = ctx->length().size();
             for (int i = 0; i < count; i++) {
                 //All indicies must be integers
+                visit(ctx->length(i));
+                if(ctx->length(i)->expression()->type != Predefined::integerType){
+                    error.flag(TYPE_MUST_BE_INTEGER,ctx->length(i)->expression());
+                    continue;
+                }
+
                 arrayType->setArrayIndexType(Predefined::integerType);
-                int elementCount = stoi(ctx->length(i)->getText());
-                arrayType->setArrayElementCount(elementCount);
+                arrayType->setArrayElementCountExpression(ctx->length(i)->expression());
+                //int elementCount = stoi(ctx->length(i)->getText());
+                //arrayType->setArrayElementCount(elementCount);
 
                 if (i < count - 1) {
                     Typespec *elmtType = new Typespec(ARRAY);
@@ -752,29 +759,41 @@ Object Semantics::visitReturnStatement(uCParser::ReturnStatementContext *ctx){
 }
 
 Object Semantics::visitExpression(uCParser::ExpressionContext *ctx){
-    uCParser::SimpleExpressionContext *simpleCtx1 = ctx->simpleExpression()[0];
-    // First simple expression.
-    visit(simpleCtx1);
-
-    Typespec *simpleType1 = simpleCtx1->type;
-    ctx->type = simpleType1;
-
-    uCParser::RelOpContext *relopCtx = ctx->relOp();
-
-    // Second simple expression?
-    if (relopCtx != nullptr)
-    {
-        uCParser::SimpleExpressionContext *simpleCtx2 =
-                ctx->simpleExpression()[1];
-        visit(simpleCtx2);
-
-        Typespec *simpleType2 = simpleCtx2->type;
-        if (!TypeChecker::areComparisonCompatible(simpleType1, simpleType2))
-        {
-            error.flag(INCOMPATIBLE_COMPARISON, ctx);
+    if(!ctx->expression().empty()){
+        //Ternary expression
+        for(uCParser::ExpressionContext *exprCtx : ctx->expression()){
+            visit(exprCtx);
         }
 
-        ctx->type = Predefined::booleanType;
+        if(ctx->expression(1)->type != ctx->expression(2)->type){
+            error.flag(TYPE_MISMATCH,ctx->expression(1));
+        }
+        ctx->type = ctx->expression(1)->type;
+    }
+    else {
+
+        uCParser::SimpleExpressionContext *simpleCtx1 = ctx->simpleExpression()[0];
+        // First simple expression.
+        visit(simpleCtx1);
+
+        Typespec *simpleType1 = simpleCtx1->type;
+        ctx->type = simpleType1;
+
+        uCParser::RelOpContext *relopCtx = ctx->relOp();
+
+        // Second simple expression?
+        if (relopCtx != nullptr) {
+            uCParser::SimpleExpressionContext *simpleCtx2 =
+                    ctx->simpleExpression()[1];
+            visit(simpleCtx2);
+
+            Typespec *simpleType2 = simpleCtx2->type;
+            if (!TypeChecker::areComparisonCompatible(simpleType1, simpleType2)) {
+                error.flag(INCOMPATIBLE_COMPARISON, ctx);
+            }
+
+            ctx->type = Predefined::booleanType;
+        }
     }
 
     return nullptr;

@@ -10,91 +10,106 @@
 namespace backend { namespace compiler {
 
 void ExpressionGenerator::emitExpression(uCParser::ExpressionContext *ctx){
-    uCParser::SimpleExpressionContext *simpleCtx1 =
-            ctx->simpleExpression()[0];
-    uCParser::RelOpContext *relOpCtx = ctx->relOp();
-    Typespec *type1 = simpleCtx1->type;
-    emitSimpleExpression(simpleCtx1);
+    if(!ctx->expression().empty()){
+        //Ternary expression
+        Label* falseLabel = new Label;
+        Label* doneLabel = new Label;
 
-    // More than one simple expression?
-    if (relOpCtx != nullptr)
-    {
-        string op = relOpCtx->getText();
-        uCParser::SimpleExpressionContext *simpleCtx2 =
-                ctx->simpleExpression()[1];
-        Typespec *type2 = simpleCtx2->type;
+        //Evaluate truth expression
+        compiler->visitExpression(ctx->expression(0));
 
-        bool integerMode   = false;
-        bool realMode      = false;
-        bool characterMode = false;
+        //Do comparison to see if expression is true
+        emit(Instruction::ICONST_0);
+        emit(Instruction::IF_ICMPEQ, falseLabel->getString());
 
-        if (   (type1 == Predefined::integerType)
-               && (type2 == Predefined::integerType))
-        {
-            integerMode = true;
+        //Execute if True, Fall through to next
+        compiler->visit(ctx->expression(1));
+        emit(Instruction::GOTO,doneLabel->getString());
+
+        emitLabel(falseLabel);
+        compiler->visit(ctx->expression(2));
+
+        //Jump to when done with true section so to skip false section
+        emitLabel(doneLabel);
+    }
+    else {
+
+        uCParser::SimpleExpressionContext *simpleCtx1 =
+                ctx->simpleExpression()[0];
+        uCParser::RelOpContext *relOpCtx = ctx->relOp();
+        Typespec *type1 = simpleCtx1->type;
+        emitSimpleExpression(simpleCtx1);
+
+        // More than one simple expression?
+        if (relOpCtx != nullptr) {
+            string op = relOpCtx->getText();
+            uCParser::SimpleExpressionContext *simpleCtx2 =
+                    ctx->simpleExpression()[1];
+            Typespec *type2 = simpleCtx2->type;
+
+            bool integerMode = false;
+            bool realMode = false;
+            bool characterMode = false;
+
+            if ((type1 == Predefined::integerType)
+                && (type2 == Predefined::integerType)) {
+                integerMode = true;
+            } else if ((type1 == Predefined::realType)
+                       || (type2 == Predefined::realType)) {
+                realMode = true;
+            } else if ((type1 == Predefined::charType)
+                       && (type2 == Predefined::charType)) {
+                characterMode = true;
+            }
+
+            Label *trueLabel = new Label();
+            Label *exitLabel = new Label();
+
+            if (integerMode || characterMode) {
+                emitSimpleExpression(simpleCtx2);
+
+                if (op == "==") emit(IF_ICMPEQ, trueLabel);
+                else if (op == "!=") emit(IF_ICMPNE, trueLabel);
+                else if (op == "<") emit(IF_ICMPLT, trueLabel);
+                else if (op == "<=") emit(IF_ICMPLE, trueLabel);
+                else if (op == ">") emit(IF_ICMPGT, trueLabel);
+                else if (op == ">=") emit(IF_ICMPGE, trueLabel);
+            } else if (realMode) {
+                if (type1 == Predefined::integerType) emit(I2F);
+                emitSimpleExpression(simpleCtx2);
+                if (type2 == Predefined::integerType) emit(I2F);
+
+                emit(FCMPG);
+
+                if (op == "=") emit(IFEQ, trueLabel);
+                else if (op == "<>") emit(IFNE, trueLabel);
+                else if (op == "<") emit(IFLT, trueLabel);
+                else if (op == "<=") emit(IFLE, trueLabel);
+                else if (op == ">") emit(IFGT, trueLabel);
+                else if (op == ">=") emit(IFGE, trueLabel);
+            } else  // stringMode
+            {
+                emitSimpleExpression(simpleCtx2);
+                emit(INVOKEVIRTUAL,
+                     "java/lang/String.compareTo(Ljava/lang/String;)I");
+                localStack->decrease(1);
+
+                if (op == "=") emit(IFEQ, trueLabel);
+                else if (op == "<>") emit(IFNE, trueLabel);
+                else if (op == "<") emit(IFLT, trueLabel);
+                else if (op == "<=") emit(IFLE, trueLabel);
+                else if (op == ">") emit(IFGT, trueLabel);
+                else if (op == ">=") emit(IFGE, trueLabel);
+            }
+
+            emit(ICONST_0); // false
+            emit(GOTO, exitLabel);
+            emitLabel(trueLabel);
+            emit(ICONST_1); // true
+            emitLabel(exitLabel);
+
+            localStack->decrease(1);  // only one branch will be taken
         }
-        else if (   (type1 == Predefined::realType)
-                    || (type2 == Predefined::realType))
-        {
-            realMode = true;
-        }
-        else if (   (type1 == Predefined::charType)
-                    && (type2 == Predefined::charType))
-        {
-            characterMode = true;
-        }
-
-        Label *trueLabel = new Label();
-        Label *exitLabel = new Label();
-
-        if (integerMode || characterMode)
-        {
-            emitSimpleExpression(simpleCtx2);
-
-            if      (op == "==" ) emit(IF_ICMPEQ, trueLabel);
-            else if (op == "!=") emit(IF_ICMPNE, trueLabel);
-            else if (op == "<" ) emit(IF_ICMPLT, trueLabel);
-            else if (op == "<=") emit(IF_ICMPLE, trueLabel);
-            else if (op == ">" ) emit(IF_ICMPGT, trueLabel);
-            else if (op == ">=") emit(IF_ICMPGE, trueLabel);
-        }
-        else if (realMode)
-        {
-            if (type1 == Predefined::integerType) emit(I2F);
-            emitSimpleExpression(simpleCtx2);
-            if (type2 == Predefined::integerType) emit(I2F);
-
-            emit(FCMPG);
-
-            if      (op == "=" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
-            else if (op == "<" ) emit(IFLT, trueLabel);
-            else if (op == "<=") emit(IFLE, trueLabel);
-            else if (op == ">" ) emit(IFGT, trueLabel);
-            else if (op == ">=") emit(IFGE, trueLabel);
-        }
-        else  // stringMode
-        {
-            emitSimpleExpression(simpleCtx2);
-            emit(INVOKEVIRTUAL,
-                 "java/lang/String.compareTo(Ljava/lang/String;)I");
-            localStack->decrease(1);
-
-            if      (op == "=" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
-            else if (op == "<" ) emit(IFLT, trueLabel);
-            else if (op == "<=") emit(IFLE, trueLabel);
-            else if (op == ">" ) emit(IFGT, trueLabel);
-            else if (op == ">=") emit(IFGE, trueLabel);
-        }
-
-        emit(ICONST_0); // false
-        emit(GOTO, exitLabel);
-        emitLabel(trueLabel);
-        emit(ICONST_1); // true
-        emitLabel(exitLabel);
-
-        localStack->decrease(1);  // only one branch will be taken
     }
 }
 

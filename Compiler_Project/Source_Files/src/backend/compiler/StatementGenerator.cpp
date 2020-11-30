@@ -102,7 +102,6 @@ void StatementGenerator::emitDeclarationAssignment(uCParser::AssignVariableConte
     emitStoreValue(varId, varId->getType());
 }
 
-//TODO: Add support for arrays
 void StatementGenerator::emitIncrement(uCParser::IncrementVariableContext *ctx){
     SymtabEntry *varEntry = ctx->variable()->entry;
     Typespec *varType = ctx->variable()->type;
@@ -125,7 +124,6 @@ void StatementGenerator::emitIncrement(uCParser::IncrementVariableContext *ctx){
     }
 }
 
-//TODO: Add support for arrays
 void StatementGenerator::emitDecrement(uCParser::DecrementVariableContext *ctx){
     SymtabEntry *varEntry = ctx->variable()->entry;
     Typespec *varType = ctx->variable()->type;
@@ -186,7 +184,62 @@ void StatementGenerator::emitIf(uCParser::IfStatementContext *ctx){
 
     //Jump to when done with true section so to skip false section
     emitLabel(doneLabel);
-};
+}
+
+void StatementGenerator::emitSwitch(uCParser::SwitchStatementContext *ctx){
+    std::vector<std::pair<uCParser::CaseBranchContext*,Label*>> branchLabels;
+
+    //Add new labels for all the branches
+    for(uCParser::CaseBranchContext* branch : ctx->switchCaseList()->caseBranch()){
+        branchLabels.emplace_back(branch,new Label);
+    }
+    Label* exitCase = new Label;
+    Label* defaultCase = ctx->switchCaseList()->defaultBranch()?new Label:nullptr;
+
+    //Evaluate input expression
+    compiler->visit(ctx->expression());
+
+    emit(Instruction::LOOKUPSWITCH);
+    std::set<std::pair<int,Label*>> labelSet; //Used since labels have to be in order
+    //Add all the constants and associated labels
+    for(unsigned int i=0;i<branchLabels.size();i++){
+        if(!branchLabels[i].first->number()){
+            continue;
+        }
+
+        //C only has 1 number per case, tell it what label to jump to
+        labelSet.insert(std::make_pair(stoi(branchLabels[i].first->number()->getText()), branchLabels[i].second));
+    }
+
+    //Output all the labels in order
+    for(auto entry : labelSet){
+        emitLabel(entry.first,entry.second);
+    }
+
+    if(ctx->switchCaseList()->defaultBranch()) {
+        emitLabel("default",defaultCase);
+    }
+    else{
+        emitLabel("default", exitCase);
+    }
+
+    //Create labels + code to execute for each branch
+    for(auto entry : branchLabels){
+        emitLabel(entry.second);
+        if(entry.first->controlScope() != nullptr) {
+            compiler->visit(entry.first->controlScope());
+        }
+        emit(Instruction::GOTO,exitCase->getString());
+    }
+
+    if(ctx->switchCaseList()->defaultBranch()){
+        emitLabel(defaultCase);
+        compiler->visit(ctx->switchCaseList()->defaultBranch()->controlScope());
+        emit(Instruction::GOTO,exitCase->getString());
+    }
+
+    emitLabel(exitCase);
+}
 
 void StatementGenerator::emitDoWhile(uCParser::DoWhileLoopContext *ctx){
     Label *loopTopLabel  = new Label();

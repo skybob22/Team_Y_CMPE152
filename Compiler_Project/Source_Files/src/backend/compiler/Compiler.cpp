@@ -54,6 +54,11 @@ Object Compiler::visitIfStatement(uCParser::IfStatementContext *ctx){
     return nullptr;
 }
 
+Object Compiler::visitSwitchStatement(uCParser::SwitchStatementContext *ctx){
+    statementCode->emitSwitch(ctx);
+    return nullptr;
+}
+
 Object Compiler::visitDoWhileLoop(uCParser::DoWhileLoopContext *ctx){
     statementCode->emitDoWhile(ctx);
     return nullptr;

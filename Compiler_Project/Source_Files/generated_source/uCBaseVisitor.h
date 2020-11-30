@@ -90,6 +90,22 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitSwitchStatement(uCParser::SwitchStatementContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitSwitchCaseList(uCParser::SwitchCaseListContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitCaseBranch(uCParser::CaseBranchContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitDefaultBranch(uCParser::DefaultBranchContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx) override {
     return visitChildren(ctx);
   }

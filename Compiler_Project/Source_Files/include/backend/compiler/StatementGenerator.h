@@ -31,6 +31,8 @@ public:
 
     void emitIf(uCParser::IfStatementContext *ctx);
 
+    void emitSwitch(uCParser::SwitchStatementContext *ctx);
+
     void emitDoWhile(uCParser::DoWhileLoopContext *ctx);
 
     void emitWhile(uCParser::WhileLoopContext *ctx);

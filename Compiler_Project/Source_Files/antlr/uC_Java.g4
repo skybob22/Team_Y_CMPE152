@@ -52,6 +52,7 @@ controlStatement
     | whileLoop
     | forLoop
     | ifStatement
+    | switchStatement
     | controlScope
     ;
 
@@ -63,6 +64,11 @@ ifStatement
       (ELSE IF '(' expression ')' controlScope)*
       (ELSE controlScope)?
     ;
+
+switchStatement : SWITCH '(' expression ')' '{' switchCaseList '}';
+switchCaseList :  caseBranch* defaultBranch? ;
+caseBranch : CASE number ':' controlScope ;
+defaultBranch : DEFAULT ':' controlScope ;
 
 //====Function declarations/definitions/calls====//
 functionDefinition : functionDeclaration controlScope ;
@@ -188,6 +194,8 @@ IF        : I F ;
 ELSEIF    : E L S E I F ;
 ELSE      : E L S E ;
 SWITCH    : S W I T C H ;
+CASE      : C A S E ;
+DEFAULT   : D E F A U L T ;
 PRINT     : P R I N T ;
 PRINTLN   : P R I N T L N ;
 READ      : R E A D ;

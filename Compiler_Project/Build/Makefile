@@ -55,7 +55,7 @@ parse_tree: | $(ANTLR_OBJ_DIR_NAME)_Java
 	java -cp $(ANTLR_OBJ_DIR)_Java:$(ANTLR_SRC_DIR)/$(ANTLR_FILE) org.antlr.v4.gui.TestRig $(ANTLR_GRAMMER_NAME)_Java program -gui $(if $(FILE_PATH),../$(FILE_PATH))
 
 railroad:
-	java -jar $(ANTLR_SRC_DIR)/$(ANTLR_RR_FILE) $(ANTLR_SRC_DIR)/$(ANTLR_GRAMMER_NAME)_Java.g4
+	java -jar $(ANTLR_SRC_DIR)/$(ANTLR_RR_FILE) $(ANTLR_SRC_DIR)/$(ANTLR_GRAMMER_NAME).g4
 
 
 

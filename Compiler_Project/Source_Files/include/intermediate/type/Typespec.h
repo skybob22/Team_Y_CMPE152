@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Object.h"
+#include "uCParser.h"
 #include "intermediate/symtab/Symtab.h"
 
 namespace intermediate { namespace type {
@@ -67,6 +68,8 @@ private:
             Typespec *indexType;
             Typespec *elementType;
             int elementCount;
+            //Can be used to evaluate expressions at runtime for dynamic arrays
+            uCParser::ExpressionContext* exprCtx;
         } array;
 
         struct
@@ -109,6 +112,7 @@ public:
                 info.array.indexType = nullptr;
                 info.array.elementType = nullptr;
                 info.array.elementCount = 0;
+                info.array.exprCtx = nullptr;
                 break;
 
             case Form::RECORD:
@@ -262,6 +266,14 @@ public:
      * @return the count.
      */
     int getArrayElementCount() const { return info.array.elementCount; }
+
+    void setArrayElementCountExpression(uCParser::ExpressionContext* ctx){
+        info.array.exprCtx = ctx;
+    }
+
+    uCParser::ExpressionContext *getArrayElementCountExpression(){
+        return info.array.exprCtx;
+    }
 
     /**
      * Set the array element count.

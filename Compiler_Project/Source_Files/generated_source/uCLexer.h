@@ -22,13 +22,13 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, INT = 26, 
-    BOOL = 27, FLOAT = 28, VOID = 29, DO = 30, WHILE = 31, FOR = 32, IF = 33, 
-    ELSEIF = 34, ELSE = 35, SWITCH = 36, CASE = 37, DEFAULT = 38, PRINT = 39, 
-    PRINTLN = 40, READ = 41, READLN = 42, RETURN = 43, ARRAYINDICATOR = 44, 
-    SINGLEQUOTE = 45, DOUBLEQUOTE = 46, DOUBLESLASH = 47, IDENTIFIER = 48, 
-    INTEGER = 49, REAL = 50, CHARACTER = 51, STRING = 52, NEWLINE = 53, 
-    WS = 54, COMMENT = 55
+    T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, T__25 = 26, 
+    INT = 27, BOOL = 28, FLOAT = 29, VOID = 30, DO = 31, WHILE = 32, FOR = 33, 
+    IF = 34, ELSEIF = 35, ELSE = 36, SWITCH = 37, CASE = 38, DEFAULT = 39, 
+    PRINT = 40, PRINTLN = 41, READ = 42, READLN = 43, RETURN = 44, ARRAYINDICATOR = 45, 
+    SINGLEQUOTE = 46, DOUBLEQUOTE = 47, DOUBLESLASH = 48, IDENTIFIER = 49, 
+    INTEGER = 50, REAL = 51, CHARACTER = 52, STRING = 53, NEWLINE = 54, 
+    WS = 55, COMMENT = 56
   };
 
   uCLexer(antlr4::CharStream *input);

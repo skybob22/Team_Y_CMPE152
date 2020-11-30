@@ -54,12 +54,20 @@ void StructuredDataGenerator::emitAllocateArray(SymtabEntry *targetId,
 
     // Count the dimensions and emit a load constant of each element count.
     emitLine();
-    do
-    {
-        int elmtCount = elmtType->getArrayElementCount();
-        ++dimensionCount;
-        emitLoadConstant(elmtCount);
-        elmtType = elmtType->getArrayElementType();
+    do{
+        //If there is a runtime dynamic size specified by an expression, use it
+        if(arrayType->getArrayElementCountExpression() != nullptr){
+            //Place the desired array size on top of stack by visiting expression
+            compiler->visit(arrayType->getArrayElementCountExpression());
+            ++dimensionCount;
+            elmtType = elmtType->getArrayElementType();
+        }
+        else {
+            int elmtCount = elmtType->getArrayElementCount();
+            ++dimensionCount;
+            emitLoadConstant(elmtCount);
+            elmtType = elmtType->getArrayElementType();
+        }
     } while (elmtType->getForm() == ARRAY);
 
     // The array element type.

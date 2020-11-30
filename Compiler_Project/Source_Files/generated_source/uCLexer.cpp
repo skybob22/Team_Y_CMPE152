@@ -6,52 +6,52 @@
     using namespace intermediate::type;
 
 
-// Generated from ../Source_Files/antlr/C.g4 by ANTLR 4.8
+// Generated from ../Source_Files/antlr/uC.g4 by ANTLR 4.8
 
 
-#include "CLexer.h"
+#include "uCLexer.h"
 
 
 using namespace antlr4;
 
 
-CLexer::CLexer(CharStream *input) : Lexer(input) {
+uCLexer::uCLexer(CharStream *input) : Lexer(input) {
   _interpreter = new atn::LexerATNSimulator(this, _atn, _decisionToDFA, _sharedContextCache);
 }
 
-CLexer::~CLexer() {
+uCLexer::~uCLexer() {
   delete _interpreter;
 }
 
-std::string CLexer::getGrammarFileName() const {
-  return "C.g4";
+std::string uCLexer::getGrammarFileName() const {
+  return "uC.g4";
 }
 
-const std::vector<std::string>& CLexer::getRuleNames() const {
+const std::vector<std::string>& uCLexer::getRuleNames() const {
   return _ruleNames;
 }
 
-const std::vector<std::string>& CLexer::getChannelNames() const {
+const std::vector<std::string>& uCLexer::getChannelNames() const {
   return _channelNames;
 }
 
-const std::vector<std::string>& CLexer::getModeNames() const {
+const std::vector<std::string>& uCLexer::getModeNames() const {
   return _modeNames;
 }
 
-const std::vector<std::string>& CLexer::getTokenNames() const {
+const std::vector<std::string>& uCLexer::getTokenNames() const {
   return _tokenNames;
 }
 
-dfa::Vocabulary& CLexer::getVocabulary() const {
+dfa::Vocabulary& uCLexer::getVocabulary() const {
   return _vocabulary;
 }
 
-const std::vector<uint16_t> CLexer::getSerializedATN() const {
+const std::vector<uint16_t> uCLexer::getSerializedATN() const {
   return _serializedATN;
 }
 
-const atn::ATN& CLexer::getATN() const {
+const atn::ATN& uCLexer::getATN() const {
   return _atn;
 }
 
@@ -59,14 +59,14 @@ const atn::ATN& CLexer::getATN() const {
 
 
 // Static vars and initialization.
-std::vector<dfa::DFA> CLexer::_decisionToDFA;
-atn::PredictionContextCache CLexer::_sharedContextCache;
+std::vector<dfa::DFA> uCLexer::_decisionToDFA;
+atn::PredictionContextCache uCLexer::_sharedContextCache;
 
 // We own the ATN which in turn owns the ATN states.
-atn::ATN CLexer::_atn;
-std::vector<uint16_t> CLexer::_serializedATN;
+atn::ATN uCLexer::_atn;
+std::vector<uint16_t> uCLexer::_serializedATN;
 
-std::vector<std::string> CLexer::_ruleNames = {
+std::vector<std::string> uCLexer::_ruleNames = {
   u8"T__0", u8"T__1", u8"T__2", u8"T__3", u8"T__4", u8"T__5", u8"T__6", 
   u8"T__7", u8"T__8", u8"T__9", u8"T__10", u8"T__11", u8"T__12", u8"T__13", 
   u8"T__14", u8"T__15", u8"T__16", u8"T__17", u8"T__18", u8"T__19", u8"T__20", 
@@ -81,15 +81,15 @@ std::vector<std::string> CLexer::_ruleNames = {
   u8"WS", u8"COMMENT"
 };
 
-std::vector<std::string> CLexer::_channelNames = {
+std::vector<std::string> uCLexer::_channelNames = {
   "DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 };
 
-std::vector<std::string> CLexer::_modeNames = {
+std::vector<std::string> uCLexer::_modeNames = {
   u8"DEFAULT_MODE"
 };
 
-std::vector<std::string> CLexer::_literalNames = {
+std::vector<std::string> uCLexer::_literalNames = {
   "", u8"';'", u8"','", u8"'['", u8"']'", u8"'='", u8"'++'", u8"'--'", u8"'{'", 
   u8"'}'", u8"'('", u8"')'", u8"':'", u8"'!'", u8"'-'", u8"'=='", u8"'!='", 
   u8"'<'", u8"'<='", u8"'>'", u8"'>='", u8"'+'", u8"'||'", u8"'*'", u8"'/'", 
@@ -97,7 +97,7 @@ std::vector<std::string> CLexer::_literalNames = {
   "", u8"'[]'", u8"'''", u8"'\"'", u8"'//'"
 };
 
-std::vector<std::string> CLexer::_symbolicNames = {
+std::vector<std::string> uCLexer::_symbolicNames = {
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
   "", "", "", "", "", "", "", "", u8"INT", u8"BOOL", u8"FLOAT", u8"VOID", 
   u8"DO", u8"WHILE", u8"FOR", u8"IF", u8"ELSEIF", u8"ELSE", u8"SWITCH", 
@@ -106,11 +106,11 @@ std::vector<std::string> CLexer::_symbolicNames = {
   u8"REAL", u8"CHARACTER", u8"STRING", u8"NEWLINE", u8"WS", u8"COMMENT"
 };
 
-dfa::Vocabulary CLexer::_vocabulary(_literalNames, _symbolicNames);
+dfa::Vocabulary uCLexer::_vocabulary(_literalNames, _symbolicNames);
 
-std::vector<std::string> CLexer::_tokenNames;
+std::vector<std::string> uCLexer::_tokenNames;
 
-CLexer::Initializer::Initializer() {
+uCLexer::Initializer::Initializer() {
   // This code could be in a static initializer lambda, but VS doesn't allow access to private class members from there.
 	for (size_t i = 0; i < _symbolicNames.size(); ++i) {
 		std::string name = _vocabulary.getLiteralName(i);
@@ -433,4 +433,4 @@ CLexer::Initializer::Initializer() {
   }
 }
 
-CLexer::Initializer CLexer::_init;
+uCLexer::Initializer uCLexer::_init;

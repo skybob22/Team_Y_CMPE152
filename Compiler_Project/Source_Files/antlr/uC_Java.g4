@@ -1,16 +1,7 @@
-grammar C;
-
-@header {
-    #include <map>
-    #include "intermediate/symtab/Symtab.h"
-    #include "intermediate/type/Typespec.h"
-    using namespace intermediate::symtab;
-    using namespace intermediate::type;
-}
+grammar uC_Java;
 
 //====Starting point====//
-program locals [SymtabEntry *entry = nullptr]
-    : (functionDefinition | functionDeclaration | c_statement)+ ;
+program : (functionDefinition | functionDeclaration ';' | variableDeclaration ';')+ ;
 
 //====General Statements====//
 c_statement
@@ -23,7 +14,7 @@ statement
     | variableDeclaration
     | controlStatement
     | printStatement
-    | printlnStatement
+    | printLnStatement
     | readStatement
     | readlnStatement
     | functionCall
@@ -42,11 +33,11 @@ length : INTEGER ;
 //====Variable assignment====//
 assignmentStatement
     : lhs '=' rhs   #assignVariable
-    | variable '++' #incrementVariable
-    | variable '--' #decrementVariable
+    | variable '++' #decrementVariable
+    | variable '--' #irncrementVariable
     ;
 
-lhs locals [ Typespec *type = nullptr ]
+lhs
     : variable
     | variableDeclaration
     ;
@@ -77,17 +68,19 @@ ifStatement
 functionDefinition : functionDeclaration controlScope ;
 functionDeclaration : typeIdentifier functionIdentifier '(' (parameterDeclarationsList | VOID)? ')' ;
 
-functionIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
+functionIdentifier
    : IDENTIFIER ;
 parameterDeclarationsList : parameterDeclaration ( ',' parameterDeclaration )* ;
 parameterDeclaration     : typeIdentifier ARRAYINDICATOR* parameterIdentifier;
-parameterIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
+parameterIdentifier
    : IDENTIFIER ;
 
 returnStatement
     : RETURN expression?;
 
-functionCall : functionIdentifier '(' argumentList? ')' ;
+functionCall : functionName '(' argumentList? ')' ;
+functionName
+    : IDENTIFIER ;
 argumentList : argument ( ',' argument )* ;
 argument     : expression ;
 
@@ -95,29 +88,26 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement   : PRINT '(' printArguments ')' ;
-printlnStatement : PRINTLN '(' printArguments? ')' ;
-printArguments   : printArgument (',' printArgument)* ;
-printArgument    : expression (':' fieldWidth)? ;
-fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
-decimalPlaces    : integerConstant ;
-
+printStatement: PRINT '(' printList* ')' ;
+printLnStatement: PRINTLN '(' printList* ')' ;
+printList : printItem (',' printItem)* ;
+printItem : variable | stringConstant ;
 //====Readin (So we can get input)====//
 readStatement : READ '(' readArguments ')' ;
 readlnStatement : READLN '(' readArguments ')' ;
 readArguments : variable ( ',' variable )* ;
 
 //====Expressions,factors, etc.====//
-expression locals [ Typespec *type = nullptr ]
+expression
     : simpleExpression (relOp simpleExpression)? ;
 
-simpleExpression locals [ Typespec *type = nullptr ]
+simpleExpression
     : sign? term (addOp term)* ;
 
-term locals [ Typespec *type = nullptr ]
+term
     : factor (mulOp factor)* ;
 
-factor locals [ Typespec *type = nullptr ]
+factor
     : variable             # variableFactor
     | number               # numberFactor
     | characterConstant    # characterFactor
@@ -128,11 +118,11 @@ factor locals [ Typespec *type = nullptr ]
     ;
 
 //====Variables====//
-variable locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
+variable
     : variableIdentifier modifier* ;
 modifier : '[' index ']';
 index : expression ;
-variableIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
+variableIdentifier
     : IDENTIFIER ;
 
 number          : sign? unsignedNumber ;
@@ -148,7 +138,7 @@ addOp : '+' | '-' | '||' ;
 mulOp : '*' | '/' | '&&' ;
 
 //====Built-in Types====//
-typeIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
+typeIdentifier
     : INT |
       BOOL |
       FLOAT |

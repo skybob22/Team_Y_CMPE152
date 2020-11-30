@@ -1,4 +1,4 @@
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 #include "antlr4-runtime.h"
 
 #include "intermediate/symtab/Predefined.h"
@@ -9,10 +9,10 @@
 
 namespace backend { namespace compiler {
 
-void ExpressionGenerator::emitExpression(CParser::ExpressionContext *ctx){
-    CParser::SimpleExpressionContext *simpleCtx1 =
+void ExpressionGenerator::emitExpression(uCParser::ExpressionContext *ctx){
+    uCParser::SimpleExpressionContext *simpleCtx1 =
             ctx->simpleExpression()[0];
-    CParser::RelOpContext *relOpCtx = ctx->relOp();
+    uCParser::RelOpContext *relOpCtx = ctx->relOp();
     Typespec *type1 = simpleCtx1->type;
     emitSimpleExpression(simpleCtx1);
 
@@ -20,7 +20,7 @@ void ExpressionGenerator::emitExpression(CParser::ExpressionContext *ctx){
     if (relOpCtx != nullptr)
     {
         string op = relOpCtx->getText();
-        CParser::SimpleExpressionContext *simpleCtx2 =
+        uCParser::SimpleExpressionContext *simpleCtx2 =
                 ctx->simpleExpression()[1];
         Typespec *type2 = simpleCtx2->type;
 
@@ -98,13 +98,13 @@ void ExpressionGenerator::emitExpression(CParser::ExpressionContext *ctx){
     }
 }
 
-void ExpressionGenerator::emitSimpleExpression(CParser::SimpleExpressionContext *ctx){
+void ExpressionGenerator::emitSimpleExpression(uCParser::SimpleExpressionContext *ctx){
     int count = ctx->term().size();
     bool negate =    (ctx->sign() != nullptr)
                      && (ctx->sign()->getText() == "-");
 
     // First term.
-    CParser::TermContext *termCtx1 = ctx->term()[0];
+    uCParser::TermContext *termCtx1 = ctx->term()[0];
     Typespec *type1 = termCtx1->type;
     emitTerm(termCtx1);
 
@@ -114,7 +114,7 @@ void ExpressionGenerator::emitSimpleExpression(CParser::SimpleExpressionContext 
     for (int i = 1; i < count; i++)
     {
         string op = toLowerCase(ctx->addOp()[i-1]->getText());
-        CParser::TermContext *termCtx2 = ctx->term()[i];
+        uCParser::TermContext *termCtx2 = ctx->term()[i];
         Typespec *type2 = termCtx2->type;
 
         bool integerMode = false;
@@ -184,11 +184,11 @@ void ExpressionGenerator::emitSimpleExpression(CParser::SimpleExpressionContext 
     }
 }
 
-void ExpressionGenerator::emitTerm(CParser::TermContext *ctx){
+void ExpressionGenerator::emitTerm(uCParser::TermContext *ctx){
     int count = ctx->factor().size();
 
     // First factor.
-    CParser::FactorContext *factorCtx1 = ctx->factor()[0];
+    uCParser::FactorContext *factorCtx1 = ctx->factor()[0];
     Typespec *type1 = factorCtx1->type;
     compiler->visit(factorCtx1);
 
@@ -196,7 +196,7 @@ void ExpressionGenerator::emitTerm(CParser::TermContext *ctx){
     for (int i = 1; i < count; i++)
     {
         string op = toLowerCase(ctx->mulOp()[i-1]->getText());
-        CParser::FactorContext *factorCtx2 = ctx->factor()[i];
+        uCParser::FactorContext *factorCtx2 = ctx->factor()[i];
         Typespec *type2 = factorCtx2->type;
 
         bool integerMode = false;
@@ -239,13 +239,13 @@ void ExpressionGenerator::emitTerm(CParser::TermContext *ctx){
     }
 }
 
-void ExpressionGenerator::emitNotFactor(CParser::NotFactorContext *ctx){
+void ExpressionGenerator::emitNotFactor(uCParser::NotFactorContext *ctx){
     compiler->visit(ctx->factor());
     emit(ICONST_1);
     emit(IXOR);
 }
 
-void ExpressionGenerator::emitLoadValue(CParser::VariableContext *varCtx){
+void ExpressionGenerator::emitLoadValue(uCParser::VariableContext *varCtx){
     int a = varCtx->modifier().size();
     // Load the scalar value or structure address.
     Typespec *variableType = emitLoadVariable(varCtx);
@@ -254,12 +254,12 @@ void ExpressionGenerator::emitLoadValue(CParser::VariableContext *varCtx){
     int modifierCount = varCtx->modifier().size();
     if (modifierCount > 0)
     {
-        CParser::ModifierContext *lastModCtx = varCtx->modifier().back();
+        uCParser::ModifierContext *lastModCtx = varCtx->modifier().back();
         emitLoadArrayElementValue(variableType);
     }
 }
 
-Typespec *ExpressionGenerator::emitLoadVariable(CParser::VariableContext *varCtx){
+Typespec *ExpressionGenerator::emitLoadVariable(uCParser::VariableContext *varCtx){
     SymtabEntry *variableId = varCtx->entry;
     Typespec *variableType = variableId->getType();
 
@@ -272,7 +272,7 @@ Typespec *ExpressionGenerator::emitLoadVariable(CParser::VariableContext *varCtx
     // Loop over subscript and field modifiers.
     for (int i = 0; i < modifierCount; ++i)
     {
-        CParser::ModifierContext *modCtx = varCtx->modifier(i);
+        uCParser::ModifierContext *modCtx = varCtx->modifier(i);
         bool lastModifier = i == modifierCount - 1;
 
         // Subscript
@@ -283,7 +283,7 @@ Typespec *ExpressionGenerator::emitLoadVariable(CParser::VariableContext *varCtx
     return variableType;
 }
 
-Typespec *ExpressionGenerator::emitLoadArrayElementAccess(CParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier){
+Typespec *ExpressionGenerator::emitLoadArrayElementAccess(uCParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier){
     // Loop over the subscripts.
     emitExpression(modCtx->index()->expression());
 
@@ -320,12 +320,12 @@ Typespec *ExpressionGenerator::emitLoadArrayElementValue(Typespec *elmtType){
     }
 }
 
-void ExpressionGenerator::emitLoadIntegerConstant(CParser::NumberContext *intCtx){
+void ExpressionGenerator::emitLoadIntegerConstant(uCParser::NumberContext *intCtx){
     int value = stoi(intCtx->getText());
     emitLoadConstant(value);
 }
 
-void ExpressionGenerator::emitLoadRealConstant(CParser::NumberContext *realCtx){
+void ExpressionGenerator::emitLoadRealConstant(uCParser::NumberContext *realCtx){
     float value = stof(realCtx->getText());
     emitLoadConstant(value);
 }

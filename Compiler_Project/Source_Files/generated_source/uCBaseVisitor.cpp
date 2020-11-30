@@ -6,9 +6,9 @@
     using namespace intermediate::type;
 
 
-// Generated from ../Source_Files/antlr/C.g4 by ANTLR 4.8
+// Generated from ../Source_Files/antlr/uC.g4 by ANTLR 4.8
 
 
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 
 

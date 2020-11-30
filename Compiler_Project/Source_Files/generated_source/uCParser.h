@@ -6,7 +6,7 @@
     using namespace intermediate::type;
 
 
-// Generated from ../Source_Files/antlr/C.g4 by ANTLR 4.8
+// Generated from ../Source_Files/antlr/uC.g4 by ANTLR 4.8
 
 #pragma once
 
@@ -16,7 +16,7 @@
 
 
 
-class  CParser : public antlr4::Parser {
+class  uCParser : public antlr4::Parser {
 public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
@@ -49,8 +49,8 @@ public:
     RuleStringConstant = 52
   };
 
-  CParser(antlr4::TokenStream *input);
-  ~CParser();
+  uCParser(antlr4::TokenStream *input);
+  ~uCParser();
 
   virtual std::string getGrammarFileName() const override;
   virtual const antlr4::atn::ATN& getATN() const override { return _atn; };
@@ -122,8 +122,8 @@ public:
     FunctionDefinitionContext* functionDefinition(size_t i);
     std::vector<FunctionDeclarationContext *> functionDeclaration();
     FunctionDeclarationContext* functionDeclaration(size_t i);
-    std::vector<C_statementContext *> c_statement();
-    C_statementContext* c_statement(size_t i);
+    std::vector<VariableDeclarationContext *> variableDeclaration();
+    VariableDeclarationContext* variableDeclaration(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -136,6 +136,7 @@ public:
   public:
     C_statementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    FunctionDeclarationContext *functionDeclaration();
     StatementContext *statement();
     EmptyStatementContext *emptyStatement();
 

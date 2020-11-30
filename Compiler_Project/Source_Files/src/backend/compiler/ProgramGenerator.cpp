@@ -1,6 +1,6 @@
 #include <vector>
 
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 #include "antlr4-runtime.h"
 
 #include "backend/compiler/Directive.h"
@@ -13,7 +13,7 @@ namespace backend { namespace compiler {
 
 using namespace std;
 
-void ProgramGenerator::emitProgram(CParser::ProgramContext *ctx){
+void ProgramGenerator::emitProgram(uCParser::ProgramContext *ctx){
     //Hack due to non-existant program identifier in C/C++
     programId = ctx->entry;
     Symtab *programSymtab = programId->getRoutineSymtab();
@@ -31,7 +31,7 @@ void ProgramGenerator::emitProgram(CParser::ProgramContext *ctx){
     emitMainMethod(ctx);
 }
 
-void ProgramGenerator::emitRoutine(CParser::FunctionDefinitionContext *ctx){
+void ProgramGenerator::emitRoutine(uCParser::FunctionDefinitionContext *ctx){
     SymtabEntry *routineId = ctx->functionDeclaration()->functionIdentifier()->entry;
     Symtab *routineSymtab = routineId->getRoutineSymtab();
 
@@ -45,7 +45,7 @@ void ProgramGenerator::emitRoutine(CParser::FunctionDefinitionContext *ctx){
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 
     // Emit code for the compound statement.
-    CParser::ControlScopeContext *stmtCtx = (CParser::ControlScopeContext *) routineId->getExecutable();
+    uCParser::ControlScopeContext *stmtCtx = (uCParser::ControlScopeContext *) routineId->getExecutable();
     compiler->visit(stmtCtx);
 
     emitFunctionReturn(routineId);
@@ -111,15 +111,15 @@ void ProgramGenerator::emitConstructor(){
     localStack->reset();
 }
 
-void ProgramGenerator::emitSubroutines(CParser::ProgramContext *ctx){
-    for(CParser::FunctionDefinitionContext *fCtx : ctx->functionDefinition()){
+void ProgramGenerator::emitSubroutines(uCParser::ProgramContext *ctx){
+    for(uCParser::FunctionDefinitionContext *fCtx : ctx->functionDefinition()){
         string fName = fCtx->functionDeclaration()->functionIdentifier()->getText();
         compiler = new Compiler(compiler);
         compiler->visit(fCtx);
     }
 }
 
-void ProgramGenerator::emitMainMethod(CParser::ProgramContext *ctx){
+void ProgramGenerator::emitMainMethod(uCParser::ProgramContext *ctx){
     emitLine();
     emitComment("MAIN");
     emitDirective(METHOD_PUBLIC_STATIC,
@@ -196,7 +196,7 @@ void ProgramGenerator::emitMainEpilogue(){
     close();  // the object file
 }
 
-void ProgramGenerator::emitFunction(CParser::FunctionDefinitionContext *ctx){
+void ProgramGenerator::emitFunction(uCParser::FunctionDefinitionContext *ctx){
     SymtabEntry *routineId = ctx->functionDeclaration()->functionIdentifier()->entry;
     Symtab *routineSymtab = routineId->getRoutineSymtab();
 
@@ -210,7 +210,7 @@ void ProgramGenerator::emitFunction(CParser::FunctionDefinitionContext *ctx){
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 
     // Emit code for the compound statement.
-    CParser::ControlScopeContext *stmtCtx = (CParser::ControlScopeContext *) routineId->getExecutable();
+    uCParser::ControlScopeContext *stmtCtx = (uCParser::ControlScopeContext *) routineId->getExecutable();
     compiler->visit(stmtCtx);
 
     emitFunctionReturn(routineId);

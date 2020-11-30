@@ -16,25 +16,25 @@ public:
     ExpressionGenerator(CodeGenerator *parent, Compiler *compiler,string outputDir="")
         : CodeGenerator(parent, compiler,outputDir) {}
 
-    void emitExpression(CParser::ExpressionContext *ctx);
+    void emitExpression(uCParser::ExpressionContext *ctx);
 
-    void emitSimpleExpression(CParser::SimpleExpressionContext *ctx);
+    void emitSimpleExpression(uCParser::SimpleExpressionContext *ctx);
 
-    void emitTerm(CParser::TermContext *ctx);
+    void emitTerm(uCParser::TermContext *ctx);
 
-    void emitNotFactor(CParser::NotFactorContext *ctx);
+    void emitNotFactor(uCParser::NotFactorContext *ctx);
 
-    void emitLoadValue(CParser::VariableContext *varCtx);
+    void emitLoadValue(uCParser::VariableContext *varCtx);
 
-    Typespec *emitLoadVariable(CParser::VariableContext *varCtx);
+    Typespec *emitLoadVariable(uCParser::VariableContext *varCtx);
 
-    Typespec *emitLoadArrayElementAccess(CParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier);
+    Typespec *emitLoadArrayElementAccess(uCParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier);
 
     Typespec *emitLoadArrayElementValue(Typespec *elmtType);
 
-    void emitLoadIntegerConstant(CParser::NumberContext *intCtx);
+    void emitLoadIntegerConstant(uCParser::NumberContext *intCtx);
 
-    void emitLoadRealConstant(CParser::NumberContext *realCtx);
+    void emitLoadRealConstant(uCParser::NumberContext *realCtx);
 
 private:
 

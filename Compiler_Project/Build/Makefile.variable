@@ -31,7 +31,7 @@ ANTLR_RUNTIME_LIB := $(ANTLR_SRC_DIR)/antlr_runtime/libraries
 
 #Antlr specific variables
 ANTLR_SRC_DIR := $(CODE_DIR)/antlr
-ANTLR_GRAMMER_NAME := C
+ANTLR_GRAMMER_NAME := uC
 ANTLR_FILE := antlr-4.8-complete.jar
 ANTLR_RR_FILE := rrd-antlr4-0.1.2.jar
 ANTLR_OUTPUT_DIR := $(CODE_DIR)/generated_source
@@ -39,7 +39,7 @@ ANTLR_OUTPUT_DIR := $(CODE_DIR)/generated_source
 
 
 #Main files to include/exclude to fix potential issues with multiple mains
-APP_MAIN := $(APP_SRC_DIR)/C.cpp
+APP_MAIN := $(APP_SRC_DIR)/uC.cpp
 
 
 #All directories that need to be compiled here

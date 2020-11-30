@@ -60,6 +60,14 @@ public:
 
     virtual antlrcpp::Any visitIfStatement(uCParser::IfStatementContext *context) = 0;
 
+    virtual antlrcpp::Any visitSwitchStatement(uCParser::SwitchStatementContext *context) = 0;
+
+    virtual antlrcpp::Any visitSwitchCaseList(uCParser::SwitchCaseListContext *context) = 0;
+
+    virtual antlrcpp::Any visitCaseBranch(uCParser::CaseBranchContext *context) = 0;
+
+    virtual antlrcpp::Any visitDefaultBranch(uCParser::DefaultBranchContext *context) = 0;
+
     virtual antlrcpp::Any visitFunctionDefinition(uCParser::FunctionDefinitionContext *context) = 0;
 
     virtual antlrcpp::Any visitFunctionDeclaration(uCParser::FunctionDeclarationContext *context) = 0;

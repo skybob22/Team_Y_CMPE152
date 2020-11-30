@@ -622,6 +622,31 @@ Object Semantics::visitIfStatement(uCParser::IfStatementContext *ctx){
     return nullptr;
 }
 
+Object Semantics::visitSwitchStatement(uCParser::SwitchStatementContext *ctx){
+    uCParser::ExpressionContext *exprCtx = ctx->expression();
+    visit(exprCtx);
+    Typespec *exprType = exprCtx->type;
+    Form exprTypeForm = exprType->getForm();
+
+    if(exprTypeForm != SCALAR && exprType != Predefined::integerType){
+        error.flag(TYPE_MUST_BE_INTEGER, exprCtx);
+    }
+
+    set<int> constants;
+    uCParser::SwitchCaseListContext *caseListCtx = ctx->switchCaseList();
+
+    // Loop over the CASE branches.
+    for(uCParser::CaseBranchContext* cbCtx : caseListCtx->caseBranch()){
+       //We already know based on the syntax tree that the constants are ok since they are numbers (or default)
+       visit(cbCtx->controlScope());
+    }
+    if(caseListCtx->defaultBranch()){
+        visit(caseListCtx->defaultBranch()->controlScope());
+    }
+
+    return nullptr;
+}
+
 Object Semantics::visitFunctionCall(uCParser::FunctionCallContext *ctx){
     //Can be treated like procedure call since we know in this case the value isn't being stored
     uCParser::FunctionIdentifierContext*nameCtx = ctx->functionIdentifier();

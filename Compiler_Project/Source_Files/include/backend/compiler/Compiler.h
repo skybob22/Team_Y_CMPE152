@@ -65,6 +65,7 @@ namespace backend { namespace compiler {
             Object visitIncrementVariable(uCParser::IncrementVariableContext *ctx) override;
             Object visitDecrementVariable(uCParser::DecrementVariableContext *ctx) override;
             Object visitIfStatement(uCParser::IfStatementContext *ctx) override;
+            Object visitSwitchStatement(uCParser::SwitchStatementContext *ctx) override;
             Object visitDoWhileLoop(uCParser::DoWhileLoopContext *ctx) override;
             Object visitWhileLoop(uCParser::WhileLoopContext *ctx) override;
             Object visitForLoop(uCParser::ForLoopContext *ctx) override;

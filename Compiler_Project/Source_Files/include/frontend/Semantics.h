@@ -109,6 +109,7 @@ namespace frontend {
         Object visitWhileLoop(uCParser::WhileLoopContext *ctx) override;
         Object visitForLoop(uCParser::ForLoopContext *ctx) override;
         Object visitIfStatement(uCParser::IfStatementContext *ctx) override;
+        Object visitSwitchStatement(uCParser::SwitchStatementContext *ctx) override;
 
         Object visitFunctionCall(uCParser::FunctionCallContext *ctx) override;
         Object visitFunctionCallFactor(uCParser::FunctionCallFactorContext *ctx) override;

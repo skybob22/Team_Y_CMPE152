@@ -24,10 +24,11 @@ public:
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
     T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, INT = 26, 
     BOOL = 27, FLOAT = 28, VOID = 29, DO = 30, WHILE = 31, FOR = 32, IF = 33, 
-    ELSEIF = 34, ELSE = 35, SWITCH = 36, PRINT = 37, PRINTLN = 38, READ = 39, 
-    READLN = 40, RETURN = 41, ARRAYINDICATOR = 42, SINGLEQUOTE = 43, DOUBLEQUOTE = 44, 
-    DOUBLESLASH = 45, IDENTIFIER = 46, INTEGER = 47, REAL = 48, CHARACTER = 49, 
-    STRING = 50, NEWLINE = 51, WS = 52, COMMENT = 53
+    ELSEIF = 34, ELSE = 35, SWITCH = 36, CASE = 37, DEFAULT = 38, PRINT = 39, 
+    PRINTLN = 40, READ = 41, READLN = 42, RETURN = 43, ARRAYINDICATOR = 44, 
+    SINGLEQUOTE = 45, DOUBLEQUOTE = 46, DOUBLESLASH = 47, IDENTIFIER = 48, 
+    INTEGER = 49, REAL = 50, CHARACTER = 51, STRING = 52, NEWLINE = 53, 
+    WS = 54, COMMENT = 55
   };
 
   enum {
@@ -35,18 +36,19 @@ public:
     RuleVariableDeclaration = 4, RuleLength = 5, RuleAssignmentStatement = 6, 
     RuleLhs = 7, RuleRhs = 8, RuleControlScope = 9, RuleControlStatement = 10, 
     RuleDoWhileLoop = 11, RuleWhileLoop = 12, RuleForLoop = 13, RuleIfStatement = 14, 
-    RuleFunctionDefinition = 15, RuleFunctionDeclaration = 16, RuleFunctionIdentifier = 17, 
-    RuleParameterDeclarationsList = 18, RuleParameterDeclaration = 19, RuleParameterIdentifier = 20, 
-    RuleReturnStatement = 21, RuleFunctionCall = 22, RuleArgumentList = 23, 
-    RuleArgument = 24, RulePrintStatement = 25, RulePrintlnStatement = 26, 
-    RulePrintArguments = 27, RulePrintArgument = 28, RuleFieldWidth = 29, 
-    RuleDecimalPlaces = 30, RuleReadStatement = 31, RuleReadlnStatement = 32, 
-    RuleReadArguments = 33, RuleExpression = 34, RuleSimpleExpression = 35, 
-    RuleTerm = 36, RuleFactor = 37, RuleVariable = 38, RuleModifier = 39, 
-    RuleIndex = 40, RuleVariableIdentifier = 41, RuleNumber = 42, RuleUnsignedNumber = 43, 
-    RuleSign = 44, RuleIntegerConstant = 45, RuleRealConstant = 46, RuleRelOp = 47, 
-    RuleAddOp = 48, RuleMulOp = 49, RuleTypeIdentifier = 50, RuleCharacterConstant = 51, 
-    RuleStringConstant = 52
+    RuleSwitchStatement = 15, RuleSwitchCaseList = 16, RuleCaseBranch = 17, 
+    RuleDefaultBranch = 18, RuleFunctionDefinition = 19, RuleFunctionDeclaration = 20, 
+    RuleFunctionIdentifier = 21, RuleParameterDeclarationsList = 22, RuleParameterDeclaration = 23, 
+    RuleParameterIdentifier = 24, RuleReturnStatement = 25, RuleFunctionCall = 26, 
+    RuleArgumentList = 27, RuleArgument = 28, RulePrintStatement = 29, RulePrintlnStatement = 30, 
+    RulePrintArguments = 31, RulePrintArgument = 32, RuleFieldWidth = 33, 
+    RuleDecimalPlaces = 34, RuleReadStatement = 35, RuleReadlnStatement = 36, 
+    RuleReadArguments = 37, RuleExpression = 38, RuleSimpleExpression = 39, 
+    RuleTerm = 40, RuleFactor = 41, RuleVariable = 42, RuleModifier = 43, 
+    RuleIndex = 44, RuleVariableIdentifier = 45, RuleNumber = 46, RuleUnsignedNumber = 47, 
+    RuleSign = 48, RuleIntegerConstant = 49, RuleRealConstant = 50, RuleRelOp = 51, 
+    RuleAddOp = 52, RuleMulOp = 53, RuleTypeIdentifier = 54, RuleCharacterConstant = 55, 
+    RuleStringConstant = 56
   };
 
   uCParser(antlr4::TokenStream *input);
@@ -74,6 +76,10 @@ public:
   class WhileLoopContext;
   class ForLoopContext;
   class IfStatementContext;
+  class SwitchStatementContext;
+  class SwitchCaseListContext;
+  class CaseBranchContext;
+  class DefaultBranchContext;
   class FunctionDefinitionContext;
   class FunctionDeclarationContext;
   class FunctionIdentifierContext;
@@ -305,6 +311,7 @@ public:
     WhileLoopContext *whileLoop();
     ForLoopContext *forLoop();
     IfStatementContext *ifStatement();
+    SwitchStatementContext *switchStatement();
     ControlScopeContext *controlScope();
 
 
@@ -381,6 +388,65 @@ public:
   };
 
   IfStatementContext* ifStatement();
+
+  class  SwitchStatementContext : public antlr4::ParserRuleContext {
+  public:
+    SwitchStatementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *SWITCH();
+    ExpressionContext *expression();
+    SwitchCaseListContext *switchCaseList();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  SwitchStatementContext* switchStatement();
+
+  class  SwitchCaseListContext : public antlr4::ParserRuleContext {
+  public:
+    SwitchCaseListContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<CaseBranchContext *> caseBranch();
+    CaseBranchContext* caseBranch(size_t i);
+    DefaultBranchContext *defaultBranch();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  SwitchCaseListContext* switchCaseList();
+
+  class  CaseBranchContext : public antlr4::ParserRuleContext {
+  public:
+    CaseBranchContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *CASE();
+    NumberContext *number();
+    ControlScopeContext *controlScope();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  CaseBranchContext* caseBranch();
+
+  class  DefaultBranchContext : public antlr4::ParserRuleContext {
+  public:
+    DefaultBranchContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *DEFAULT();
+    ControlScopeContext *controlScope();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  DefaultBranchContext* defaultBranch();
 
   class  FunctionDefinitionContext : public antlr4::ParserRuleContext {
   public:

@@ -21,47 +21,47 @@ public:
     StatementGenerator(CodeGenerator *parent, Compiler *compiler,string outputDir="")
         : CodeGenerator(parent, compiler,outputDir) {}
 
-    void emitAssignment(CParser::AssignVariableContext *ctx);
+    void emitAssignment(uCParser::AssignVariableContext *ctx);
 
-    void emitDeclarationAssignment(CParser::AssignVariableContext *ctx);
+    void emitDeclarationAssignment(uCParser::AssignVariableContext *ctx);
 
-    void emitIncrement(CParser::IncrementVariableContext *ctx);
+    void emitIncrement(uCParser::IncrementVariableContext *ctx);
 
-    void emitDecrement(CParser::DecrementVariableContext *ctx);
+    void emitDecrement(uCParser::DecrementVariableContext *ctx);
 
-    void emitIf(CParser::IfStatementContext *ctx);
+    void emitIf(uCParser::IfStatementContext *ctx);
 
-    void emitDoWhile(CParser::DoWhileLoopContext *ctx);
+    void emitDoWhile(uCParser::DoWhileLoopContext *ctx);
 
-    void emitWhile(CParser::WhileLoopContext *ctx);
+    void emitWhile(uCParser::WhileLoopContext *ctx);
 
-    void emitFor(CParser::ForLoopContext *ctx);
+    void emitFor(uCParser::ForLoopContext *ctx);
 
-    void emitProcedureCall(CParser::FunctionCallContext *ctx);
+    void emitProcedureCall(uCParser::FunctionCallContext *ctx);
 
-    void emitFunctionCall(CParser::FunctionCallContext *ctx);
+    void emitFunctionCall(uCParser::FunctionCallContext *ctx);
 
-    void emitPrint(CParser::PrintStatementContext *ctx);
+    void emitPrint(uCParser::PrintStatementContext *ctx);
 
-    void emitPrintln(CParser::PrintlnStatementContext *ctx);
+    void emitPrintln(uCParser::PrintlnStatementContext *ctx);
 
-    void emitRead(CParser::ReadStatementContext *ctx);
+    void emitRead(uCParser::ReadStatementContext *ctx);
 
-    void emitReadln(CParser::ReadlnStatementContext *ctx);
+    void emitReadln(uCParser::ReadlnStatementContext *ctx);
 
-    void emitReturn(CParser::ReturnStatementContext *ctx);
+    void emitReturn(uCParser::ReturnStatementContext *ctx);
 
 private:
 
-    void emitCall(SymtabEntry *routineId, CParser::ArgumentListContext *argListCtx);
+    void emitCall(SymtabEntry *routineId, uCParser::ArgumentListContext *argListCtx);
 
-    void emitPrint(CParser::PrintArgumentsContext *argsCtx, bool needLF);
+    void emitPrint(uCParser::PrintArgumentsContext *argsCtx, bool needLF);
 
-    int createPrintFormat(CParser::PrintArgumentsContext *argsCtx, string& format,bool needLF);
+    int createPrintFormat(uCParser::PrintArgumentsContext *argsCtx, string& format,bool needLF);
 
-    void emitArgumentsArray(CParser::PrintArgumentsContext *argsCtx,int exprCount);
+    void emitArgumentsArray(uCParser::PrintArgumentsContext *argsCtx,int exprCount);
 
-    void emitRead(CParser::ReadArgumentsContext *argsCtx, bool needSkip);
+    void emitRead(uCParser::ReadArgumentsContext *argsCtx, bool needSkip);
 
 private:
     //A couple utility tools

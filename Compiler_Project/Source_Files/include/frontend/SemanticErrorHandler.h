@@ -38,7 +38,8 @@ enum class Error
     INVALID_RETURN_TYPE,
     TOO_MANY_SUBSCRIPTS,
     INVALID_FIELD,
-    FUNCTION_NOT_DEFINED
+    FUNCTION_NOT_DEFINED,
+    NO_MAIN_FUNCTION
 };
 
 constexpr Error UNDECLARED_IDENTIFIER       = Error::UNDECLARED_IDENTIFIER;
@@ -65,6 +66,7 @@ constexpr Error INVALID_RETURN_TYPE         = Error::INVALID_RETURN_TYPE;
 constexpr Error TOO_MANY_SUBSCRIPTS         = Error::TOO_MANY_SUBSCRIPTS;
 constexpr Error INVALID_FIELD               = Error::INVALID_FIELD;
 constexpr Error FUNCTION_NOT_DEFINED        = Error::FUNCTION_NOT_DEFINED;
+constexpr Error NO_MAIN_FUNCTION            = Error::NO_MAIN_FUNCTION;
 
 class SemanticErrorHandler
 {
@@ -124,6 +126,8 @@ public:
                 "Invalid field";
         SEMANTIC_ERROR_MESSAGES[FUNCTION_NOT_DEFINED] =
                 "Function declared but not defined";
+        SEMANTIC_ERROR_MESSAGES[NO_MAIN_FUNCTION] =
+                "No function 'main' present";
     }
 
     int getCount() const { return count; }

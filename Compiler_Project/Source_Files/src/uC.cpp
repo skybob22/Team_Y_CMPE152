@@ -5,8 +5,8 @@
 #include <chrono>
 
 #include "antlr4-runtime.h"
-#include "CLexer.h"
-#include "CParser.h"
+#include "uCLexer.h"
+#include "uCParser.h"
 
 #include "frontend/Listing.h"
 #include "frontend/SyntaxErrorHandler.h"
@@ -62,13 +62,13 @@ int main(int argc, const char *args[])
 
     // Create a lexer which scans the character stream
     // to create a token stream.
-    CLexer lexer(&input);
+    uCLexer lexer(&input);
     lexer.removeErrorListeners();
     lexer.addErrorListener(&syntaxErrorHandler);
     CommonTokenStream tokens(&lexer);
 
     // Create a parser which parses the token stream.
-    CParser parser(&tokens);
+    uCParser parser(&tokens);
 
     // Pass 1: Check syntax and create the parse tree.
     cout << endl << "PASS 1 Syntax: ";

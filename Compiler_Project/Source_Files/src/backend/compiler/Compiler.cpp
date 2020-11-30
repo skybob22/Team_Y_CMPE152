@@ -3,24 +3,24 @@
 
 namespace backend { namespace compiler {
 
-Object Compiler::loadValue(CParser::VariableContext *ctx){
+Object Compiler::loadValue(uCParser::VariableContext *ctx){
     expressionCode->emitLoadValue(ctx);
     return nullptr;
 }
 
-Object Compiler::visitProgram(CParser::ProgramContext *ctx){
+Object Compiler::visitProgram(uCParser::ProgramContext *ctx){
     createNewGenerators(code);
     programCode->emitProgram(ctx);
     return nullptr;
 }
 
-Object Compiler::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx){
+Object Compiler::visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx){
     createNewGenerators(code);
     programCode->emitRoutine(ctx);
     return nullptr;
 }
 
-Object Compiler::visitStatement(CParser::StatementContext *ctx){
+Object Compiler::visitStatement(uCParser::StatementContext *ctx){
     if (ctx->controlStatement() == nullptr){
         statementCode->emitComment(ctx);
     }
@@ -28,7 +28,7 @@ Object Compiler::visitStatement(CParser::StatementContext *ctx){
     return visitChildren(ctx);
 }
 
-Object Compiler::visitAssignVariable(CParser::AssignVariableContext *ctx){
+Object Compiler::visitAssignVariable(uCParser::AssignVariableContext *ctx){
     if(ctx->lhs()->variable()){
         statementCode->emitAssignment(ctx);
     }
@@ -39,37 +39,37 @@ Object Compiler::visitAssignVariable(CParser::AssignVariableContext *ctx){
     return nullptr;
 }
 
-Object Compiler::visitIncrementVariable(CParser::IncrementVariableContext *ctx){
+Object Compiler::visitIncrementVariable(uCParser::IncrementVariableContext *ctx){
     statementCode->emitIncrement(ctx);
     return nullptr;
 }
 
-Object Compiler::visitDecrementVariable(CParser::DecrementVariableContext *ctx){
+Object Compiler::visitDecrementVariable(uCParser::DecrementVariableContext *ctx){
     statementCode->emitDecrement(ctx);
     return nullptr;
 }
 
-Object Compiler::visitIfStatement(CParser::IfStatementContext *ctx){
+Object Compiler::visitIfStatement(uCParser::IfStatementContext *ctx){
     statementCode->emitIf(ctx);
     return nullptr;
 }
 
-Object Compiler::visitDoWhileLoop(CParser::DoWhileLoopContext *ctx){
+Object Compiler::visitDoWhileLoop(uCParser::DoWhileLoopContext *ctx){
     statementCode->emitDoWhile(ctx);
     return nullptr;
 }
 
-Object Compiler::visitWhileLoop(CParser::WhileLoopContext *ctx){
+Object Compiler::visitWhileLoop(uCParser::WhileLoopContext *ctx){
     statementCode->emitWhile(ctx);
     return nullptr;
 }
 
-Object Compiler::visitForLoop(CParser::ForLoopContext *ctx){
+Object Compiler::visitForLoop(uCParser::ForLoopContext *ctx){
     statementCode->emitFor(ctx);
     return nullptr;
 }
 
-Object Compiler::visitFunctionCall(CParser::FunctionCallContext *ctx){
+Object Compiler::visitFunctionCall(uCParser::FunctionCallContext *ctx){
     statementCode->emitFunctionCall(ctx);
     auto b = ctx->functionIdentifier()->getText();
     auto a = ctx->functionIdentifier()->type;
@@ -80,27 +80,27 @@ Object Compiler::visitFunctionCall(CParser::FunctionCallContext *ctx){
     return nullptr;
 }
 
-Object Compiler::visitReturnStatement(CParser::ReturnStatementContext *ctx){
+Object Compiler::visitReturnStatement(uCParser::ReturnStatementContext *ctx){
     statementCode->emitReturn(ctx);
     return nullptr;
 }
 
-Object Compiler::visitExpression(CParser::ExpressionContext *ctx){
+Object Compiler::visitExpression(uCParser::ExpressionContext *ctx){
     expressionCode->emitExpression(ctx);
     return nullptr;
 }
 
-Object Compiler::visitVariableFactor(CParser::VariableFactorContext *ctx){
+Object Compiler::visitVariableFactor(uCParser::VariableFactorContext *ctx){
     expressionCode->emitLoadValue(ctx->variable());
     return nullptr;
 }
 
-Object Compiler::visitVariable(CParser::VariableContext *ctx){
+Object Compiler::visitVariable(uCParser::VariableContext *ctx){
     expressionCode->emitLoadVariable(ctx);
     return nullptr;
 }
 
-Object Compiler::visitNumberFactor(CParser::NumberFactorContext *ctx){
+Object Compiler::visitNumberFactor(uCParser::NumberFactorContext *ctx){
     if (ctx->type == Predefined::integerType)
     {
         expressionCode->emitLoadIntegerConstant(ctx->number());
@@ -113,50 +113,50 @@ Object Compiler::visitNumberFactor(CParser::NumberFactorContext *ctx){
     return nullptr;
 }
 
-Object Compiler::visitCharacterFactor(CParser::CharacterFactorContext *ctx){
+Object Compiler::visitCharacterFactor(uCParser::CharacterFactorContext *ctx){
     char ch = ctx->getText()[1];
     expressionCode->emitLoadConstant(ch);
 
     return nullptr;
 }
 
-Object Compiler::visitStringFactor(CParser::StringFactorContext *ctx){
+Object Compiler::visitStringFactor(uCParser::StringFactorContext *ctx){
     string jasminString = convertString(ctx->getText(), true);
     expressionCode->emitLoadConstant(jasminString);
 
     return nullptr;
 }
 
-Object Compiler::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx){
+Object Compiler::visitFunctionCallFactor(uCParser::FunctionCallFactorContext *ctx){
     statementCode->emitFunctionCall(ctx->functionCall());
     return nullptr;
 }
 
-Object Compiler::visitNotFactor(CParser::NotFactorContext *ctx){
+Object Compiler::visitNotFactor(uCParser::NotFactorContext *ctx){
     expressionCode->emitNotFactor(ctx);
     return nullptr;
 }
 
-Object Compiler::visitParenthesizedFactor(CParser::ParenthesizedFactorContext *ctx){
+Object Compiler::visitParenthesizedFactor(uCParser::ParenthesizedFactorContext *ctx){
     return visit(ctx->expression());
 }
 
-Object Compiler::visitPrintStatement(CParser::PrintStatementContext *ctx){
+Object Compiler::visitPrintStatement(uCParser::PrintStatementContext *ctx){
     statementCode->emitPrint(ctx);
     return nullptr;
 }
 
-Object Compiler::visitPrintlnStatement(CParser::PrintlnStatementContext *ctx){
+Object Compiler::visitPrintlnStatement(uCParser::PrintlnStatementContext *ctx){
     statementCode->emitPrintln(ctx);
     return nullptr;
 }
 
-Object Compiler::visitReadStatement(CParser::ReadStatementContext *ctx){
+Object Compiler::visitReadStatement(uCParser::ReadStatementContext *ctx){
     statementCode->emitRead(ctx);
     return nullptr;
 }
 
-Object Compiler::visitReadlnStatement(CParser::ReadlnStatementContext *ctx){
+Object Compiler::visitReadlnStatement(uCParser::ReadlnStatementContext *ctx){
     statementCode->emitReadln(ctx);
     return nullptr;
 }

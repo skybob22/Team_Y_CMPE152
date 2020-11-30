@@ -41,7 +41,7 @@ int Semantics::typeCount(Typespec *type){
 }
 
 void Semantics::checkCallArguments(
-        CParser::ArgumentListContext *listCtx, vector<SymtabEntry *> *parms)
+        uCParser::ArgumentListContext *listCtx, vector<SymtabEntry *> *parms)
 {
     int parmsCount = parms->size();
     int argsCount = listCtx != nullptr ? listCtx->argument().size() : 0;
@@ -53,8 +53,8 @@ void Semantics::checkCallArguments(
 
     // Check each argument against the corresponding parameter.
     for (int i = 0; i < parmsCount; i++){
-        CParser::ArgumentContext *argCtx = listCtx->argument()[i];
-        CParser::ExpressionContext *exprCtx = argCtx->expression();
+        uCParser::ArgumentContext *argCtx = listCtx->argument()[i];
+        uCParser::ExpressionContext *exprCtx = argCtx->expression();
         visit(exprCtx);
 
         SymtabEntry *parmId = (*parms)[i];
@@ -82,18 +82,18 @@ void Semantics::checkCallArguments(
     }
 }
 
-bool Semantics::expressionIsVariable(CParser::ExpressionContext *exprCtx){
+bool Semantics::expressionIsVariable(uCParser::ExpressionContext *exprCtx){
     // Only a single simple expression?
     if (exprCtx->simpleExpression().size() == 1){
-        CParser::SimpleExpressionContext *simpleCtx =
+        uCParser::SimpleExpressionContext *simpleCtx =
                 exprCtx->simpleExpression()[0];
         // Only a single term?
         if (simpleCtx->term().size() == 1){
-            CParser::TermContext *termCtx = simpleCtx->term()[0];
+            uCParser::TermContext *termCtx = simpleCtx->term()[0];
 
             // Only a single factor?
             if (termCtx->factor().size() == 1){
-                return dynamic_cast<CParser::VariableFactorContext *>(
+                return dynamic_cast<uCParser::VariableFactorContext *>(
                                termCtx->factor()[0]) != nullptr;
             }
         }
@@ -102,20 +102,20 @@ bool Semantics::expressionIsVariable(CParser::ExpressionContext *exprCtx){
     return false;
 }
 
-Typespec *Semantics::variableDatatype(CParser::VariableContext *varCtx,
+Typespec *Semantics::variableDatatype(uCParser::VariableContext *varCtx,
                                       Typespec *varType)
 {
     Typespec *type = varType;
 
     // Subscripts.
-    for(CParser::ModifierContext *modCtx : varCtx->modifier()){
+    for(uCParser::ModifierContext *modCtx : varCtx->modifier()){
         //Subscript
         if(modCtx->index()){
-            CParser::IndexContext *indexCtx = modCtx->index();
+            uCParser::IndexContext *indexCtx = modCtx->index();
             if (type->getForm() == ARRAY)
             {
                 Typespec *indexType = type->getArrayIndexType();
-                CParser::ExpressionContext *exprCtx = indexCtx->expression();
+                uCParser::ExpressionContext *exprCtx = indexCtx->expression();
                 visit(exprCtx);
 
                 if (indexType->baseType() != exprCtx->type->baseType())
@@ -136,6 +136,17 @@ Typespec *Semantics::variableDatatype(CParser::VariableContext *varCtx,
     return type;
 }
 void Semantics::postErrorCheck(){
+    bool mainPresent = false;
+    SymtabEntry *main = symtabStack->getLocalSymtab()->lookup("main");
+    if(main != nullptr){
+        if(main->getKind() == FUNCTION || main->getKind() == PROCEDURE){
+            mainPresent = true;
+        }
+    }
+    if(!mainPresent){
+        error.flag(Error::NO_MAIN_FUNCTION,0,"");
+    }
+
     //Need to do this at the end of parsing
     for(auto entry : symtabStack->getLocalSymtab()->sortedEntries()){
         if(entry->getKind() == FUNCTION || entry->getKind() == PROCEDURE){
@@ -155,7 +166,7 @@ int Semantics::getErrorCount() const{
 }
 
 
-Object Semantics::visitProgram(CParser::ProgramContext *ctx){
+Object Semantics::visitProgram(uCParser::ProgramContext *ctx){
     //C doesn't have a defined program name, pick so use input when creating the object to extract filename
     programId = symtabStack->enterLocal(programName, PROGRAM);
     programId->setRoutineSymtab(symtabStack->push());
@@ -174,11 +185,11 @@ Object Semantics::visitProgram(CParser::ProgramContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *ctx){
+Object Semantics::visitFunctionDeclaration(uCParser::FunctionDeclarationContext *ctx){
     visit(ctx->typeIdentifier());
 
-    CParser::FunctionIdentifierContext *idCtx = ctx->functionIdentifier();
-    CParser::ParameterDeclarationsListContext *parameters = ctx->parameterDeclarationsList();
+    uCParser::FunctionIdentifierContext *idCtx = ctx->functionIdentifier();
+    uCParser::ParameterDeclarationsListContext *parameters = ctx->parameterDeclarationsList();
 
     int lineNumber = idCtx->getStart()->getLine();
     bool nonVoid = ctx->typeIdentifier()->type != Predefined::voidType;
@@ -222,7 +233,7 @@ Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *
     }
 
     if (nonVoid){
-        CParser::TypeIdentifierContext *typeIdCtx = ctx->typeIdentifier();
+        uCParser::TypeIdentifierContext *typeIdCtx = ctx->typeIdentifier();
         visit(typeIdCtx);
         returnType = typeIdCtx->type;
 
@@ -255,8 +266,8 @@ Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *
     return nullptr;
 }
 
-Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx){
-    CParser::FunctionDeclarationContext *fdCtx = ctx->functionDeclaration();
+Object Semantics::visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx){
+    uCParser::FunctionDeclarationContext *fdCtx = ctx->functionDeclaration();
     string routineName = fdCtx->functionIdentifier()->getText();
     SymtabEntry *routineId = symtabStack->lookupLocal(routineName);
 
@@ -291,11 +302,11 @@ Object Semantics::visitFunctionDefinition(CParser::FunctionDefinitionContext *ct
     return nullptr;
 }
 
-Object Semantics::visitParameterDeclarationsList(CParser::ParameterDeclarationsListContext *ctx){
+Object Semantics::visitParameterDeclarationsList(uCParser::ParameterDeclarationsListContext *ctx){
     vector<SymtabEntry *> *parameterList = new vector<SymtabEntry *>();
 
     // Loop over the parameter declarations.
-    for (CParser::ParameterDeclarationContext *dclCtx : ctx->parameterDeclaration())
+    for (uCParser::ParameterDeclarationContext *dclCtx : ctx->parameterDeclaration())
     {
         vector<SymtabEntry *> parameterSublist =
                 visit(dclCtx).as<vector<SymtabEntry *>>();
@@ -305,16 +316,16 @@ Object Semantics::visitParameterDeclarationsList(CParser::ParameterDeclarationsL
     return parameterList;
 }
 
-Object Semantics::visitParameterDeclaration(CParser::ParameterDeclarationContext *ctx){
+Object Semantics::visitParameterDeclaration(uCParser::ParameterDeclarationContext *ctx){
     Kind kind = VALUE_PARAMETER;
-    CParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
+    uCParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
 
     visit(typeCtx);
     Typespec *parmType = typeCtx->type;
 
     vector<SymtabEntry *> parameterSublist;
 
-    CParser::ParameterIdentifierContext *idCtx = ctx->parameterIdentifier();
+    uCParser::ParameterIdentifierContext *idCtx = ctx->parameterIdentifier();
     int lineNumber = idCtx->getStart()->getLine();
     string parmName = idCtx->IDENTIFIER()->getText();
     SymtabEntry *parmId = symtabStack->lookupLocal(parmName);
@@ -360,9 +371,9 @@ Object Semantics::visitParameterDeclaration(CParser::ParameterDeclarationContext
     return parameterSublist;
 }
 
-Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *ctx){
+Object Semantics::visitVariableDeclaration(uCParser::VariableDeclarationContext *ctx){
     if(!ctx->length().empty()){
-        CParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(0);
+        uCParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(0);
         int lineNumber = idCtx->getStart()->getLine();
         string variableName = idCtx->IDENTIFIER()->getText();
 
@@ -407,11 +418,11 @@ Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *
         variableId->appendLineNumber(lineNumber);
     }
     else{
-        CParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
+        uCParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
         visit(typeCtx);
 
         for(unsigned int i=0;i<ctx->variableIdentifier().size();i++){
-            CParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(i);
+            uCParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(i);
 
             int lineNumber = idCtx->getStart()->getLine();
             string variableName = idCtx->IDENTIFIER()->getText();
@@ -443,7 +454,7 @@ Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *
     return nullptr;
 }
 
-Object Semantics::visitTypeIdentifier(CParser::TypeIdentifierContext *ctx){
+Object Semantics::visitTypeIdentifier(uCParser::TypeIdentifierContext *ctx){
     string typeName = ctx->getText();
     SymtabEntry *typeId = symtabStack->lookup(typeName);
 
@@ -471,14 +482,14 @@ Object Semantics::visitTypeIdentifier(CParser::TypeIdentifierContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitLhs(CParser::LhsContext *ctx){
+Object Semantics::visitLhs(uCParser::LhsContext *ctx){
     if(ctx->variable()){
-        CParser::VariableContext *varCtx = ctx->variable();
+        uCParser::VariableContext *varCtx = ctx->variable();
         visit(varCtx);
         ctx->type = varCtx->type;
     }
     else{
-        CParser::VariableDeclarationContext *varDecCtx = ctx->variableDeclaration();
+        uCParser::VariableDeclarationContext *varDecCtx = ctx->variableDeclaration();
         visit(varDecCtx);
         ctx->type = ctx->variableDeclaration()->typeIdentifier()->type;
 
@@ -490,9 +501,9 @@ Object Semantics::visitLhs(CParser::LhsContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitAssignVariable(CParser::AssignVariableContext *ctx){
-    CParser::LhsContext *lhsCtx = ctx->lhs();
-    CParser::RhsContext *rhsCtx = ctx->rhs();
+Object Semantics::visitAssignVariable(uCParser::AssignVariableContext *ctx){
+    uCParser::LhsContext *lhsCtx = ctx->lhs();
+    uCParser::RhsContext *rhsCtx = ctx->rhs();
 
     visitChildren(ctx);
 
@@ -507,8 +518,8 @@ Object Semantics::visitAssignVariable(CParser::AssignVariableContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitDecrementVariable(CParser::DecrementVariableContext *ctx){
-    CParser::VariableContext *vCtx = ctx->variable();
+Object Semantics::visitDecrementVariable(uCParser::DecrementVariableContext *ctx){
+    uCParser::VariableContext *vCtx = ctx->variable();
     visit(vCtx);
     if(vCtx->type->getForm() != SCALAR){
         error.flag(TYPE_MUST_BE_NUMERIC,ctx);
@@ -516,8 +527,8 @@ Object Semantics::visitDecrementVariable(CParser::DecrementVariableContext *ctx)
     return nullptr;
 }
 
-Object Semantics::visitIncrementVariable(CParser::IncrementVariableContext *ctx){
-    CParser::VariableContext *vCtx = ctx->variable();
+Object Semantics::visitIncrementVariable(uCParser::IncrementVariableContext *ctx){
+    uCParser::VariableContext *vCtx = ctx->variable();
     visit(vCtx);
     if(vCtx->type->getForm() != SCALAR){
         error.flag(TYPE_MUST_BE_NUMERIC,ctx);
@@ -525,8 +536,8 @@ Object Semantics::visitIncrementVariable(CParser::IncrementVariableContext *ctx)
     return nullptr;
 }
 
-Object Semantics::visitDoWhileLoop(CParser::DoWhileLoopContext *ctx){
-    CParser::ExpressionContext *exprCtx = ctx->expression();
+Object Semantics::visitDoWhileLoop(uCParser::DoWhileLoopContext *ctx){
+    uCParser::ExpressionContext *exprCtx = ctx->expression();
     visit(exprCtx);
     Typespec *exprType = exprCtx->type;
 
@@ -539,8 +550,8 @@ Object Semantics::visitDoWhileLoop(CParser::DoWhileLoopContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitWhileLoop(CParser::WhileLoopContext *ctx){
-    CParser::ExpressionContext *exprCtx = ctx->expression();
+Object Semantics::visitWhileLoop(uCParser::WhileLoopContext *ctx){
+    uCParser::ExpressionContext *exprCtx = ctx->expression();
     visit(exprCtx);
     Typespec *exprType = exprCtx->type;
 
@@ -553,13 +564,13 @@ Object Semantics::visitWhileLoop(CParser::WhileLoopContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitForLoop(CParser::ForLoopContext *ctx){
+Object Semantics::visitForLoop(uCParser::ForLoopContext *ctx){
     //Visit the init and end-loop statements
-    for(CParser::StatementContext *sCtx : ctx->statement()){
+    for(uCParser::StatementContext *sCtx : ctx->statement()){
         visit(sCtx);
     }
 
-    CParser::ExpressionContext *exprCtx = ctx->expression();
+    uCParser::ExpressionContext *exprCtx = ctx->expression();
     visit(exprCtx);
     Typespec *exprType = exprCtx->type;
 
@@ -572,9 +583,9 @@ Object Semantics::visitForLoop(CParser::ForLoopContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitIfStatement(CParser::IfStatementContext *ctx){
+Object Semantics::visitIfStatement(uCParser::IfStatementContext *ctx){
     //Required if(condition)
-    CParser::ExpressionContext *exprCtx  = ctx->expression(0);
+    uCParser::ExpressionContext *exprCtx  = ctx->expression(0);
     visit(exprCtx);
     Typespec *expr_type = exprCtx->type;
     if (!TypeChecker::isBoolean(expr_type))    {
@@ -586,7 +597,7 @@ Object Semantics::visitIfStatement(CParser::IfStatementContext *ctx){
     int numElseIf = ctx->IF().size() - 1;
     //We know there is at least 1 'if', so the number of 'else if' is the number of 'if' - 1
     for(int i=0;i<numElseIf;i++){
-        CParser::ExpressionContext *ie_exprCtx  = ctx->expression(1+i);
+        uCParser::ExpressionContext *ie_exprCtx  = ctx->expression(1+i);
         visit(ie_exprCtx);
         Typespec *ie_expr_type = ie_exprCtx->type;
         if (!TypeChecker::isBoolean(ie_expr_type))        {
@@ -599,7 +610,7 @@ Object Semantics::visitIfStatement(CParser::IfStatementContext *ctx){
     //If number of 'if' and 'else' are different by more than 1, we know there is an else at the end
     bool elsePresent = (ctx->IF().size() - 1) != ctx->ELSE().size();
     if(elsePresent){
-        CParser::ExpressionContext *e_exprCtx  = ctx->expression().back();
+        uCParser::ExpressionContext *e_exprCtx  = ctx->expression().back();
         visit(e_exprCtx);
         Typespec *e_expr_type = e_exprCtx->type;
         if (!TypeChecker::isBoolean(e_expr_type))        {
@@ -611,10 +622,10 @@ Object Semantics::visitIfStatement(CParser::IfStatementContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
+Object Semantics::visitFunctionCall(uCParser::FunctionCallContext *ctx){
     //Can be treated like procedure call since we know in this case the value isn't being stored
-    CParser::FunctionIdentifierContext*nameCtx = ctx->functionIdentifier();
-    CParser::ArgumentListContext *listCtx = ctx->argumentList();
+    uCParser::FunctionIdentifierContext*nameCtx = ctx->functionIdentifier();
+    uCParser::ArgumentListContext *listCtx = ctx->argumentList();
     string name = ctx->functionIdentifier()->getText();
     SymtabEntry *procedureId = symtabStack->lookup(name);
     bool badName = false;
@@ -633,7 +644,7 @@ Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
     // Bad procedure name. Do a simple arguments check and then leave.
     if (badName)
     {
-        for (CParser::ArgumentContext *exprCtx : listCtx->argument())
+        for (uCParser::ArgumentContext *exprCtx : listCtx->argument())
         {
             visit(exprCtx);
         }
@@ -652,10 +663,10 @@ Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx){
-    CParser::FunctionCallContext *callCtx = ctx->functionCall();
-    CParser::FunctionIdentifierContext *nameCtx = callCtx->functionIdentifier();
-    CParser::ArgumentListContext *listCtx = callCtx->argumentList();
+Object Semantics::visitFunctionCallFactor(uCParser::FunctionCallFactorContext *ctx){
+    uCParser::FunctionCallContext *callCtx = ctx->functionCall();
+    uCParser::FunctionIdentifierContext *nameCtx = callCtx->functionIdentifier();
+    uCParser::ArgumentListContext *listCtx = callCtx->argumentList();
     string name = callCtx->functionIdentifier()->getText();
     SymtabEntry *functionId = symtabStack->lookup(name);
     bool badName = false;
@@ -676,7 +687,7 @@ Object Semantics::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ct
     // Bad function name. Do a simple arguments check and then leave.
     if (badName)
     {
-        for (CParser::ArgumentContext *exprCtx : listCtx->argument())
+        for (uCParser::ArgumentContext *exprCtx : listCtx->argument())
         {
             visit(exprCtx);
         }
@@ -696,11 +707,11 @@ Object Semantics::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ct
     return nullptr;
 }
 
-Object Semantics::visitReturnStatement(CParser::ReturnStatementContext *ctx){
+Object Semantics::visitReturnStatement(uCParser::ReturnStatementContext *ctx){
     Typespec* routineType = symtabStack->getLocalSymtab()->getOwner()->getType();
     Kind routineKind = symtabStack->getLocalSymtab()->getOwner()->getKind();
     if(ctx->expression()){
-        CParser::ExpressionContext *eCtx = ctx->expression();
+        uCParser::ExpressionContext *eCtx = ctx->expression();
         visit(eCtx);
         if(eCtx->type != routineType){
             error.flag(INVALID_RETURN_TYPE,ctx);
@@ -715,20 +726,20 @@ Object Semantics::visitReturnStatement(CParser::ReturnStatementContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitExpression(CParser::ExpressionContext *ctx){
-    CParser::SimpleExpressionContext *simpleCtx1 = ctx->simpleExpression()[0];
+Object Semantics::visitExpression(uCParser::ExpressionContext *ctx){
+    uCParser::SimpleExpressionContext *simpleCtx1 = ctx->simpleExpression()[0];
     // First simple expression.
     visit(simpleCtx1);
 
     Typespec *simpleType1 = simpleCtx1->type;
     ctx->type = simpleType1;
 
-    CParser::RelOpContext *relopCtx = ctx->relOp();
+    uCParser::RelOpContext *relopCtx = ctx->relOp();
 
     // Second simple expression?
     if (relopCtx != nullptr)
     {
-        CParser::SimpleExpressionContext *simpleCtx2 =
+        uCParser::SimpleExpressionContext *simpleCtx2 =
                 ctx->simpleExpression()[1];
         visit(simpleCtx2);
 
@@ -744,11 +755,11 @@ Object Semantics::visitExpression(CParser::ExpressionContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitSimpleExpression(CParser::SimpleExpressionContext *ctx){
+Object Semantics::visitSimpleExpression(uCParser::SimpleExpressionContext *ctx){
     int count = ctx->term().size();
-    CParser::SignContext *signCtx = ctx->sign();
+    uCParser::SignContext *signCtx = ctx->sign();
     bool hasSign = signCtx != nullptr;
-    CParser::TermContext *termCtx1 = ctx->term()[0];
+    uCParser::TermContext *termCtx1 = ctx->term()[0];
 
     if (hasSign)
     {
@@ -767,7 +778,7 @@ Object Semantics::visitSimpleExpression(CParser::SimpleExpressionContext *ctx){
     for (int i = 1; i < count; i++)
     {
         string op = ctx->addOp()[i-1]->getText();
-        CParser::TermContext *termCtx2 = ctx->term()[i];
+        uCParser::TermContext *termCtx2 = ctx->term()[i];
         visit(termCtx2);
         Typespec *termType2 = termCtx2->type;
 
@@ -864,9 +875,9 @@ Object Semantics::visitSimpleExpression(CParser::SimpleExpressionContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitTerm(CParser::TermContext *ctx){
+Object Semantics::visitTerm(uCParser::TermContext *ctx){
     int count = ctx->factor().size();
-    CParser::FactorContext *factorCtx1 = ctx->factor()[0];
+    uCParser::FactorContext *factorCtx1 = ctx->factor()[0];
 
     // First factor.
     visit(factorCtx1);
@@ -876,7 +887,7 @@ Object Semantics::visitTerm(CParser::TermContext *ctx){
     for (int i = 1; i < count; i++)
     {
         string op = ctx->mulOp()[i-1]->getText();
-        CParser::FactorContext *factorCtx2 = ctx->factor()[i];
+        uCParser::FactorContext *factorCtx2 = ctx->factor()[i];
         visit(factorCtx2);
         Typespec *factorType2 = factorCtx2->type;
 
@@ -972,16 +983,16 @@ Object Semantics::visitTerm(CParser::TermContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitVariableFactor(CParser::VariableFactorContext *ctx){
-    CParser::VariableContext *varCtx = ctx->variable();
+Object Semantics::visitVariableFactor(uCParser::VariableFactorContext *ctx){
+    uCParser::VariableContext *varCtx = ctx->variable();
     visit(varCtx);
     ctx->type = varCtx->type;
 
     return nullptr;
 }
 
-Object Semantics::visitVariable(CParser::VariableContext *ctx){
-    CParser::VariableIdentifierContext *varIdCtx =
+Object Semantics::visitVariable(uCParser::VariableContext *ctx){
+    uCParser::VariableIdentifierContext *varIdCtx =
             ctx->variableIdentifier();
 
     visit(varIdCtx);
@@ -991,7 +1002,7 @@ Object Semantics::visitVariable(CParser::VariableContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitVariableIdentifier(CParser::VariableIdentifierContext *ctx){
+Object Semantics::visitVariableIdentifier(uCParser::VariableIdentifierContext *ctx){
 
     string variableName = ctx->IDENTIFIER()->getText();
     SymtabEntry *variableId = symtabStack->lookup(variableName);
@@ -1026,10 +1037,10 @@ Object Semantics::visitVariableIdentifier(CParser::VariableIdentifierContext *ct
     return nullptr;
 }
 
-Object Semantics::visitNumberFactor(CParser::NumberFactorContext *ctx){
-    CParser::NumberContext          *numberCtx   = ctx->number();
-    CParser::UnsignedNumberContext  *unsignedCtx = numberCtx->unsignedNumber();
-    CParser::IntegerConstantContext *integerCtx  = unsignedCtx->integerConstant();
+Object Semantics::visitNumberFactor(uCParser::NumberFactorContext *ctx){
+    uCParser::NumberContext          *numberCtx   = ctx->number();
+    uCParser::UnsignedNumberContext  *unsignedCtx = numberCtx->unsignedNumber();
+    uCParser::IntegerConstantContext *integerCtx  = unsignedCtx->integerConstant();
 
     ctx->type = (integerCtx != nullptr) ? Predefined::integerType
                                         : Predefined::realType;
@@ -1037,18 +1048,18 @@ Object Semantics::visitNumberFactor(CParser::NumberFactorContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitCharacterFactor(CParser::CharacterFactorContext *ctx){
+Object Semantics::visitCharacterFactor(uCParser::CharacterFactorContext *ctx){
     ctx->type = Predefined::charType;
     return nullptr;
 }
 
-Object Semantics::visitStringFactor(CParser::StringFactorContext *ctx){
+Object Semantics::visitStringFactor(uCParser::StringFactorContext *ctx){
     ctx->type = Predefined::stringType;
     return nullptr;
 }
 
-Object Semantics::visitNotFactor(CParser::NotFactorContext *ctx){
-    CParser::FactorContext *factorCtx = ctx->factor();
+Object Semantics::visitNotFactor(uCParser::NotFactorContext *ctx){
+    uCParser::FactorContext *factorCtx = ctx->factor();
     visit(factorCtx);
 
     if (factorCtx->type != Predefined::booleanType)
@@ -1060,8 +1071,8 @@ Object Semantics::visitNotFactor(CParser::NotFactorContext *ctx){
     return nullptr;
 }
 
-Object Semantics::visitParenthesizedFactor(CParser::ParenthesizedFactorContext *ctx){
-    CParser::ExpressionContext *exprCtx = ctx->expression();
+Object Semantics::visitParenthesizedFactor(uCParser::ParenthesizedFactorContext *ctx){
+    uCParser::ExpressionContext *exprCtx = ctx->expression();
     visit(exprCtx);
     ctx->type = exprCtx->type;
 

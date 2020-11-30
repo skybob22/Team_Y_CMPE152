@@ -1,7 +1,7 @@
 #ifndef COMPILER_H_
 #define COMPILER_H_
 
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 #include "antlr4-runtime.h"
 
 #include "intermediate/symtab/SymtabStack.h"
@@ -19,7 +19,7 @@ namespace backend { namespace compiler {
 
         class CodeGenerator;
 
-        class Compiler : public CBaseVisitor
+        class Compiler : public uCBaseVisitor
         {
         private:
             SymtabEntry *programId;  // symbol table entry of the program name
@@ -56,33 +56,33 @@ namespace backend { namespace compiler {
              * @return the file name.
              */
             string getObjectFileName() { return code->getObjectFileName(); }
-            Object loadValue(CParser::VariableContext *ctx);
+            Object loadValue(uCParser::VariableContext *ctx);
 
-            Object visitProgram(CParser::ProgramContext *ctx) override;
-            Object visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx) override;
-            Object visitStatement(CParser::StatementContext *ctx) override;
-            Object visitAssignVariable(CParser::AssignVariableContext *ctx) override;
-            Object visitIncrementVariable(CParser::IncrementVariableContext *ctx) override;
-            Object visitDecrementVariable(CParser::DecrementVariableContext *ctx) override;
-            Object visitIfStatement(CParser::IfStatementContext *ctx) override;
-            Object visitDoWhileLoop(CParser::DoWhileLoopContext *ctx) override;
-            Object visitWhileLoop(CParser::WhileLoopContext *ctx) override;
-            Object visitForLoop(CParser::ForLoopContext *ctx) override;
-            Object visitFunctionCall(CParser::FunctionCallContext *ctx) override;
-            Object visitReturnStatement(CParser::ReturnStatementContext *ctx) override;
-            Object visitExpression(CParser::ExpressionContext *ctx) override;
-            Object visitVariableFactor(CParser::VariableFactorContext *ctx) override;
-            Object visitVariable(CParser::VariableContext *ctx) override;
-            Object visitNumberFactor(CParser::NumberFactorContext *ctx) override;
-            Object visitCharacterFactor(CParser::CharacterFactorContext *ctx) override;
-            Object visitStringFactor(CParser::StringFactorContext *ctx) override;
-            Object visitFunctionCallFactor(CParser::FunctionCallFactorContext *ctx) override;
-            Object visitNotFactor(CParser::NotFactorContext *ctx) override;
-            Object visitParenthesizedFactor(CParser::ParenthesizedFactorContext *ctx) override;
-            Object visitPrintStatement(CParser::PrintStatementContext *ctx) override;
-            Object visitPrintlnStatement(CParser::PrintlnStatementContext *ctx) override;
-            Object visitReadStatement(CParser::ReadStatementContext *ctx) override;
-            Object visitReadlnStatement(CParser::ReadlnStatementContext *ctx) override;
+            Object visitProgram(uCParser::ProgramContext *ctx) override;
+            Object visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx) override;
+            Object visitStatement(uCParser::StatementContext *ctx) override;
+            Object visitAssignVariable(uCParser::AssignVariableContext *ctx) override;
+            Object visitIncrementVariable(uCParser::IncrementVariableContext *ctx) override;
+            Object visitDecrementVariable(uCParser::DecrementVariableContext *ctx) override;
+            Object visitIfStatement(uCParser::IfStatementContext *ctx) override;
+            Object visitDoWhileLoop(uCParser::DoWhileLoopContext *ctx) override;
+            Object visitWhileLoop(uCParser::WhileLoopContext *ctx) override;
+            Object visitForLoop(uCParser::ForLoopContext *ctx) override;
+            Object visitFunctionCall(uCParser::FunctionCallContext *ctx) override;
+            Object visitReturnStatement(uCParser::ReturnStatementContext *ctx) override;
+            Object visitExpression(uCParser::ExpressionContext *ctx) override;
+            Object visitVariableFactor(uCParser::VariableFactorContext *ctx) override;
+            Object visitVariable(uCParser::VariableContext *ctx) override;
+            Object visitNumberFactor(uCParser::NumberFactorContext *ctx) override;
+            Object visitCharacterFactor(uCParser::CharacterFactorContext *ctx) override;
+            Object visitStringFactor(uCParser::StringFactorContext *ctx) override;
+            Object visitFunctionCallFactor(uCParser::FunctionCallFactorContext *ctx) override;
+            Object visitNotFactor(uCParser::NotFactorContext *ctx) override;
+            Object visitParenthesizedFactor(uCParser::ParenthesizedFactorContext *ctx) override;
+            Object visitPrintStatement(uCParser::PrintStatementContext *ctx) override;
+            Object visitPrintlnStatement(uCParser::PrintlnStatementContext *ctx) override;
+            Object visitReadStatement(uCParser::ReadStatementContext *ctx) override;
+            Object visitReadlnStatement(uCParser::ReadlnStatementContext *ctx) override;
 
 
         private:

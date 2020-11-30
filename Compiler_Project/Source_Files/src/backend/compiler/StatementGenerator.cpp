@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 #include "antlr4-runtime.h"
 
 #include "intermediate/symtab/Predefined.h"
@@ -50,16 +50,16 @@ void StatementGenerator::emitCast(Typespec* from, Typespec* to){
     }
 }
 
-void StatementGenerator::emitAssignment(CParser::AssignVariableContext *ctx){
-    CParser::VariableContext *varCtx = ctx->lhs()->variable();
+void StatementGenerator::emitAssignment(uCParser::AssignVariableContext *ctx){
+    uCParser::VariableContext *varCtx = ctx->lhs()->variable();
     SymtabEntry *varId = varCtx->entry;
     Typespec *varType = varCtx->type;
 
-    CParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
+    uCParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
     Typespec *exprType = exprCtx->type;
 
     int modifierCount = varCtx->modifier().size();
-    CParser::ModifierContext *lastModCtx = (modifierCount > 0)?varCtx->modifier().back():nullptr;
+    uCParser::ModifierContext *lastModCtx = (modifierCount > 0)?varCtx->modifier().back():nullptr;
     if(modifierCount > 0){
         compiler->visit(varCtx);
     }
@@ -83,11 +83,11 @@ void StatementGenerator::emitAssignment(CParser::AssignVariableContext *ctx){
 
 }
 
-void StatementGenerator::emitDeclarationAssignment(CParser::AssignVariableContext *ctx){
+void StatementGenerator::emitDeclarationAssignment(uCParser::AssignVariableContext *ctx){
     SymtabEntry *varId = ctx->lhs()->variableDeclaration()->variableIdentifier(0)->entry;
     Typespec *varType = ctx->lhs()->variableDeclaration()->variableIdentifier(0)->type;
 
-    CParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
+    uCParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
 
     Typespec *exprType = exprCtx->type;
 
@@ -103,7 +103,7 @@ void StatementGenerator::emitDeclarationAssignment(CParser::AssignVariableContex
 }
 
 //TODO: Add support for arrays
-void StatementGenerator::emitIncrement(CParser::IncrementVariableContext *ctx){
+void StatementGenerator::emitIncrement(uCParser::IncrementVariableContext *ctx){
     SymtabEntry *varEntry = ctx->variable()->entry;
     Typespec *varType = ctx->variable()->type;
 
@@ -126,7 +126,7 @@ void StatementGenerator::emitIncrement(CParser::IncrementVariableContext *ctx){
 }
 
 //TODO: Add support for arrays
-void StatementGenerator::emitDecrement(CParser::DecrementVariableContext *ctx){
+void StatementGenerator::emitDecrement(uCParser::DecrementVariableContext *ctx){
     SymtabEntry *varEntry = ctx->variable()->entry;
     Typespec *varType = ctx->variable()->type;
 
@@ -148,7 +148,7 @@ void StatementGenerator::emitDecrement(CParser::DecrementVariableContext *ctx){
     }
 }
 
-void StatementGenerator::emitIf(CParser::IfStatementContext *ctx){
+void StatementGenerator::emitIf(uCParser::IfStatementContext *ctx){
     Label* doneLabel = new Label();
 
     int numElseIf = ctx->IF().size() - 1;
@@ -188,7 +188,7 @@ void StatementGenerator::emitIf(CParser::IfStatementContext *ctx){
     emitLabel(doneLabel);
 };
 
-void StatementGenerator::emitDoWhile(CParser::DoWhileLoopContext *ctx){
+void StatementGenerator::emitDoWhile(uCParser::DoWhileLoopContext *ctx){
     Label *loopTopLabel  = new Label();
     Label *loopExitLabel = new Label();
 
@@ -202,7 +202,7 @@ void StatementGenerator::emitDoWhile(CParser::DoWhileLoopContext *ctx){
     emitLabel(loopExitLabel);
 }
 
-void StatementGenerator::emitWhile(CParser::WhileLoopContext *ctx){
+void StatementGenerator::emitWhile(uCParser::WhileLoopContext *ctx){
     Label* topLabel = new Label();
     Label* exitLabel = new Label();
 
@@ -223,7 +223,7 @@ void StatementGenerator::emitWhile(CParser::WhileLoopContext *ctx){
     emitLabel(exitLabel); //Jump to here to exit loop
 }
 
-void StatementGenerator::emitFor(CParser::ForLoopContext *ctx){
+void StatementGenerator::emitFor(uCParser::ForLoopContext *ctx){
     Label* topLabel = new Label();
     Label* exitLabel = new Label();
 
@@ -246,15 +246,15 @@ void StatementGenerator::emitFor(CParser::ForLoopContext *ctx){
     emitLabel(exitLabel);
 }
 
-void StatementGenerator::emitProcedureCall(CParser::FunctionCallContext *ctx){
+void StatementGenerator::emitProcedureCall(uCParser::FunctionCallContext *ctx){
     emitCall(ctx->functionIdentifier()->entry,ctx->argumentList());
 }
 
-void StatementGenerator::emitFunctionCall(CParser::FunctionCallContext *ctx){
+void StatementGenerator::emitFunctionCall(uCParser::FunctionCallContext *ctx){
     emitCall(ctx->functionIdentifier()->entry,ctx->argumentList());
 }
 
-void StatementGenerator::emitCall(SymtabEntry *routineId, CParser::ArgumentListContext *argListCtx){
+void StatementGenerator::emitCall(SymtabEntry *routineId, uCParser::ArgumentListContext *argListCtx){
 //Need to get datatypes of arguments
     string argTypeString;
 
@@ -281,7 +281,7 @@ void StatementGenerator::emitCall(SymtabEntry *routineId, CParser::ArgumentListC
     emit(Instruction::INVOKESTATIC,functionName);
 }
 
-void StatementGenerator::emitReturn(CParser::ReturnStatementContext *ctx) {
+void StatementGenerator::emitReturn(uCParser::ReturnStatementContext *ctx) {
     //Leave the value on top of stack
     if (ctx->expression()){
         compiler->visit(ctx->expression());
@@ -294,15 +294,15 @@ void StatementGenerator::emitReturn(CParser::ReturnStatementContext *ctx) {
     }
 }
 
-void StatementGenerator::emitPrint(CParser::PrintStatementContext *ctx){
+void StatementGenerator::emitPrint(uCParser::PrintStatementContext *ctx){
     emitPrint(ctx->printArguments(), false);
 }
 
-void StatementGenerator::emitPrintln(CParser::PrintlnStatementContext *ctx){
+void StatementGenerator::emitPrintln(uCParser::PrintlnStatementContext *ctx){
     emitPrint(ctx->printArguments(), true);
 }
 
-void StatementGenerator::emitPrint(CParser::PrintArgumentsContext *argsCtx, bool needLF){
+void StatementGenerator::emitPrint(uCParser::PrintArgumentsContext *argsCtx, bool needLF){
     emit(GETSTATIC, "java/lang/System/out", "Ljava/io/PrintStream;");
 
     // WRITELN with no arguments.
@@ -342,12 +342,12 @@ void StatementGenerator::emitPrint(CParser::PrintArgumentsContext *argsCtx, bool
     }
 }
 
-int StatementGenerator::createPrintFormat(CParser::PrintArgumentsContext *argsCtx, string& format, bool needLF){
+int StatementGenerator::createPrintFormat(uCParser::PrintArgumentsContext *argsCtx, string& format, bool needLF){
     int exprCount = 0;
     format += "\"";
 
     // Loop over the write arguments.
-    for (CParser::PrintArgumentContext *argCtx : argsCtx->printArgument())
+    for (uCParser::PrintArgumentContext *argCtx : argsCtx->printArgument())
     {
         Typespec *type = argCtx->expression()->type;
         string argText = argCtx->getText();
@@ -361,14 +361,14 @@ int StatementGenerator::createPrintFormat(CParser::PrintArgumentsContext *argsCt
             exprCount++;
             format.append("%");
 
-            CParser::FieldWidthContext *fwCtx = argCtx->fieldWidth();
+            uCParser::FieldWidthContext *fwCtx = argCtx->fieldWidth();
             if (fwCtx != nullptr)
             {
                 string sign = (   (fwCtx->sign() != nullptr)
                                   && (fwCtx->sign()->getText() == "-")) ? "-" : "";
                 format += sign + fwCtx->integerConstant()->getText();
 
-                CParser::DecimalPlacesContext *dpCtx =
+                uCParser::DecimalPlacesContext *dpCtx =
                         fwCtx->decimalPlaces();
                 if (dpCtx != nullptr)
                 {
@@ -390,7 +390,7 @@ int StatementGenerator::createPrintFormat(CParser::PrintArgumentsContext *argsCt
     return exprCount;
 }
 
-void StatementGenerator::emitArgumentsArray(CParser::PrintArgumentsContext *argsCtx, int exprCount){
+void StatementGenerator::emitArgumentsArray(uCParser::PrintArgumentsContext *argsCtx, int exprCount){
     // Create the arguments array.
     emitLoadConstant(exprCount);
     emit(ANEWARRAY, "java/lang/Object");
@@ -398,11 +398,11 @@ void StatementGenerator::emitArgumentsArray(CParser::PrintArgumentsContext *args
     int index = 0;
 
     // Loop over the write arguments to fill the arguments array.
-    for (CParser::PrintArgumentContext *argCtx :
+    for (uCParser::PrintArgumentContext *argCtx :
             argsCtx->printArgument())
     {
         string argText = argCtx->getText();
-        CParser::ExpressionContext *exprCtx = argCtx->expression();
+        uCParser::ExpressionContext *exprCtx = argCtx->expression();
         Typespec *type = exprCtx->type->baseType();
 
         // Skip string constants, which were made part of
@@ -427,21 +427,21 @@ void StatementGenerator::emitArgumentsArray(CParser::PrintArgumentsContext *args
     }
 }
 
-void StatementGenerator::emitRead(CParser::ReadStatementContext *ctx){
+void StatementGenerator::emitRead(uCParser::ReadStatementContext *ctx){
     emitRead(ctx->readArguments(), false);
 }
 
-void StatementGenerator::emitReadln(CParser::ReadlnStatementContext *ctx){
+void StatementGenerator::emitReadln(uCParser::ReadlnStatementContext *ctx){
     emitRead(ctx->readArguments(), true);
 }
 
-void StatementGenerator::emitRead(CParser::ReadArgumentsContext *argsCtx, bool needSkip){
+void StatementGenerator::emitRead(uCParser::ReadArgumentsContext *argsCtx, bool needSkip){
     int size = argsCtx->variable().size();
 
     // Loop over read arguments.
     for (int i = 0; i < size; i++)
     {
-        CParser::VariableContext *varCtx = argsCtx->variable()[i];
+        uCParser::VariableContext *varCtx = argsCtx->variable()[i];
         Typespec *varType = varCtx->type;
 
         if (varType == Predefined::integerType)

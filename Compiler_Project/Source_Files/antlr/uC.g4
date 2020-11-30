@@ -1,11 +1,21 @@
-grammar C_Java;
+grammar uC;
+
+@header {
+    #include <map>
+    #include "intermediate/symtab/Symtab.h"
+    #include "intermediate/type/Typespec.h"
+    using namespace intermediate::symtab;
+    using namespace intermediate::type;
+}
 
 //====Starting point====//
-program : (functionDefinition | functionDeclaration | c_statement)+ ;
+program locals [SymtabEntry *entry = nullptr]
+    : (functionDefinition | functionDeclaration ';' | variableDeclaration ';')+ ;
 
 //====General Statements====//
 c_statement
-    : statement ';'
+    : functionDeclaration ';'
+    | statement ';'
     | emptyStatement ';'
     ;
 
@@ -14,7 +24,7 @@ statement
     | variableDeclaration
     | controlStatement
     | printStatement
-    | printLnStatement
+    | printlnStatement
     | readStatement
     | readlnStatement
     | functionCall
@@ -33,11 +43,11 @@ length : INTEGER ;
 //====Variable assignment====//
 assignmentStatement
     : lhs '=' rhs   #assignVariable
-    | variable '++' #decrementVariable
-    | variable '--' #irncrementVariable
+    | variable '++' #incrementVariable
+    | variable '--' #decrementVariable
     ;
 
-lhs
+lhs locals [ Typespec *type = nullptr ]
     : variable
     | variableDeclaration
     ;
@@ -68,19 +78,17 @@ ifStatement
 functionDefinition : functionDeclaration controlScope ;
 functionDeclaration : typeIdentifier functionIdentifier '(' (parameterDeclarationsList | VOID)? ')' ;
 
-functionIdentifier
+functionIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
    : IDENTIFIER ;
 parameterDeclarationsList : parameterDeclaration ( ',' parameterDeclaration )* ;
 parameterDeclaration     : typeIdentifier ARRAYINDICATOR* parameterIdentifier;
-parameterIdentifier
+parameterIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
    : IDENTIFIER ;
 
 returnStatement
     : RETURN expression?;
 
-functionCall : functionName '(' argumentList? ')' ;
-functionName
-    : IDENTIFIER ;
+functionCall : functionIdentifier '(' argumentList? ')' ;
 argumentList : argument ( ',' argument )* ;
 argument     : expression ;
 
@@ -88,26 +96,29 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement: PRINT '(' printList* ')' ;
-printLnStatement: PRINTLN '(' printList* ')' ;
-printList : printItem (',' printItem)* ;
-printItem : variable | stringConstant ;
+printStatement   : PRINT '(' printArguments ')' ;
+printlnStatement : PRINTLN '(' printArguments? ')' ;
+printArguments   : printArgument (',' printArgument)* ;
+printArgument    : expression (':' fieldWidth)? ;
+fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
+decimalPlaces    : integerConstant ;
+
 //====Readin (So we can get input)====//
 readStatement : READ '(' readArguments ')' ;
 readlnStatement : READLN '(' readArguments ')' ;
 readArguments : variable ( ',' variable )* ;
 
 //====Expressions,factors, etc.====//
-expression
+expression locals [ Typespec *type = nullptr ]
     : simpleExpression (relOp simpleExpression)? ;
 
-simpleExpression
+simpleExpression locals [ Typespec *type = nullptr ]
     : sign? term (addOp term)* ;
 
-term
+term locals [ Typespec *type = nullptr ]
     : factor (mulOp factor)* ;
 
-factor
+factor locals [ Typespec *type = nullptr ]
     : variable             # variableFactor
     | number               # numberFactor
     | characterConstant    # characterFactor
@@ -118,11 +129,11 @@ factor
     ;
 
 //====Variables====//
-variable
+variable locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
     : variableIdentifier modifier* ;
 modifier : '[' index ']';
 index : expression ;
-variableIdentifier
+variableIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
     : IDENTIFIER ;
 
 number          : sign? unsignedNumber ;
@@ -138,7 +149,7 @@ addOp : '+' | '-' | '||' ;
 mulOp : '*' | '/' | '&&' ;
 
 //====Built-in Types====//
-typeIdentifier
+typeIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
     : INT |
       BOOL |
       FLOAT |

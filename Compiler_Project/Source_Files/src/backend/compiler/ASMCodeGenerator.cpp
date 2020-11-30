@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <chrono>
 
-#include "CBaseVisitor.h"
+#include "uCBaseVisitor.h"
 #include "antlr4-runtime.h"
 
 #include "intermediate/symtab/Predefined.h"
@@ -74,7 +74,7 @@ void CodeGenerator::emitComment(string text)
  * Emit a statement comment.
  * @param ctx the StatementContext.
  */
-void CodeGenerator::emitComment(CParser::StatementContext *ctx)
+void CodeGenerator::emitComment(uCParser::StatementContext *ctx)
 {
     string text = ctx->getText();
     if (text.length() > 70) text = text.substr(0, 70) + " ...";

@@ -3,6 +3,11 @@
 
 namespace backend { namespace compiler {
 
+Object Compiler::loadValue(CParser::VariableContext *ctx){
+    expressionCode->emitLoadValue(ctx);
+    return nullptr;
+}
+
 Object Compiler::visitProgram(CParser::ProgramContext *ctx){
     createNewGenerators(code);
     programCode->emitProgram(ctx);
@@ -16,8 +21,7 @@ Object Compiler::visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx
 }
 
 Object Compiler::visitStatement(CParser::StatementContext *ctx){
-    if (ctx->controlStatement() == nullptr)
-    {
+    if (ctx->controlStatement() == nullptr){
         statementCode->emitComment(ctx);
     }
 
@@ -25,7 +29,13 @@ Object Compiler::visitStatement(CParser::StatementContext *ctx){
 }
 
 Object Compiler::visitAssignVariable(CParser::AssignVariableContext *ctx){
-    statementCode->emitAssignment(ctx);
+    if(ctx->lhs()->variable()){
+        statementCode->emitAssignment(ctx);
+    }
+    else{
+        statementCode->emitDeclarationAssignment(ctx);
+    }
+
     return nullptr;
 }
 

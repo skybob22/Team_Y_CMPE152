@@ -23,6 +23,8 @@ public:
 
     void emitAssignment(CParser::AssignVariableContext *ctx);
 
+    void emitDeclarationAssignment(CParser::AssignVariableContext *ctx);
+
     void emitIncrement(CParser::IncrementVariableContext *ctx);
 
     void emitDecrement(CParser::DecrementVariableContext *ctx);

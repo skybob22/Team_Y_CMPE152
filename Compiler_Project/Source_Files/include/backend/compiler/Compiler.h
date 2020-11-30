@@ -56,6 +56,7 @@ namespace backend { namespace compiler {
              * @return the file name.
              */
             string getObjectFileName() { return code->getObjectFileName(); }
+            Object loadValue(CParser::VariableContext *ctx);
 
             Object visitProgram(CParser::ProgramContext *ctx) override;
             Object visitFunctionDefinition(CParser::FunctionDefinitionContext *ctx) override;

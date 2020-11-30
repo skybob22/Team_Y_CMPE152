@@ -35,7 +35,7 @@ emptyStatement : ;
 //====Declarations====//
 variableDeclaration
     : typeIdentifier variableIdentifier (',' variableIdentifier)*
-    | typeIdentifier variableIdentifier '[' length ']'
+    | typeIdentifier variableIdentifier ('[' length ']')*
     ;
 length : INTEGER ;
 
@@ -80,7 +80,7 @@ functionDeclaration : typeIdentifier functionIdentifier '(' (parameterDeclaratio
 functionIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
    : IDENTIFIER ;
 parameterDeclarationsList : parameterDeclaration ( ',' parameterDeclaration )* ;
-parameterDeclaration     : typeIdentifier parameterIdentifier;
+parameterDeclaration     : typeIdentifier ARRAYINDICATOR* parameterIdentifier;
 parameterIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
    : IDENTIFIER ;
 
@@ -95,9 +95,9 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement   : PRINT printArguments ;
-printlnStatement : PRINTLN printArguments? ;
-printArguments   : '(' printArgument (',' printArgument)* ')' ;
+printStatement   : PRINT '(' printArguments ')' ;
+printlnStatement : PRINTLN '(' printArguments? ')' ;
+printArguments   : printArgument (',' printArgument)* ;
 printArgument    : expression (':' fieldWidth)? ;
 fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
 decimalPlaces    : integerConstant ;
@@ -129,7 +129,7 @@ factor locals [ Typespec *type = nullptr ]
 
 //====Variables====//
 variable locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-    : variableIdentifier modifier? ;
+    : variableIdentifier modifier* ;
 modifier : '[' index ']';
 index : expression ;
 variableIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
@@ -204,6 +204,7 @@ READ      : R E A D ;
 READLN    : R E A D L N ;
 RETURN    : R E T U R N ;
 
+ARRAYINDICATOR : '[]' ;
 SINGLEQUOTE  : '\'' ;
 DOUBLEQUOTE  : '"' ;
 DOUBLESLASH  : '//' ;

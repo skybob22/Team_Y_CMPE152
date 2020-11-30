@@ -65,7 +65,7 @@ void Semantics::checkCallArguments(
         // with the same datatype.
         if (parmId->getKind() == REFERENCE_PARAMETER){
             if (expressionIsVariable(exprCtx)){
-                if (parmType != argType){
+                if (parmType->getForm() != argType->getForm()){
                     error.flag(TYPE_MISMATCH, exprCtx);
                 }
             }
@@ -108,24 +108,28 @@ Typespec *Semantics::variableDatatype(CParser::VariableContext *varCtx,
     Typespec *type = varType;
 
     // Subscripts.
-    if (varCtx->modifier() != nullptr){
-        CParser::IndexContext *indexCtx = varCtx->modifier()->index();
-        // Get the subscript.
-        if (type->getForm() == ARRAY){
-            Typespec *indexType = type->getArrayIndexType();
-            CParser::ExpressionContext *exprCtx =
-                    indexCtx->expression();
-            visit(exprCtx);
+    for(CParser::ModifierContext *modCtx : varCtx->modifier()){
+        //Subscript
+        if(modCtx->index()){
+            CParser::IndexContext *indexCtx = modCtx->index();
+            if (type->getForm() == ARRAY)
+            {
+                Typespec *indexType = type->getArrayIndexType();
+                CParser::ExpressionContext *exprCtx = indexCtx->expression();
+                visit(exprCtx);
 
-            if (indexType->baseType() != exprCtx->type->baseType()){
-                error.flag(TYPE_MISMATCH, exprCtx);
+                if (indexType->baseType() != exprCtx->type->baseType())
+                {
+                    error.flag(TYPE_MISMATCH, exprCtx);
+                }
+
+                // Datatype of the next dimension.
+                type = type->getArrayElementType();
             }
-
-            // Datatype of the next dimension.
-            type = type->getArrayElementType();
-        }
-        else{
-            error.flag(TOO_MANY_SUBSCRIPTS, indexCtx);
+            else
+            {
+                error.flag(TOO_MANY_SUBSCRIPTS, indexCtx);
+            }
         }
     }
 
@@ -171,7 +175,6 @@ Object Semantics::visitProgram(CParser::ProgramContext *ctx){
 }
 
 Object Semantics::visitFunctionDeclaration(CParser::FunctionDeclarationContext *ctx){
-    //TODO: Ideally should do parsing here instead of FunctionDefinition, move if time
     visit(ctx->typeIdentifier());
 
     CParser::FunctionIdentifierContext *idCtx = ctx->functionIdentifier();
@@ -303,8 +306,6 @@ Object Semantics::visitParameterDeclarationsList(CParser::ParameterDeclarationsL
 }
 
 Object Semantics::visitParameterDeclaration(CParser::ParameterDeclarationContext *ctx){
-
-
     Kind kind = VALUE_PARAMETER;
     CParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
 
@@ -315,11 +316,33 @@ Object Semantics::visitParameterDeclaration(CParser::ParameterDeclarationContext
 
     CParser::ParameterIdentifierContext *idCtx = ctx->parameterIdentifier();
     int lineNumber = idCtx->getStart()->getLine();
-    string parmName = toLowerCase(idCtx->IDENTIFIER()->getText());
+    string parmName = idCtx->IDENTIFIER()->getText();
     SymtabEntry *parmId = symtabStack->lookupLocal(parmName);
 
     if (parmId == nullptr)
     {
+        int modCount = ctx->ARRAYINDICATOR().size();
+        if(modCount > 0){
+            kind = REFERENCE_PARAMETER;
+            Typespec *arrayType = new Typespec(ARRAY);
+            parmType = arrayType;
+
+            //Loop over array dimentions
+            for (int i = 0; i < modCount; i++) {
+                //All indicies must be integers
+                arrayType->setArrayIndexType(Predefined::integerType);
+
+                if (i < modCount - 1) {
+                    Typespec *elmtType = new Typespec(ARRAY);
+                    arrayType->setArrayElementType(elmtType);
+                    arrayType = elmtType;
+                }
+            }
+
+            visit(ctx->typeIdentifier());
+            Typespec *elementType = ctx->typeIdentifier()->type;
+            arrayType->setArrayElementType(elementType);
+        }
         parmId = symtabStack->enterLocal(parmName, kind);
         parmId->setType(parmType);
     }
@@ -338,8 +361,50 @@ Object Semantics::visitParameterDeclaration(CParser::ParameterDeclarationContext
 }
 
 Object Semantics::visitVariableDeclaration(CParser::VariableDeclarationContext *ctx){
-    if(ctx->length()){
-        //TODO: Array declarations
+    if(!ctx->length().empty()){
+        CParser::VariableIdentifierContext *idCtx = ctx->variableIdentifier(0);
+        int lineNumber = idCtx->getStart()->getLine();
+        string variableName = idCtx->IDENTIFIER()->getText();
+
+        SymtabEntry *variableId = symtabStack->lookupLocal(variableName);
+
+        if(variableId == nullptr) {
+            variableId = symtabStack->enterLocal(variableName, VARIABLE);
+
+            Typespec *arrayType = new Typespec(ARRAY);
+            ctx->variableIdentifier(0)->type = arrayType;
+            variableId->setType(arrayType);
+
+            //Loop over array dimentions
+            int count = ctx->length().size();
+            for (int i = 0; i < count; i++) {
+                //All indicies must be integers
+                arrayType->setArrayIndexType(Predefined::integerType);
+                int elementCount = stoi(ctx->length(i)->getText());
+                arrayType->setArrayElementCount(elementCount);
+
+                if (i < count - 1) {
+                    Typespec *elmtType = new Typespec(ARRAY);
+                    arrayType->setArrayElementType(elmtType);
+                    arrayType = elmtType;
+                }
+            }
+
+            visit(ctx->typeIdentifier());
+            Typespec *elementType = ctx->typeIdentifier()->type;
+            arrayType->setArrayElementType(elementType);
+
+            Symtab *symtab = variableId->getSymtab();
+            if (symtab->getNestingLevel() > 1)
+            {
+                variableId->setSlotNumber(symtab->nextSlotNumber());
+            }
+            idCtx->entry = variableId;
+        }
+        else{
+            error.flag(REDECLARED_IDENTIFIER, ctx);
+        }
+        variableId->appendLineNumber(lineNumber);
     }
     else{
         CParser::TypeIdentifierContext *typeCtx = ctx->typeIdentifier();
@@ -415,7 +480,12 @@ Object Semantics::visitLhs(CParser::LhsContext *ctx){
     else{
         CParser::VariableDeclarationContext *varDecCtx = ctx->variableDeclaration();
         visit(varDecCtx);
-        ctx->type = ctx->variableDeclaration()->typeIdentifier()->type;;
+        ctx->type = ctx->variableDeclaration()->typeIdentifier()->type;
+
+        //Trying to assign value to newly declared array
+        if(!ctx->variableDeclaration()->length().empty()){
+            error.flag(INCOMPATIBLE_ASSIGNMENT, ctx);
+        }
     }
     return nullptr;
 }
@@ -545,7 +615,7 @@ Object Semantics::visitFunctionCall(CParser::FunctionCallContext *ctx){
     //Can be treated like procedure call since we know in this case the value isn't being stored
     CParser::FunctionIdentifierContext*nameCtx = ctx->functionIdentifier();
     CParser::ArgumentListContext *listCtx = ctx->argumentList();
-    string name = toLowerCase(ctx->functionIdentifier()->getText());
+    string name = ctx->functionIdentifier()->getText();
     SymtabEntry *procedureId = symtabStack->lookup(name);
     bool badName = false;
 
@@ -586,7 +656,7 @@ Object Semantics::visitFunctionCallFactor(CParser::FunctionCallFactorContext *ct
     CParser::FunctionCallContext *callCtx = ctx->functionCall();
     CParser::FunctionIdentifierContext *nameCtx = callCtx->functionIdentifier();
     CParser::ArgumentListContext *listCtx = callCtx->argumentList();
-    string name = toLowerCase(callCtx->functionIdentifier()->getText());
+    string name = callCtx->functionIdentifier()->getText();
     SymtabEntry *functionId = symtabStack->lookup(name);
     bool badName = false;
 
@@ -696,7 +766,7 @@ Object Semantics::visitSimpleExpression(CParser::SimpleExpressionContext *ctx){
     // Loop over any subsequent terms.
     for (int i = 1; i < count; i++)
     {
-        string op = toLowerCase(ctx->addOp()[i-1]->getText());
+        string op = ctx->addOp()[i-1]->getText();
         CParser::TermContext *termCtx2 = ctx->term()[i];
         visit(termCtx2);
         Typespec *termType2 = termCtx2->type;
@@ -805,7 +875,7 @@ Object Semantics::visitTerm(CParser::TermContext *ctx){
     // Loop over any subsequent factors.
     for (int i = 1; i < count; i++)
     {
-        string op = toLowerCase(ctx->mulOp()[i-1]->getText());
+        string op = ctx->mulOp()[i-1]->getText();
         CParser::FactorContext *factorCtx2 = ctx->factor()[i];
         visit(factorCtx2);
         Typespec *factorType2 = factorCtx2->type;

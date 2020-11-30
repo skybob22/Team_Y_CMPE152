@@ -79,9 +79,9 @@ public:
         SEMANTIC_ERROR_MESSAGES[UNDECLARED_IDENTIFIER] =
                 "Undeclared identifier";
         SEMANTIC_ERROR_MESSAGES[REDECLARED_IDENTIFIER] =
-                "Redeclared identifier";
+                "Redeclaration of identifier";
         SEMANTIC_ERROR_MESSAGES[REDEFINED_IDENTIFIER] =
-                "Redefined identifier";
+                "Redefinition of identifier";
         SEMANTIC_ERROR_MESSAGES[INVALID_CONSTANT] =
                 "Invalid constant";
         SEMANTIC_ERROR_MESSAGES[INVALID_SIGN] =
@@ -91,7 +91,7 @@ public:
         SEMANTIC_ERROR_MESSAGES[INVALID_VARIABLE] =
                 "Invalid variable";
         SEMANTIC_ERROR_MESSAGES[TYPE_MISMATCH] =
-                "Invalid type";
+                "Type mismatch, invalid type";
         SEMANTIC_ERROR_MESSAGES[TYPE_MUST_BE_INTEGER] =
                 "Datatype must be integer";
         SEMANTIC_ERROR_MESSAGES[TYPE_MUST_BE_NUMERIC] =
@@ -123,7 +123,7 @@ public:
         SEMANTIC_ERROR_MESSAGES[INVALID_FIELD] =
                 "Invalid field";
         SEMANTIC_ERROR_MESSAGES[FUNCTION_NOT_DEFINED] =
-                "Function not defined";
+                "Function declared but not defined";
     }
 
     int getCount() const { return count; }

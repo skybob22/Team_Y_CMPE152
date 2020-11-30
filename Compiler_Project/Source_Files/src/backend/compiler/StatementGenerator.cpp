@@ -24,7 +24,21 @@ string StatementGenerator::typeToString(Typespec *type){
             {Predefined::undefinedType,"V"},
             {Predefined::voidType,"V"}
     };
-    return typeMap[type];
+
+    string retStr;
+    while(type->getForm() == ARRAY){
+        retStr += "[";
+        type = type->getArrayElementType();
+    }
+
+    auto result = typeMap.find(type);
+    if(result != typeMap.end()){
+        retStr += typeMap[type];
+    }
+    else {
+        retStr += "V";
+    }
+    return retStr;
 }
 
 void StatementGenerator::emitCast(Typespec* from, Typespec* to){
@@ -37,60 +51,103 @@ void StatementGenerator::emitCast(Typespec* from, Typespec* to){
 }
 
 void StatementGenerator::emitAssignment(CParser::AssignVariableContext *ctx){
-    SymtabEntry *varId;
-    Typespec *varType;
-    if(ctx->lhs()->variable()){
-        varId = ctx->lhs()->variable()->entry;
-        varType = ctx->lhs()->variable()->type;
-    }
-    else{
-        varId = ctx->lhs()->variableDeclaration()->variableIdentifier()[0]->entry;
-        varType = ctx->lhs()->variableDeclaration()->variableIdentifier()[0]->type;
-    }
-    CParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
+    CParser::VariableContext *varCtx = ctx->lhs()->variable();
+    SymtabEntry *varId = varCtx->entry;
+    Typespec *varType = varCtx->type;
 
+    CParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
     Typespec *exprType = exprCtx->type;
 
-    /*Not needed since we're not using arrays
-    // The last modifier, if any, is the variable's last subscript or field.
     int modifierCount = varCtx->modifier().size();
-    PascalParser::ModifierContext *lastModCtx = modifierCount == 0
-                                                ? nullptr : varCtx->modifier()[modifierCount - 1];
-
-
-    // The target variable has subscripts and/or fields.
-    if (modifierCount > 0)
-    {
-        lastModCtx = varCtx->modifier()[modifierCount - 1];
+    CParser::ModifierContext *lastModCtx = (modifierCount > 0)?varCtx->modifier().back():nullptr;
+    if(modifierCount > 0){
         compiler->visit(varCtx);
-    }*/
+    }
 
-    // Emit code to evaluate the expression.
+    //Emit code to evaluate expression
     compiler->visit(exprCtx);
 
     // float variable := integer constant
     if (   (varType == Predefined::realType)
            && (exprType->baseType() == Predefined::integerType)) emit(I2F);
 
+    //Target variable has no subscripts or fields
+    if(lastModCtx == nullptr){
+        emitStoreValue(varId,varId->getType());
+    }
+    //Target is an array element
+    else{
+        emitStoreValue(nullptr,varType);
+    }
+
+
+}
+
+void StatementGenerator::emitDeclarationAssignment(CParser::AssignVariableContext *ctx){
+    SymtabEntry *varId = ctx->lhs()->variableDeclaration()->variableIdentifier(0)->entry;
+    Typespec *varType = ctx->lhs()->variableDeclaration()->variableIdentifier(0)->type;
+
+    CParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
+
+    Typespec *exprType = exprCtx->type;
+
+    // Emit code to evaluate the expression.
+    compiler->visit(exprCtx);
+
+    // float variable := integer constant
+    if ((varType == Predefined::realType)
+           && (exprType->baseType() == Predefined::integerType)) emit(I2F);
+
     // Emit code to store the expression value into the target variable.
     emitStoreValue(varId, varId->getType());
 }
 
+//TODO: Add support for arrays
 void StatementGenerator::emitIncrement(CParser::IncrementVariableContext *ctx){
-    CodeGenerator::emitLoadValue(ctx->variable()->entry);
-    emitLoadConstant(1);
-    emit(Instruction::IADD);
-    emitStoreValue(ctx->variable()->entry,ctx->variable()->type);
+    SymtabEntry *varEntry = ctx->variable()->entry;
+    Typespec *varType = ctx->variable()->type;
+
+    //Check if array
+    if(!ctx->variable()->modifier().empty()){
+        //Need to load the element for saving
+        compiler->visit(ctx->variable());
+        compiler->loadValue(ctx->variable());
+
+        emitLoadConstant(1);
+        emit(Instruction::IADD);
+        emitStoreValue(nullptr,varType);
+    }
+    else {
+        compiler->visit(ctx->variable());
+        emitLoadConstant(1);
+        emit(Instruction::IADD);
+        emitStoreValue(varEntry, varType);
+    }
 }
 
+//TODO: Add support for arrays
 void StatementGenerator::emitDecrement(CParser::DecrementVariableContext *ctx){
-    CodeGenerator::emitLoadValue(ctx->variable()->entry);
-    emitLoadConstant(1);
-    emit(Instruction::ISUB);
-    emitStoreValue(ctx->variable()->entry,ctx->variable()->type);
+    SymtabEntry *varEntry = ctx->variable()->entry;
+    Typespec *varType = ctx->variable()->type;
+
+    //Check if array
+    if(!ctx->variable()->modifier().empty()){
+        //Need to load the element for saving
+        compiler->visit(ctx->variable());
+        compiler->loadValue(ctx->variable());
+
+        emitLoadConstant(1);
+        emit(Instruction::ISUB);
+        emitStoreValue(nullptr,varType);
+    }
+    else {
+        compiler->visit(ctx->variable());
+        emitLoadConstant(1);
+        emit(Instruction::ISUB);
+        emitStoreValue(varEntry, varType);
+    }
 }
 
-//FIXME: Debug this, likely isn't correct
 void StatementGenerator::emitIf(CParser::IfStatementContext *ctx){
     Label* doneLabel = new Label();
 
@@ -228,6 +285,12 @@ void StatementGenerator::emitReturn(CParser::ReturnStatementContext *ctx) {
     //Leave the value on top of stack
     if (ctx->expression()){
         compiler->visit(ctx->expression());
+
+        //Correct type is already checked by semantics pass
+        emitReturnValue(ctx->expression()->type);
+    }
+    else{
+        emit(RETURN);
     }
 }
 

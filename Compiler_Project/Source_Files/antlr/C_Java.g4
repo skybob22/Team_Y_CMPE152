@@ -26,7 +26,7 @@ emptyStatement : ;
 //====Declarations====//
 variableDeclaration
     : typeIdentifier variableIdentifier (',' variableIdentifier)*
-    | typeIdentifier variableIdentifier '[' length ']'
+    | typeIdentifier variableIdentifier ('[' length ']')*
     ;
 length : INTEGER ;
 
@@ -71,7 +71,7 @@ functionDeclaration : typeIdentifier functionIdentifier '(' (parameterDeclaratio
 functionIdentifier
    : IDENTIFIER ;
 parameterDeclarationsList : parameterDeclaration ( ',' parameterDeclaration )* ;
-parameterDeclaration     : typeIdentifier parameterIdentifier;
+parameterDeclaration     : typeIdentifier ARRAYINDICATOR* parameterIdentifier;
 parameterIdentifier
    : IDENTIFIER ;
 
@@ -119,7 +119,7 @@ factor
 
 //====Variables====//
 variable
-    : variableIdentifier modifier? ;
+    : variableIdentifier modifier* ;
 modifier : '[' index ']';
 index : expression ;
 variableIdentifier
@@ -194,6 +194,7 @@ READ      : R E A D ;
 READLN    : R E A D L N ;
 RETURN    : R E T U R N ;
 
+ARRAYINDICATOR : '[]' ;
 SINGLEQUOTE  : '\'' ;
 DOUBLEQUOTE  : '"' ;
 DOUBLESLASH  : '//' ;

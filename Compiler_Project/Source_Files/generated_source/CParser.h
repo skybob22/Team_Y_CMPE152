@@ -25,9 +25,9 @@ public:
     T__20 = 21, T__21 = 22, T__22 = 23, T__23 = 24, T__24 = 25, INT = 26, 
     BOOL = 27, FLOAT = 28, VOID = 29, DO = 30, WHILE = 31, FOR = 32, IF = 33, 
     ELSEIF = 34, ELSE = 35, SWITCH = 36, PRINT = 37, PRINTLN = 38, READ = 39, 
-    READLN = 40, RETURN = 41, SINGLEQUOTE = 42, DOUBLEQUOTE = 43, DOUBLESLASH = 44, 
-    IDENTIFIER = 45, INTEGER = 46, REAL = 47, CHARACTER = 48, STRING = 49, 
-    NEWLINE = 50, WS = 51, COMMENT = 52
+    READLN = 40, RETURN = 41, ARRAYINDICATOR = 42, SINGLEQUOTE = 43, DOUBLEQUOTE = 44, 
+    DOUBLESLASH = 45, IDENTIFIER = 46, INTEGER = 47, REAL = 48, CHARACTER = 49, 
+    STRING = 50, NEWLINE = 51, WS = 52, COMMENT = 53
   };
 
   enum {
@@ -186,7 +186,8 @@ public:
     TypeIdentifierContext *typeIdentifier();
     std::vector<VariableIdentifierContext *> variableIdentifier();
     VariableIdentifierContext* variableIdentifier(size_t i);
-    LengthContext *length();
+    std::vector<LengthContext *> length();
+    LengthContext* length(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -445,6 +446,8 @@ public:
     virtual size_t getRuleIndex() const override;
     TypeIdentifierContext *typeIdentifier();
     ParameterIdentifierContext *parameterIdentifier();
+    std::vector<antlr4::tree::TerminalNode *> ARRAYINDICATOR();
+    antlr4::tree::TerminalNode* ARRAYINDICATOR(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -786,7 +789,8 @@ public:
     VariableContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     VariableIdentifierContext *variableIdentifier();
-    ModifierContext *modifier();
+    std::vector<ModifierContext *> modifier();
+    ModifierContext* modifier(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

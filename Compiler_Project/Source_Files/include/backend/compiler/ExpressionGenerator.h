@@ -28,6 +28,10 @@ public:
 
     Typespec *emitLoadVariable(CParser::VariableContext *varCtx);
 
+    Typespec *emitLoadArrayElementAccess(CParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier);
+
+    Typespec *emitLoadArrayElementValue(Typespec *elmtType);
+
     void emitLoadIntegerConstant(CParser::NumberContext *intCtx);
 
     void emitLoadRealConstant(CParser::NumberContext *realCtx);

@@ -246,26 +246,17 @@ void ExpressionGenerator::emitNotFactor(CParser::NotFactorContext *ctx){
 }
 
 void ExpressionGenerator::emitLoadValue(CParser::VariableContext *varCtx){
+    int a = varCtx->modifier().size();
     // Load the scalar value or structure address.
     Typespec *variableType = emitLoadVariable(varCtx);
 
-    //Not needed since we're not doing arrays
     // Load an array element's or record field's value.
-    /*int modifierCount = varCtx->modifier().size();
+    int modifierCount = varCtx->modifier().size();
     if (modifierCount > 0)
     {
-        CParser::ModifierContext *lastModCtx =
-                varCtx->modifier()[modifierCount - 1];
-
-        if (lastModCtx->indexList() != nullptr)
-        {
-            emitLoadArrayElementValue(variableType);
-        }
-        else
-        {
-            emitLoadRecordFieldValue(lastModCtx->field(), variableType);
-        }
-    }*/
+        CParser::ModifierContext *lastModCtx = varCtx->modifier().back();
+        emitLoadArrayElementValue(variableType);
+    }
 }
 
 Typespec *ExpressionGenerator::emitLoadVariable(CParser::VariableContext *varCtx){
@@ -277,28 +268,56 @@ Typespec *ExpressionGenerator::emitLoadVariable(CParser::VariableContext *varCtx
     CodeGenerator::emitLoadValue(variableId);  // why need CodeGenerator::?
 
     //Not needed since we aren't including arrays/records
-    /*int modifierCount = varCtx->modifier().size();
+    int modifierCount = varCtx->modifier().size();
     // Loop over subscript and field modifiers.
     for (int i = 0; i < modifierCount; ++i)
     {
-        PascalParser::ModifierContext *modCtx = varCtx->modifier()[i];
+        CParser::ModifierContext *modCtx = varCtx->modifier(i);
         bool lastModifier = i == modifierCount - 1;
 
         // Subscript
-        if (modCtx->indexList() != nullptr)
-        {
-            variableType = emitLoadArrayElementAccess(
-                    modCtx->indexList(), variableType, lastModifier);
-        }
+        variableType = emitLoadArrayElementAccess(modCtx, variableType, lastModifier);
 
-            // Field
-        else if (!lastModifier)
-        {
-            variableType = emitLoadRecordField(modCtx->field(), variableType);
-        }
-    }*/
+    }
 
     return variableType;
+}
+
+Typespec *ExpressionGenerator::emitLoadArrayElementAccess(CParser::ModifierContext *modCtx,Typespec *elmtType, bool lastModifier){
+    // Loop over the subscripts.
+    emitExpression(modCtx->index()->expression());
+
+    if (!lastModifier){
+        emit(AALOAD);
+    }
+    elmtType = elmtType->getArrayElementType();
+
+    return elmtType;
+}
+
+Typespec *ExpressionGenerator::emitLoadArrayElementValue(Typespec *elmtType){
+    Form form = SCALAR;
+
+    if (elmtType != nullptr)
+    {
+        elmtType = elmtType->baseType();
+        form = elmtType->getForm();
+    }
+
+    // Load a character from a string.
+    if (elmtType == Predefined::charType){
+        emit(INVOKEVIRTUAL, "java/lang/StringBuilder.charAt(I)C");
+    }
+
+        // Load an array element.
+    else{
+        emit(  elmtType == Predefined::integerType ? IALOAD
+        : elmtType == Predefined::realType    ? FALOAD
+        : elmtType == Predefined::booleanType ? BALOAD
+        : elmtType == Predefined::charType    ? CALOAD
+        : form == ENUMERATION                 ? IALOAD
+        :                                       AALOAD);
+    }
 }
 
 void ExpressionGenerator::emitLoadIntegerConstant(CParser::NumberContext *intCtx){

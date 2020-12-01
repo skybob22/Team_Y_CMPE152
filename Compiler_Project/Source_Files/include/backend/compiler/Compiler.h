@@ -60,6 +60,7 @@ namespace backend { namespace compiler {
 
             Object visitProgram(uCParser::ProgramContext *ctx) override;
             Object visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx) override;
+            Object visitVariableDeclaration(uCParser::VariableDeclarationContext *ctx) override;
             Object visitStatement(uCParser::StatementContext *ctx) override;
             Object visitAssignVariable(uCParser::AssignVariableContext *ctx) override;
             Object visitIncrementVariable(uCParser::IncrementVariableContext *ctx) override;

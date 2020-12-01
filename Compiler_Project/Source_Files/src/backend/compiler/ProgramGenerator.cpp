@@ -39,8 +39,9 @@ void ProgramGenerator::emitRoutine(uCParser::FunctionDefinitionContext *ctx){
     emitFunctionLocals(routineId);
 
     // Generate code to allocate any arrays, records, and strings.
-    StructuredDataGenerator structuredCode(this, compiler);
-    structuredCode.emitData(routineId);
+    //Moved to initialize arrays dynamically during runtime
+    //StructuredDataGenerator structuredCode(this, compiler);
+    //structuredCode.emitData(routineId);
 
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 

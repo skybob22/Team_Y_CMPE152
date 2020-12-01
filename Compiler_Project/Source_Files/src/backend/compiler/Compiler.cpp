@@ -1,5 +1,6 @@
 #include "intermediate/symtab/Predefined.h"
 #include "backend/compiler/Compiler.h"
+#include "backend/compiler/StructuredDataGenerator.h"
 
 namespace backend { namespace compiler {
 
@@ -17,6 +18,15 @@ Object Compiler::visitProgram(uCParser::ProgramContext *ctx){
 Object Compiler::visitFunctionDefinition(uCParser::FunctionDefinitionContext *ctx){
     createNewGenerators(code);
     programCode->emitRoutine(ctx);
+    return nullptr;
+}
+
+Object Compiler::visitVariableDeclaration(uCParser::VariableDeclarationContext *ctx){
+    if(!ctx->length().empty()) {
+        //Only need to dynamically allocate array types
+        StructuredDataGenerator structuredCode(programCode, this);
+        structuredCode.emitInit(ctx->variableIdentifier(0)->entry);
+    }
     return nullptr;
 }
 

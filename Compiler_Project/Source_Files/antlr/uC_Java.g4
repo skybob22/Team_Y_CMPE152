@@ -105,7 +105,9 @@ readArguments : variable ( ',' variable )* ;
 
 //====Expressions,factors, etc.====//
 expression
-    : simpleExpression (relOp simpleExpression)? ;
+    : simpleExpression (relOp simpleExpression)?
+    | expression '?' expression ':' expression
+    ;
 
 simpleExpression
     : sign? term (addOp term)* ;

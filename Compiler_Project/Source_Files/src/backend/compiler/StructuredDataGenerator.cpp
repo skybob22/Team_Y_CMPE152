@@ -41,6 +41,21 @@ void StructuredDataGenerator::emitData(SymtabEntry *routineId)
     }
 }
 
+void StructuredDataGenerator::emitInit(SymtabEntry *targetId){
+    if(targetId == nullptr){
+        return;
+    }
+
+    if(targetId->getKind() == VARIABLE){
+        Typespec *type = targetId->getType();
+        Form form = type->getForm();
+
+        //Only need to allocate arrays dynamically, scalars are handled during routine init
+        if      (form == ARRAY)  emitAllocateArray(targetId, type);
+        else if (form == RECORD) emitAllocateRecord(targetId, type, DUP);
+    }
+}
+
 /**
  * Emit code to allocate an array for a target variable or field.
  * @param targetId the target variable's or field's symbol table entry.

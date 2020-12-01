@@ -18,6 +18,8 @@ public:
      */
     void emitData(SymtabEntry *routineId);
 
+    void emitInit(SymtabEntry *targetId);
+
 
 private:
     /**

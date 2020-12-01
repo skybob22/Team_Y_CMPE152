@@ -14,7 +14,8 @@ void main(){
 }
 
 int fib(int index){
-	int arr[(index<=1)?2:index+1];
+	int arrLen = (index<=1)?2:index+1;
+	int arr[arrLen];
 	arr[0] = 0;
 	arr[1] = 1;
 	for(int i=2;i<=index;i++){

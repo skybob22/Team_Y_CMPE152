@@ -143,7 +143,7 @@ realConstant    : REAL;
 //====Operators====//
 relOp : '==' | '!=' | '<' | '<=' | '>' | '>=' ;
 addOp : '+' | '-' | '||' ;
-mulOp : '*' | '/' | '&&' ;
+mulOp : '*' | '/' | '%' | '&&' ;
 
 //====Built-in Types====//
 typeIdentifier

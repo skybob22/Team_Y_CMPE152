@@ -989,7 +989,7 @@ Object Semantics::visitTerm(uCParser::TermContext *ctx){
                 }
             }
         }
-        else if ((op == "div") ||(op == "mod"))
+        else if (op == "%")
         {
             // Both operands integer ==> integer result. Else type mismatch.
             if (!TypeChecker::isInteger(factorType1))

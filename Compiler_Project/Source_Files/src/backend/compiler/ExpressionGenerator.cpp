@@ -82,7 +82,7 @@ void ExpressionGenerator::emitExpression(uCParser::ExpressionContext *ctx){
                 emit(FCMPG);
 
                 if (op == "=") emit(IFEQ, trueLabel);
-                else if (op == "<>") emit(IFNE, trueLabel);
+                else if (op == "!=") emit(IFNE, trueLabel);
                 else if (op == "<") emit(IFLT, trueLabel);
                 else if (op == "<=") emit(IFLE, trueLabel);
                 else if (op == ">") emit(IFGT, trueLabel);
@@ -95,7 +95,7 @@ void ExpressionGenerator::emitExpression(uCParser::ExpressionContext *ctx){
                 localStack->decrease(1);
 
                 if (op == "=") emit(IFEQ, trueLabel);
-                else if (op == "<>") emit(IFNE, trueLabel);
+                else if (op == "!=") emit(IFNE, trueLabel);
                 else if (op == "<") emit(IFLT, trueLabel);
                 else if (op == "<=") emit(IFLE, trueLabel);
                 else if (op == ">") emit(IFGT, trueLabel);
@@ -234,8 +234,7 @@ void ExpressionGenerator::emitTerm(uCParser::TermContext *ctx){
 
             if      (op == "*")   emit(IMUL);
             else if (op == "/")   emit(FDIV);
-            else if (op == "div") emit(IDIV);
-            else if (op == "mod") emit(IREM);
+            else if (op == "%") emit(IREM);
         }
         else if (realMode)
         {

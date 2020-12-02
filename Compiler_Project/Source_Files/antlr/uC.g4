@@ -155,7 +155,7 @@ realConstant    : REAL;
 //====Operators====//
 relOp : '==' | '!=' | '<' | '<=' | '>' | '>=' ;
 addOp : '+' | '-' | '||' ;
-mulOp : '*' | '/' | '&&' ;
+mulOp : '*' | '/' | '%' | '&&' ;
 
 //====Built-in Types====//
 typeIdentifier locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]

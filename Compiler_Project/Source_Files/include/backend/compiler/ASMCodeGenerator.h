@@ -242,6 +242,13 @@ public:
     void emitLoadValue(SymtabEntry *variableId);
 
     /**
+     * Initializes local variable to a default value
+     * @param type
+     * @param index
+     */
+    void emitInitLocal(Typespec *type, int index);
+
+    /**
      * Emit a load instruction for a local variable.
      * @param type the variable's data type.
      * @param index the variable's index into the local variables array.

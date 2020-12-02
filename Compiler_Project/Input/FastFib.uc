@@ -15,6 +15,7 @@ void main(){
 	}while(i >= 0);
 }
 
+//Iterative Fibbonachi function
 int fib(int index){
 	int arrLen = (index<=1)?2:index+1;
 	int arr[arrLen];
@@ -28,6 +29,7 @@ int fib(int index){
 	return arr[index];
 }
 
+//Print 2-dimentional matrix
 void printList(int[] list,int len){
     print("[");
     for(int k=0;k<len;k++){

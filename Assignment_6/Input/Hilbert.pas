@@ -1,8 +1,8 @@
 PROGRAM Hilbert (input, output);
 
-{Use LU decomposition and back-substitution to invert matrices.  
- A Hilbert matrix of size 5 serves as an example. Hilbert matrices 
- are ill-conditioned and are notoriously difficult to invert accurately.  
+{Use LU decomposition and back-substitution to invert matrices.
+ A Hilbert matrix of size 5 serves as an example. Hilbert matrices
+ are ill-conditioned and are notoriously difficult to invert accurately.
  This program computes the Hilbert matrix, inverts it, multiples the
  Hilbert matrix by its inverse (resulting in an approximation of the
  identity matrix), and then inverts the inverse (resulting in an
@@ -13,16 +13,19 @@ CONST
 
 TYPE
     vector = ARRAY [1..MAX]         OF real;
+    intvector = ARRAY [1..MAX] OF integer;
     matrix = ARRAY [1..MAX, 1..MAX] OF real;
-    
+
     why = (SINGULARMATRIX, ZEROROW, NOCONVERGENCE);
 
 VAR
-    ps      : ARRAY [1..MAX] OF integer;  {global pivot index array}
+    ps      : intvector;  {global pivot index array}
     H       : matrix;                     {Hilbert matrix}
     Hinv    : matrix;                     {Hilbert matrix inverse}
     Z       : matrix;                     {Identity matrix}
     i, j, n : integer;
+    qq       : integer;
+    asdf    : real;
 
 PROCEDURE singular(w : why);
 
@@ -33,12 +36,52 @@ PROCEDURE singular(w : why);
             NOCONVERGENCE  : writeln('No convergence in improve.');
         END;
     END;
-    
+
 FUNCTION abs(x : real) : real;
 
     BEGIN
         IF x < 0 THEN x := -x;
         abs := x;
+    END;
+
+PROCEDURE printmatrix(VAR M : matrix);
+
+    VAR
+        i, j : integer;
+
+    BEGIN
+        writeln;
+        FOR i := 1 TO n DO BEGIN
+            FOR j := 1 TO n DO write(M[i,j]:15:6);
+            writeln;
+        END;
+        writeln;
+    END;
+
+PROCEDURE printvector(VAR V : vector);
+
+    VAR
+        i : integer;
+
+    BEGIN
+        writeln;
+        FOR i := 1 TO n DO BEGIN
+            write(V[i]:10:6)
+        END;
+        writeln;
+    END;
+
+PROCEDURE printintvector(VAR V : intvector);
+
+    VAR
+        i : integer;
+
+    BEGIN
+        writeln;
+        FOR i := 1 TO n DO BEGIN
+            write(V[i]:10:6)
+        END;
+        writeln;
     END;
 
 PROCEDURE decompose(n : integer; VAR A, LU : matrix);
@@ -167,53 +210,54 @@ PROCEDURE invert(n : integer; VAR A, Ainv : matrix);
     BEGIN
         decompose(n, A, LU);
 
+
         FOR j := 1 TO n DO BEGIN
             FOR i := 1 TO n DO BEGIN
                 IF i = j THEN b[i] := 1
                          ELSE b[i] := 0;
             END;
 
+            writeln;
+            writeln;
+            writeln('LU:');
+            printMatrix(LU);
+            writeln('b:');
+            printVector(b);
+            {writeln('x:');
+            printvector(x);}
+            writeln;
+            writeln;
+            writeln;
+
             solve(n, LU, b, x);
 
             FOR i := 1 TO n DO Ainv[i,j] := x[i];
         END;
     END;
-    
+
 PROCEDURE multiply(n : integer; VAR A, B, P : matrix);
 
     {Compute P = A x B.}
-    
+
     VAR
         i, j, k : integer;
         sum : real;
-        
+
     BEGIN
         FOR i := 1 TO n DO BEGIN
             FOR j := 1 TO n DO BEGIN
                 sum := 0.0;
-                
+
                 FOR k := 1 TO n DO BEGIN
                     sum := sum + A[i,k]*B[k,j];
                 END;
-                
+
                 P[i,j] := sum;
             END;
         END;
     END;
 
-PROCEDURE printmatrix(VAR M : matrix);
 
-    VAR
-        i, j : integer;
-
-    BEGIN
-        writeln;
-        FOR i := 1 TO n DO BEGIN
-            FOR j := 1 TO n DO write(M[i,j]:15:6);
-            writeln;
-        END;
-        writeln;
-    END;
 
 BEGIN
     n := 5;
@@ -234,10 +278,10 @@ BEGIN
 
     writeln('Hilbert matrix inverted:');
     printmatrix(Hinv);
-    
+
     {Multiply the Hilbert matrix by its inverse.}
     multiply(n, H, Hinv, Z);
-    
+
     writeln('Hilbert matrix multiplied by its inverse:');
     printmatrix(Z);
 

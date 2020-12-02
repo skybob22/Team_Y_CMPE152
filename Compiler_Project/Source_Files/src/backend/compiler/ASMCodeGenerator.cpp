@@ -312,6 +312,43 @@ void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
     }
 }
 
+void CodeGenerator::emitInitLocal(Typespec *type, int index){
+    Form form = SCALAR;
+
+    if (type != nullptr)
+    {
+        type = type->baseType();
+        form = type->getForm();
+    }
+
+    if (   (type == Predefined::integerType)
+           || (type == Predefined::booleanType)
+           || (type == Predefined::charType)
+           || (form == ENUMERATION))
+    {
+        emit(ICONST_0);
+        switch (index)
+        {
+            case 0:  emit(ISTORE_0); break;
+            case 1:  emit(ISTORE_1); break;
+            case 2:  emit(ISTORE_2); break;
+            case 3:  emit(ISTORE_3); break;
+            default: emit(ISTORE, index);
+        }
+    }
+    else if (type == Predefined::realType)
+    {
+        emit(FCONST_0);
+        switch (index) {
+            case 0:  emit(FSTORE_0); break;
+            case 1:  emit(FSTORE_1); break;
+            case 2:  emit(FSTORE_2); break;
+            case 3:  emit(FSTORE_3); break;
+            default: emit(FSTORE, index);
+        }
+    }
+}
+
 /**
  * Emit a load instruction for a local variable.
  * @param type the variable's data type.

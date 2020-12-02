@@ -58,32 +58,6 @@ PROCEDURE printmatrix(VAR M : matrix);
         writeln;
     END;
 
-PROCEDURE printvector(VAR V : vector);
-
-    VAR
-        i : integer;
-
-    BEGIN
-        writeln;
-        FOR i := 1 TO n DO BEGIN
-            write(V[i]:10:6)
-        END;
-        writeln;
-    END;
-
-PROCEDURE printintvector(VAR V : intvector);
-
-    VAR
-        i : integer;
-
-    BEGIN
-        writeln;
-        FOR i := 1 TO n DO BEGIN
-            write(V[i]:10:6)
-        END;
-        writeln;
-    END;
-
 PROCEDURE decompose(n : integer; VAR A, LU : matrix);
 
     {Computes triangular matrices L and U and permutation matrix P
@@ -216,18 +190,6 @@ PROCEDURE invert(n : integer; VAR A, Ainv : matrix);
                 IF i = j THEN b[i] := 1
                          ELSE b[i] := 0;
             END;
-
-            writeln;
-            writeln;
-            writeln('LU:');
-            printMatrix(LU);
-            writeln('b:');
-            printVector(b);
-            {writeln('x:');
-            printvector(x);}
-            writeln;
-            writeln;
-            writeln;
 
             solve(n, LU, b, x);
 

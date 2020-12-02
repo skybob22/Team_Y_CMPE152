@@ -8,8 +8,10 @@ void main(){
 		read(i);
 		if(i >= 0){
 			int fib_n = fib(i);
-			println("The ",i,"th Fibbonachi number is: ",fib_n);
+			println("The ",i,(i==1)?"st":((i==2)?"nd":(i==3?"rd":"th")),
+            " Fibbonachi number is: ",fib_n);
 		}
+		println();
 	}while(i >= 0);
 }
 
@@ -21,6 +23,8 @@ int fib(int index){
 	for(int i=2;i<=index;i++){
 		arr[i] = arr[i-2] + arr[i-1];
 	}
+	print("Fib array: ");
+	printList(arr,arrLen);
 	return arr[index];
 }
 

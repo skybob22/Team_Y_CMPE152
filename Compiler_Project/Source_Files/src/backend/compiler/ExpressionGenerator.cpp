@@ -81,7 +81,7 @@ void ExpressionGenerator::emitExpression(uCParser::ExpressionContext *ctx){
 
                 emit(FCMPG);
 
-                if (op == "=") emit(IFEQ, trueLabel);
+                if (op == "==") emit(IFEQ, trueLabel);
                 else if (op == "!=") emit(IFNE, trueLabel);
                 else if (op == "<") emit(IFLT, trueLabel);
                 else if (op == "<=") emit(IFLE, trueLabel);

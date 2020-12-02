@@ -1,7 +1,7 @@
 grammar uC_Java;
 
 //====Starting point====//
-program : (functionDefinition | functionDeclaration ';' | variableDeclaration ';')+ ;
+program : (functionDefinition | functionDeclaration ';' |assignmentStatement ';' | variableDeclaration ';')+ ;
 
 //====General Statements====//
 c_statement
@@ -230,3 +230,4 @@ NEWLINE : '\r'? '\n' -> skip ;
 WS      : [ \t]+ -> skip ;
 
 COMMENT : DOUBLESLASH ~[\r\n]* -> skip ;
+BLOCKCOMMENT : '/*' .*? '*/' -> skip ;

@@ -28,7 +28,7 @@ public:
     PRINT = 41, PRINTLN = 42, READ = 43, READLN = 44, RETURN = 45, ARRAYINDICATOR = 46, 
     SINGLEQUOTE = 47, DOUBLEQUOTE = 48, DOUBLESLASH = 49, IDENTIFIER = 50, 
     INTEGER = 51, REAL = 52, CHARACTER = 53, STRING = 54, NEWLINE = 55, 
-    WS = 56, COMMENT = 57
+    WS = 56, COMMENT = 57, BLOCKCOMMENT = 58
   };
 
   enum {
@@ -128,6 +128,8 @@ public:
     FunctionDefinitionContext* functionDefinition(size_t i);
     std::vector<FunctionDeclarationContext *> functionDeclaration();
     FunctionDeclarationContext* functionDeclaration(size_t i);
+    std::vector<AssignmentStatementContext *> assignmentStatement();
+    AssignmentStatementContext* assignmentStatement(size_t i);
     std::vector<VariableDeclarationContext *> variableDeclaration();
     VariableDeclarationContext* variableDeclaration(size_t i);
 

@@ -8,6 +8,7 @@
 #include "backend/compiler/Compiler.h"
 #include "backend/compiler/ProgramGenerator.h"
 #include "backend/compiler/StructuredDataGenerator.h"
+#include "intermediate/symtab/Predefined.h"
 
 namespace backend { namespace compiler {
 
@@ -131,6 +132,21 @@ void ProgramGenerator::emitMainMethod(uCParser::ProgramContext *ctx){
     // Emit code to allocate any arrays, records, and strings.
     StructuredDataGenerator structureCode(this, compiler);
     structureCode.emitData(programId);
+
+    //Initialize any global variables that are assigned values
+    for(uCParser::AssignmentStatementContext *assignCtx : ctx->assignmentStatement()){
+        compiler->visit(assignCtx);
+    }
+
+    //Re-visit global arrays + initialize their runtime values
+    for(uCParser::VariableDeclarationContext *decCtx : ctx->variableDeclaration()){
+        if(decCtx->variableIdentifier(0)->type == nullptr){
+            continue;
+        }
+        else if(decCtx->variableIdentifier(0)->type->getForm() == ARRAY){
+            structureCode.emitInit(decCtx->variableIdentifier(0)->entry);
+        }
+    }
 
     // Emit code for main method
     emitLine();
@@ -264,6 +280,19 @@ void ProgramGenerator::emitFunctionLocals(SymtabEntry *routineId){
             int slot = id->getSlotNumber();
             emitDirective(VAR, to_string(slot) + " is " + id->getName(),
                           typeDescriptor(id));
+        }
+    }
+
+    //Ran into some weird problems when not explicitly initialized, initialize non-array values to zero
+    StructuredDataGenerator structuredCode(this, compiler);
+    for(SymtabEntry *id : ids){
+        Kind kind = id->getKind();
+        Typespec *type = id->getType();
+
+        if(kind != VALUE_PARAMETER && kind != REFERENCE_PARAMETER) {
+            if (type->getForm() == SCALAR) {
+                emitInitLocal(type, id->getSlotNumber());
+            }
         }
     }
 }

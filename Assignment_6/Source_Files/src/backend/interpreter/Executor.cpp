@@ -81,11 +81,23 @@ void Executor::assignValue(Cell *targetCell, Typespec *targetType,
     }
     else if (targetType == Predefined::realType)
     {
-        double doubleValue =
-                (valueType == Predefined::integerType) ? value.as<int>()
-              : (valueType == Predefined::charType)    ? value.as<char>()
-              :                                          value.as<double>();
-        targetCell->setValue(doubleValue);
+        try {
+            double doubleValue =
+                    (valueType == Predefined::integerType) ? value.as<int>()
+                                                           : (valueType == Predefined::charType) ? value.as<char>()
+                                                                                                 : value.as<double>();
+            targetCell->setValue(doubleValue);
+        }
+        catch (std::bad_cast z) {
+            cout << z.what() << endl;
+            bool a = value.is<int>();
+            bool b = value.is<float>();
+            bool c = value.is<long>();
+            bool d = value.is<double>();
+            bool e = value.is<bool>();
+            bool f = value.is<int>();
+            int j = 0;
+        }
     }
     else if (targetType == Predefined::stringType)
     {

@@ -10,7 +10,7 @@ grammar uC;
 
 //====Starting point====//
 program locals [SymtabEntry *entry = nullptr]
-    : (functionDefinition | functionDeclaration ';' | variableDeclaration ';')+ ;
+    : (functionDefinition | functionDeclaration ';' |assignmentStatement ';' | variableDeclaration ';')+ ;
 
 //====General Statements====//
 c_statement
@@ -242,3 +242,4 @@ NEWLINE : '\r'? '\n' -> skip ;
 WS      : [ \t]+ -> skip ;
 
 COMMENT : DOUBLESLASH ~[\r\n]* -> skip ;
+BLOCKCOMMENT : '/*' .*? '*/' -> skip ;

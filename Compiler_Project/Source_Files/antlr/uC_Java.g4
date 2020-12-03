@@ -1,11 +1,13 @@
 grammar uC_Java;
 
 //====Starting point====//
-program : (functionDefinition | functionDeclaration ';' |assignmentStatement ';' | variableDeclaration ';')+ ;
+program
+    : (functionDefinition | functionDeclaration ';' |assignmentStatement ';' | variableDeclaration ';')+ ;
 
 //====General Statements====//
 c_statement
-    : statement ';'
+    : functionDeclaration ';'
+    | statement ';'
     | emptyStatement ';'
     ;
 
@@ -14,7 +16,7 @@ statement
     | variableDeclaration
     | controlStatement
     | printStatement
-    | printLnStatement
+    | printlnStatement
     | readStatement
     | readlnStatement
     | functionCall
@@ -33,8 +35,8 @@ length : expression ;
 //====Variable assignment====//
 assignmentStatement
     : lhs '=' rhs   #assignVariable
-    | variable '++' #decrementVariable
-    | variable '--' #irncrementVariable
+    | variable '++' #incrementVariable
+    | variable '--' #decrementVariable
     ;
 
 lhs
@@ -84,9 +86,7 @@ parameterIdentifier
 returnStatement
     : RETURN expression?;
 
-functionCall : functionName '(' argumentList? ')' ;
-functionName
-    : IDENTIFIER ;
+functionCall : functionIdentifier '(' argumentList? ')' ;
 argumentList : argument ( ',' argument )* ;
 argument     : expression ;
 
@@ -94,10 +94,13 @@ argument     : expression ;
 //These are not actually in C, but we included them since we can't
 //Use #include to use stdio.h
 //====Printouts (So we can see what's going on)====//
-printStatement: PRINT '(' printList* ')' ;
-printLnStatement: PRINTLN '(' printList* ')' ;
-printList : printItem (',' printItem)* ;
-printItem : variable | stringConstant ;
+printStatement   : PRINT '(' printArguments ')' ;
+printlnStatement : PRINTLN '(' printArguments? ')' ;
+printArguments   : printArgument (',' printArgument)* ;
+printArgument    : expression (':' fieldWidth)? ;
+fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
+decimalPlaces    : integerConstant ;
+
 //====Readin (So we can get input)====//
 readStatement : READ '(' readArguments ')' ;
 readlnStatement : READLN '(' readArguments ')' ;

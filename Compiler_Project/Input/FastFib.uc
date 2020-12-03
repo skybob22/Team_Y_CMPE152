@@ -24,7 +24,7 @@ int fib(int index){
 	for(int i=2;i<=index;i++){
 		arr[i] = arr[i-2] + arr[i-1];
 	}
-	print("Fib array: ");
+	print("Fib array: "); // <- For visualization/demonstration purposes
 	printList(arr,arrLen);
 	return arr[index];
 }
